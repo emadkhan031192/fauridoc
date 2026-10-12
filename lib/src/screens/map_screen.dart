@@ -520,7 +520,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       final dist = distanceText(pos, h.lat, h.lng);
       sub = [
         tr(ref, 'hosp.hospital'),
-        dist?,
+        if (dist case final d?) d,
       ].join(' · ');
       final r =
           h.reviewCount > 0 ? '★ ${h.rating.toStringAsFixed(1)}  ' : '';
@@ -537,7 +537,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       final dist = distanceText(pos, l.lat, l.lng);
       sub = [
         tr(ref, 'map.labs'),
-        dist?,
+        if (dist case final d?) d,
       ].join(' · ');
       ratingLine = l.reviewCount > 0
           ? '★ ${l.rating.toStringAsFixed(1)}'
@@ -553,7 +553,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       final dist = distanceText(pos, d.lat, d.lng);
       sub = [
         specialtyLabel(ref.watch(localeProvider), d.specialty),
-        dist?,
+        if (dist case final d?) d,
       ].join(' · ');
       ratingLine = d.reviewCount > 0
           ? '★ ${d.rating.toStringAsFixed(1)}'
