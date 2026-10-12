@@ -526,6 +526,7 @@ class DemoRepository implements FauridocRepository {
     final s = _stats.putIfAbsent(doctorId, () => {'views': 0, 'whatsapp': 0});
     s['views'] = (s['views'] ?? 0) + 1;
     _prefs.setString(_kStats, jsonEncode({'week': _statsWeek, 'data': _stats}));
+    _emit();
   }
 
   @override
@@ -534,6 +535,7 @@ class DemoRepository implements FauridocRepository {
     final s = _stats.putIfAbsent(doctorId, () => {'views': 0, 'whatsapp': 0});
     s['whatsapp'] = (s['whatsapp'] ?? 0) + 1;
     _prefs.setString(_kStats, jsonEncode({'week': _statsWeek, 'data': _stats}));
+    _emit();
   }
 
   @override

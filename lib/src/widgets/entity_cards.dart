@@ -119,7 +119,7 @@ class LabCard extends ConsumerWidget {
     final price = q.isNotEmpty ? lab.priceFor(q) : null;
     final priceLine = price != null
         ? fill(tr(ref, 'rs'), {'p': price.toString()})
-        : '${lab.tests.length} tests';
+        : fill(tr(ref, 'testsCount'), {'n': lab.tests.length.toString()});
 
     return Card(
       child: InkWell(

@@ -171,6 +171,8 @@ const Map<String, String> enStrings = {
   'createDirectly': 'Add new',
   'confirmDelete': 'Delete this? This cannot be undone.',
   'deleted': 'Deleted.',
+  'preview': 'Preview',
+  'testsCount': '{n} tests',
   // settings
   'language': 'Language',
   'english': 'English',

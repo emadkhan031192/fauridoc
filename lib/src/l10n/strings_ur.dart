@@ -171,6 +171,8 @@ const Map<String, String> urStrings = {
   'createDirectly': 'نیا شامل کریں',
   'confirmDelete': 'حذف کریں؟ یہ واپس نہیں ہوگا۔',
   'deleted': 'حذف ہو گیا۔',
+  'preview': 'پیش نظارہ',
+  'testsCount': '{n} ٹیسٹ',
   // settings
   'language': 'زبان',
   'english': 'English',
