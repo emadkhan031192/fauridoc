@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Public directory: anyone can read approved listings.
+    // Writes (create/update/delete) are admin-only, except that a signed-in
+    // user may CREATE a pending (approved == false) listing when registering.
+    match /doctors/{id} {
+      allow read: if resource.data.approved == true || isAdmin();
+      allow create: if request.auth != null
+        && request.resource.data.approved == false
+        && (isAdmin() || request.resource.data.ownerUid == request.auth.uid);
+      allow update, delete: if isAdmin();
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if request.auth != null
+          && request.resource.data.userId == request.auth.uid;
+        allow delete: if isAdmin();
+        allow update: if false;
+      }
+    }
+
+    match /labs/{id} {
+      allow read: if resource.data.approved == true || isAdmin();
+      allow create: if request.auth != null
+        && request.resource.data.approved == false
+        && (isAdmin() || request.resource.data.ownerUid == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    match /hospitals/{id} {
+      allow read: if resource.data.approved == true || isAdmin();
+      allow create: if request.auth != null
+        && request.resource.data.approved == false
+        && (isAdmin() || request.resource.data.ownerUid == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Community: readable by all; posting/voting needs sign-in.
+    // One vote per user is enforced client-side; admins moderate.
+    match /questions/{qid} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null; // votes + admin pin
+      allow delete: if isAdmin();
+      match /replies/{rid} {
+        allow read: if true;
+        allow create: if request.auth != null
+          && request.resource.data.userId == request.auth.uid;
+        allow update: if request.auth != null; // votes
+        allow delete: if isAdmin();
+      }
+    }
+
+    // Doctor stats: readable by admins; increments by anyone viewing.
+    match /doctor_stats/{id} {
+      allow read: if isAdmin();
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // Admin-editable config lists (cities, specialties, test categories).
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Admin roster: doc id == uid. Only existing admins can add admins.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // User profiles: users manage their own doc; admins can read all.
+    match /users/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow create, update: if request.auth != null && request.auth.uid == uid;
+      allow delete: if isAdmin();
+    }
+  }
+}
