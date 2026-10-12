@@ -14,7 +14,9 @@ if (file("google-services.json").exists()) {
 
 android {
     namespace = "com.afzal.fauridoc"
-    compileSdk = 35
+    // compileSdk 36: required by androidx.browser:browser:1.9.0+ (pulled in
+    // via url_launcher etc.). targetSdk stays 35 for now.
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.afzal.fauridoc"
