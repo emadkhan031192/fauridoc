@@ -562,7 +562,7 @@ class _PickedImage extends StatelessWidget {
     return Image.file(
       File(path),
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) =>
+      errorBuilder: (_, _, _) =>
           const Icon(Icons.broken_image_outlined, color: FdColors.muted),
     );
   }
@@ -689,7 +689,7 @@ class _LabeledDropdown extends StatelessWidget {
         _Caps(label, ur),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           items: [
             for (final it in items)
               DropdownMenuItem(value: it, child: Text(it))

@@ -473,7 +473,7 @@ class _DoctorDetailScreenState extends ConsumerState<DoctorDetailScreen> {
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: photos.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          separatorBuilder: (_, _) => const SizedBox(width: 12),
           itemBuilder: (_, i) => _PhotoTile(path: photos[i]),
         ),
       );
@@ -613,15 +613,15 @@ class _PhotoTile extends StatelessWidget {
     if (path.startsWith('http')) {
       img = Image.network(path,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const SizedBox.shrink());
+          errorBuilder: (_, _, _) => const SizedBox.shrink());
     } else if (path.startsWith('/')) {
       img = Image.file(File(path),
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const SizedBox.shrink());
+          errorBuilder: (_, _, _) => const SizedBox.shrink());
     } else {
       img = Image.asset(path,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const SizedBox.shrink());
+          errorBuilder: (_, _, _) => const SizedBox.shrink());
     }
     return AspectRatio(
       aspectRatio: 1.18,

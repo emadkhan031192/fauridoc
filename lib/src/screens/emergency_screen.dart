@@ -43,7 +43,7 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
         return;
       }
       final p = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low,
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
       );
       if (mounted) setState(() => _pos = p);
     } catch (_) {
@@ -93,7 +93,7 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
       body: async.when(
         loading: () => const Center(
             child: CircularProgressIndicator(color: FdColors.primary)),
-        error: (_, __) => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
         data: (hospitals) {
           final nearest = _nearest(hospitals);
           if (nearest == null) {

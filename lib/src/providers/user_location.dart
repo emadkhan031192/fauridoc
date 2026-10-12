@@ -14,7 +14,7 @@ final userLocationProvider = FutureProvider<Position?>((ref) async {
       return null;
     }
     return await Geolocator.getCurrentPosition(
-      timeLimit: const Duration(seconds: 8),
+      locationSettings: const LocationSettings(timeLimit: Duration(seconds: 8)),
     );
   } catch (_) {
     return null;

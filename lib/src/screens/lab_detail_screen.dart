@@ -198,7 +198,7 @@ class _LabDetailScreenState extends ConsumerState<LabDetailScreen> {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: categories.length + 1,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(width: 10),
                           itemBuilder: (_, i) {
                             final c =

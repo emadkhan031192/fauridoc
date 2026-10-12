@@ -555,7 +555,7 @@ class _SpecialtyDrop extends ConsumerWidget {
           children: [
             _Cap(ur: ur, label: tr(ref, 'admin.specialization')),
             DropdownButtonFormField<String>(
-              value: effective,
+              initialValue: effective,
               hint: Text(
                   fallback.isEmpty
                       ? tr(ref, 'admin.specialization')
@@ -623,7 +623,7 @@ class _CityDrop extends ConsumerWidget {
           children: [
             _Cap(ur: ur, label: tr(ref, 'admin.city')),
             DropdownButtonFormField<String>(
-              value: effective,
+              initialValue: effective,
               hint: Text(
                   fallback.isEmpty
                       ? tr(ref, 'admin.city')
@@ -774,8 +774,9 @@ class _DepartmentsEditorState
                 isUrdu: widget.ur,
                 onTap: () {
                   final v = _ctrl.text.trim();
-                  if (v.isEmpty ||
-                      widget.items.contains(v)) return;
+                  if (v.isEmpty || widget.items.contains(v)) {
+                    return;
+                  }
                   widget.onChanged([...widget.items, v]);
                   _ctrl.clear();
                 },
@@ -910,7 +911,7 @@ class _TestsEditorState extends ConsumerState<_TestsEditor> {
                     final cats =
                         snap.data ?? const <String>[];
                     return DropdownButtonFormField<String>(
-                      value: _category,
+                      initialValue: _category,
                       hint: Text(tr(ref, 'admin.category'),
                           style: FdType.body(widget.ur,
                               size: 15,

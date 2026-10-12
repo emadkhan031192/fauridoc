@@ -302,7 +302,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: chips.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            separatorBuilder: (_, _) => const SizedBox(width: 10),
             itemBuilder: (_, i) {
               final (kind, label, dot) = chips[i];
               final selected = _type == kind;
@@ -477,7 +477,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
     try {
       final pos = await Geolocator.getCurrentPosition(
-          timeLimit: const Duration(seconds: 10));
+          locationSettings: const LocationSettings(timeLimit: Duration(seconds: 10)));
       _controller?.animateCamera(
         CameraUpdate.newLatLngZoom(
             LatLng(pos.latitude, pos.longitude), 14),
@@ -520,7 +520,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       final dist = distanceText(pos, h.lat, h.lng);
       sub = [
         tr(ref, 'hosp.hospital'),
-        if (dist != null) dist,
+        dist?,
       ].join(' · ');
       final r =
           h.reviewCount > 0 ? '★ ${h.rating.toStringAsFixed(1)}  ' : '';
@@ -537,7 +537,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       final dist = distanceText(pos, l.lat, l.lng);
       sub = [
         tr(ref, 'map.labs'),
-        if (dist != null) dist,
+        dist?,
       ].join(' · ');
       ratingLine = l.reviewCount > 0
           ? '★ ${l.rating.toStringAsFixed(1)}'
@@ -553,7 +553,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       final dist = distanceText(pos, d.lat, d.lng);
       sub = [
         specialtyLabel(ref.watch(localeProvider), d.specialty),
-        if (dist != null) dist,
+        dist?,
       ].join(' · ');
       ratingLine = d.reviewCount > 0
           ? '★ ${d.rating.toStringAsFixed(1)}'

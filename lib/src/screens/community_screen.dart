@@ -37,7 +37,7 @@ class CommunityScreen extends ConsumerStatefulWidget {
 }
 
 class _CommunityScreenState extends ConsumerState<CommunityScreen> {
-  /// 'all' | 'city' | 'spec:<name>'
+  /// 'all' | 'city' | `spec:<name>`
   String _filter = 'all';
 
   void _onAsk() {
@@ -193,7 +193,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: FdDim.page),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            separatorBuilder: (_, _) => const SizedBox(width: 10),
             itemBuilder: (_, i) => items[i],
           ),
         );
@@ -560,7 +560,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           );
           if (ok == true) {
             await repo.deleteQuestion(q.id);
-            if (context.mounted) {
+            if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(tr(ref, 'com.deleted'))),
               );

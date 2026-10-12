@@ -68,7 +68,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return;
       }
       final p = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low,
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
       );
       if (mounted) setState(() => _pos = p);
     } catch (_) {
@@ -256,11 +256,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: doctorsAsync.when(
           loading: () => const Center(
               child: CircularProgressIndicator(color: FdColors.primary)),
-          error: (_, __) => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
           data: (doctors) => hospitalsAsync.when(
             loading: () => const Center(
                 child: CircularProgressIndicator(color: FdColors.primary)),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
             data: (hospitals) => _body(
               context,
               doctors,
@@ -474,7 +474,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final specsAsync = ref.watch(_homeSpecialtiesProvider);
     return specsAsync.when(
       loading: () => const SizedBox(height: FdDim.chipHeight),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (specs) => SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(

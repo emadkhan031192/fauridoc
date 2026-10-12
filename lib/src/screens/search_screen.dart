@@ -84,7 +84,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         return;
       }
       final p = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low,
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
       );
       if (mounted) setState(() => _pos = p);
     } catch (_) {
@@ -395,7 +395,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             const SizedBox(width: 10),
             specsAsync.when(
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
               data: (specs) => _dropdownChip(
                 label: _specialty == null
                     ? trB(ref, 'search.allSpecialties')
@@ -512,7 +512,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       return async.when(
         loading: () => const Center(
             child: CircularProgressIndicator(color: FdColors.primary)),
-        error: (_, __) => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
         data: (list) {
           final doctors =
               list.where((d) => _passes5km(d.lat, d.lng)).toList();
@@ -537,7 +537,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       return async.when(
         loading: () => const Center(
             child: CircularProgressIndicator(color: FdColors.primary)),
-        error: (_, __) => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
         data: (list) {
           final labs = list.where((l) => _passes5km(l.lat, l.lng)).toList();
           return _listShell(
@@ -560,7 +560,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return async.when(
       loading: () => const Center(
           child: CircularProgressIndicator(color: FdColors.primary)),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (list) {
         final hospitals =
             list.where((h) => _passes5km(h.lat, h.lng)).toList();

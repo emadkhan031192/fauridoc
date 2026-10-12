@@ -225,7 +225,7 @@ class _QuestionDetailScreenState
                             physics:
                                 const NeverScrollableScrollPhysics(),
                             itemCount: replies.length,
-                            separatorBuilder: (_, __) =>
+                            separatorBuilder: (_, _) =>
                                 const SizedBox(height: 12),
                             itemBuilder: (context, i) => _replyTile(
                                 ref, ur, replies[i], user, isAdmin),
