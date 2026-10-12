@@ -11,6 +11,7 @@ import '../models/lab.dart';
 import '../models/model_utils.dart';
 import '../models/review.dart';
 import 'repository.dart';
+import 'seed_loader.dart';
 import 'seeds.dart';
 
 /// Demo-mode repository: everything in memory, persisted to
@@ -64,13 +65,14 @@ class DemoRepository implements FauridocRepository {
   static const _kUsers = 'demo_users';
   static const _kStats = 'demo_stats';
   static const _kConfig = 'demo_config';
+  static const _kSeedVersion = 'demo_seed_version';
+  static const _seedVersion = 2; // bump to force a reseed with fresh research data
 
   void _load() {
     try {
       final d = _prefs.getString(_kDoctors);
-      if (d == null) {
+      if (d == null || (_prefs.getInt(_kSeedVersion) ?? 0) < _seedVersion) {
         _seed();
-        _save();
         return;
       }
       for (final e in (jsonDecode(d) as List)) {
@@ -122,6 +124,13 @@ class DemoRepository implements FauridocRepository {
   }
 
   void _seed() {
+    // Seed synchronously from the legacy Dart seeds so first paint has data,
+    // then replace with the researched JSON bundle when it loads.
+    _seedFromDart();
+    _seedFromBundle();
+  }
+
+  void _seedFromDart() {
     for (final d in seedDoctors()) {
       _doctors[d.id] = d;
     }
@@ -138,6 +147,34 @@ class DemoRepository implements FauridocRepository {
     _specialties = List.of(defaultSpecialties);
     _testCategories = List.of(defaultTestCategories);
     _statsWeek = _weekKey(DateTime.now());
+    _save();
+    _emit();
+  }
+
+  Future<void> _seedFromBundle() async {
+    final bundle = await loadSeedBundle();
+    if (bundle.doctors.isEmpty) return;
+    // Replace only the legacy 'seed_*' records; keep anything the user added.
+    _doctors.removeWhere((id, _) => id.startsWith('seed_'));
+    _labs.removeWhere((id, _) => id.startsWith('seed_'));
+    _hospitals.removeWhere((id, _) => id.startsWith('seed_'));
+    for (final d in bundle.doctors) {
+      _doctors.putIfAbsent(d.id, () => d);
+    }
+    for (final l in bundle.labs) {
+      _labs.putIfAbsent(l.id, () => l);
+    }
+    for (final h in bundle.hospitals) {
+      _hospitals.putIfAbsent(h.id, () => h);
+    }
+    if (bundle.cities.isNotEmpty) _cities = List.of(bundle.cities);
+    if (bundle.specialties.isNotEmpty) _specialties = List.of(bundle.specialties);
+    if (bundle.testCategories.isNotEmpty) {
+      _testCategories = List.of(bundle.testCategories);
+    }
+    await _prefs.setInt(_kSeedVersion, _seedVersion);
+    _save();
+    _emit();
   }
 
   void _save() {

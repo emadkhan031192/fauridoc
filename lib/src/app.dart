@@ -52,7 +52,7 @@ class _FauridocAppState extends ConsumerState<FauridocApp> {
       title: 'Fauridoc',
       debugShowCheckedModeBanner: false,
       locale: Locale(locale),
-      theme: FauridocTheme.light(locale == 'ur' ? 'NotoNastaliqUrdu' : null),
+      theme: fauridocTheme(locale),
       home: Directionality(
         textDirection: locale == 'ur' ? TextDirection.rtl : TextDirection.ltr,
         child: SplashScreen(
@@ -88,35 +88,16 @@ class HomeShell extends ConsumerWidget {
       textDirection: locale == 'ur' ? TextDirection.rtl : TextDirection.ltr,
       child: Scaffold(
         body: IndexedStack(index: tab, children: screens),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: tab,
-          onDestinationSelected: (i) => ref.read(tabIndexProvider.notifier).setTab(i),
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home),
-              label: tr(ref, 'navHome'),
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.search_outlined),
-              selectedIcon: const Icon(Icons.search),
-              label: tr(ref, 'navSearch'),
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.map_outlined),
-              selectedIcon: const Icon(Icons.map),
-              label: tr(ref, 'navMap'),
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.forum_outlined),
-              selectedIcon: const Icon(Icons.forum),
-              label: tr(ref, 'navCommunity'),
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.person_outline),
-              selectedIcon: const Icon(Icons.person),
-              label: tr(ref, 'navProfile'),
-            ),
+        bottomNavigationBar: FdBottomNav(
+          currentIndex: tab,
+          onTap: (i) => ref.read(tabIndexProvider.notifier).setTab(i),
+          isUrdu: locale == 'ur',
+          labels: [
+            tr(ref, 'navHome'),
+            tr(ref, 'navSearch'),
+            tr(ref, 'navMap'),
+            tr(ref, 'navCommunity'),
+            tr(ref, 'navProfile'),
           ],
         ),
       ),

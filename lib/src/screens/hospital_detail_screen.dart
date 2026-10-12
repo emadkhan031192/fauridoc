@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../l10n/strings.dart';
 import '../models/hospital.dart';
 import '../providers/providers.dart';
+import '../providers/user_location.dart';
 import '../utils/actions.dart';
-import '../widgets/rating_stars.dart';
 import '../widgets/theme.dart';
 
-/// Full profile of one hospital: header with 24/7 emergency pill, contact,
-/// emergency contact row, departments, visiting hours, call/map actions.
+/// Hospital profile — design page-09: pink header with plus outline,
+/// red emergency-number card, info card, departments chips, sticky
+/// Call emergency / Directions bar.
 class HospitalDetailScreen extends ConsumerStatefulWidget {
   final String hospitalId;
 
@@ -19,260 +21,285 @@ class HospitalDetailScreen extends ConsumerStatefulWidget {
       _HospitalDetailScreenState();
 }
 
-class _HospitalDetailScreenState extends ConsumerState<HospitalDetailScreen> {
-  Hospital? _hospital;
-  bool _loading = true;
-  bool _failed = false;
+class _HospitalDetailScreenState
+    extends ConsumerState<HospitalDetailScreen> {
+  late final Future<Hospital?> _hospitalFuture;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _hospitalFuture =
+        ref.read(repositoryProvider).getHospital(widget.hospitalId);
   }
-
-  Future<void> _load() async {
-    try {
-      final hospital =
-          await ref.read(repositoryProvider).getHospital(widget.hospitalId);
-      if (!mounted) return;
-      setState(() {
-        _hospital = hospital;
-        _loading = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _failed = true;
-      });
-    }
-  }
-
-  void _retry() {
-    setState(() {
-      _loading = true;
-      _failed = false;
-    });
-    _load();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final hospital = _hospital;
+    final locale = ref.watch(localeProvider);
+    final ur = fdIsUrdu(locale);
+    final pos = ref.watch(userLocationProvider).valueOrNull;
+
     return Scaffold(
-      appBar: AppBar(title: Text(hospital?.name ?? '')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _failed
-              ? _errorBody()
-              : hospital == null
-                  ? Center(child: Text(tr(ref, 'noResults')))
-                  : _detailBody(hospital),
-    );
-  }
-
-  Widget _errorBody() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
-            const SizedBox(height: 12),
-            Text(tr(ref, 'error')),
-            const SizedBox(height: 12),
-            FilledButton(onPressed: _retry, child: Text(tr(ref, 'retry'))),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _detailBody(Hospital hospital) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _headerCard(hospital),
-          if (hospital.emergencyPhone.trim().isNotEmpty)
-            _emergencyCard(hospital),
-          if (hospital.departments.isNotEmpty) _departmentsCard(hospital),
-          if (hospital.visitingHours.trim().isNotEmpty)
-            _visitingHoursCard(hospital),
-          _actionsCard(hospital),
-        ],
-      ),
-    );
-  }
-
-  Widget _card(Widget child) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: child,
-      ),
-    );
-  }
-
-  TextStyle _sectionTitle(BuildContext context) {
-    return Theme.of(context)
-        .textTheme
-        .titleMedium!
-        .copyWith(fontWeight: FontWeight.w800);
-  }
-
-  // ---------- header ----------
-
-  Widget _headerCard(Hospital hospital) {
-    return _card(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: FdColors.bg,
+      body: FutureBuilder(
+        future: _hospitalFuture,
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final h = snap.data;
+          if (h == null) {
+            return Center(child: Text(tr(ref, 'error')));
+          }
+          final dist = distanceText(pos, h.lat, h.lng);
+          final emergencyNo = h.emergencyPhone.trim().isNotEmpty
+              ? h.emergencyPhone.trim()
+              : h.phone.trim();
+          return Column(
             children: [
-              EntityAvatar(
-                  photoUrl: hospital.photoUrl,
-                  name: hospital.name,
-                  radius: 32),
-              const SizedBox(width: 16),
+              _header(context),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                      FdDim.page, 20, FdDim.page, 24),
                   children: [
-                    Text(
-                      hospital.name,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: [
-                        if (hospital.verified)
-                          Pill(
-                            label: tr(ref, 'verified'),
-                            icon: Icons.verified,
-                          ),
-                        if (hospital.emergency247)
-                          Pill(
-                            label: tr(ref, 'emergency247'),
-                            icon: Icons.emergency,
-                            color: FauridocTheme.emergencyRed,
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.location_on,
-                            size: 14, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(hospital.city,
-                            style: TextStyle(color: Colors.grey[700])),
+                        Expanded(
+                          child: Text(h.name,
+                              style: FdType.title(ur, size: 26)),
+                        ),
+                        if (h.verified) ...[
+                          const SizedBox(width: 10),
+                          const FdVerifiedBadge(size: 26),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 6),
-                    RatingStars(
-                      rating: hospital.rating,
-                      reviewCount: hospital.reviewCount,
+                    Text(
+                      [
+                        tr(ref, 'hosp.hospital'),
+                        h.city,
+                        if (dist != null)
+                          fill(tr(ref, 'hosp.away'), {'d': dist}),
+                      ].join(' · '),
+                      style: FdType.body(ur,
+                          size: 16, color: FdColors.muted),
                     ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        if (h.reviewCount > 0) ...[
+                          const Icon(Icons.star,
+                              color: FdColors.starGold, size: 22),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${h.rating.toStringAsFixed(1)}  (${fill(tr(ref, 'doc.reviewsCount'), {'n': '${h.reviewCount}'})})',
+                            style: FdType.body(ur,
+                                size: 17,
+                                w: FontWeight.w700,
+                                color: FdColors.ink),
+                          ),
+                          const SizedBox(width: 12),
+                        ],
+                        if (h.emergency247)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: FdColors.redSoft,
+                              borderRadius: BorderRadius.circular(
+                                  FdDim.pillRadius),
+                            ),
+                            child: Text(
+                              tr(ref, 'hosp.emergency247'),
+                              style: FdType.body(ur,
+                                  size: 14,
+                                  w: FontWeight.w700,
+                                  color: FdColors.redInk),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _emergencyCard(ref, ur, emergencyNo),
+                    const SizedBox(height: 16),
+                    FdInfoCard(
+                      isUrdu: ur,
+                      rows: [
+                        if (h.address.trim().isNotEmpty)
+                          FdInfoRow(
+                              tr(ref, 'doc.address'), h.address),
+                        if (h.phone.trim().isNotEmpty)
+                          FdInfoRow(tr(ref, 'doc.phone'), h.phone),
+                        if (h.visitingHours.trim().isNotEmpty)
+                          FdInfoRow(tr(ref, 'hosp.visitingHours'),
+                              h.visitingHours),
+                      ],
+                    ),
+                    if (h.departments.isNotEmpty) ...[
+                      const SizedBox(height: 22),
+                      FdSectionHeader(
+                          title: tr(ref, 'hosp.departments'),
+                          isUrdu: ur),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          for (final dep in h.departments)
+                            _deptChip(ur, dep,
+                                highlight: dep.trim().toLowerCase() ==
+                                    tr(ref, 'hosp.emergency')
+                                        .toLowerCase()),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
             ],
-          ),
-          if (hospital.address.trim().isNotEmpty) ...[
-            const SizedBox(height: 12),
-            _infoRow(tr(ref, 'address'), hospital.address, Icons.location_on),
-          ],
-          if (hospital.phone.trim().isNotEmpty) ...[
-            const SizedBox(height: 4),
-            _infoRow(tr(ref, 'phone'), hospital.phone, Icons.phone),
-          ],
-          if (hospital.hasParking) ...[
-            const SizedBox(height: 8),
-            Pill(
-              label: tr(ref, 'parking'),
-              icon: Icons.local_parking,
-              color: Colors.green,
+          );
+        },
+      ),
+      bottomNavigationBar: FutureBuilder(
+        future: _hospitalFuture,
+        builder: (context, snap) {
+          final h = snap.data;
+          if (h == null) return const SizedBox.shrink();
+          final emergencyNo = h.emergencyPhone.trim().isNotEmpty
+              ? h.emergencyPhone.trim()
+              : h.phone.trim();
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(top: BorderSide(color: FdColors.line)),
             ),
-          ],
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FdButton(
+                        label: tr(ref, 'hosp.callEmergency'),
+                        icon: Icons.phone_outlined,
+                        style: FdButtonStyle.danger,
+                        isUrdu: ur,
+                        onTap: () => callNumber(context, emergencyNo),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FdButton(
+                        label: tr(ref, 'hosp.directions'),
+                        icon: Icons.navigation_outlined,
+                        style: FdButtonStyle.outline,
+                        isUrdu: ur,
+                        onTap: () => openDirections(
+                            context, h.lat, h.lng, h.name),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _header(BuildContext context) {
+    return Container(
+      height: 240,
+      color: FdColors.hospitalHeader,
+      child: Stack(
+        children: [
+          Center(
+            child: Icon(
+              Icons.add,
+              size: 110,
+              color: FdColors.redInk.withValues(alpha: 0.35),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Material(
+                  color: Colors.white,
+                  shape: const CircleBorder(),
+                  elevation: 2,
+                  shadowColor: Colors.black26,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => Navigator.of(context).pop(),
+                    child: SizedBox(
+                      width: 52,
+                      height: 52,
+                      child: Icon(
+                        Directionality.of(context) == TextDirection.rtl
+                            ? Icons.chevron_right
+                            : Icons.chevron_left,
+                        color: FdColors.ink,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _infoRow(String label, String value, IconData icon) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 18, color: FauridocTheme.tealDark),
-        const SizedBox(width: 10),
-        SizedBox(
-          width: 120,
-          child: Text(label, style: TextStyle(color: Colors.grey[700])),
+  /// Red emergency-number card.
+  Widget _emergencyCard(WidgetRef ref, bool ur, String number) {
+    return GestureDetector(
+      onTap: () => callNumber(context, number),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: FdColors.red,
+          borderRadius: BorderRadius.circular(FdDim.bannerRadius),
         ),
-        Expanded(
-          child:
-              Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ),
-      ],
-    );
-  }
-
-  // ---------- emergency contact ----------
-
-  Widget _emergencyCard(Hospital hospital) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      color: FauridocTheme.emergencyRed.withValues(alpha: 0.06),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: FauridocTheme.emergencyRed.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            const Icon(Icons.emergency,
-                color: FauridocTheme.emergencyRed, size: 28),
-            const SizedBox(width: 12),
+            Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.22),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(Icons.phone_outlined,
+                  color: Colors.white, size: 30),
+            ),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tr(ref, 'emergencyContact'),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: FauridocTheme.emergencyRed,
-                    ),
+                    tr(ref, 'hosp.emergencyNumber'),
+                    style: FdType.body(false,
+                        size: 14,
+                        w: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: 0.85)),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    hospital.emergencyPhone,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    number.isEmpty ? '–' : number,
+                    style: FdType.title(false, size: 24)
+                        .copyWith(color: Colors.white),
                   ),
                 ],
               ),
-            ),
-            FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: FauridocTheme.emergencyRed,
-              ),
-              onPressed: () =>
-                  callNumber(context, hospital.emergencyPhone),
-              icon: const Icon(Icons.call),
-              label: Text(tr(ref, 'call')),
             ),
           ],
         ),
@@ -280,74 +307,25 @@ class _HospitalDetailScreenState extends ConsumerState<HospitalDetailScreen> {
     );
   }
 
-  // ---------- departments ----------
-
-  Widget _departmentsCard(Hospital hospital) {
-    return _card(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(tr(ref, 'departments'), style: _sectionTitle(context)),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final d in hospital.departments) Chip(label: Text(d)),
-            ],
-          ),
-        ],
+  /// Department chip — "Emergency" highlighted in red, rest white.
+  Widget _deptChip(bool ur, String label, {bool highlight = false}) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+      decoration: BoxDecoration(
+        color: highlight ? FdColors.redSoft : Colors.white,
+        borderRadius: BorderRadius.circular(FdDim.pillRadius),
+        border: Border.all(
+          color: highlight ? FdColors.redSoft : FdColors.line,
+          width: 1.4,
+        ),
       ),
-    );
-  }
-
-  // ---------- visiting hours ----------
-
-  Widget _visitingHoursCard(Hospital hospital) {
-    return _card(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(tr(ref, 'visitingHours'), style: _sectionTitle(context)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.schedule,
-                  size: 18, color: FauridocTheme.tealDark),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  hospital.visitingHours,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ---------- actions ----------
-
-  Widget _actionsCard(Hospital hospital) {
-    return _card(
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          FilledButton.icon(
-            onPressed: () => callNumber(context, hospital.phone),
-            icon: const Icon(Icons.call),
-            label: Text(tr(ref, 'call')),
-          ),
-          OutlinedButton.icon(
-            onPressed: () => openDirections(
-                context, hospital.lat, hospital.lng, hospital.name),
-            icon: const Icon(Icons.map),
-            label: Text(tr(ref, 'viewOnMap')),
-          ),
-        ],
+      child: Text(
+        label,
+        style: FdType.body(ur,
+            size: 16,
+            w: FontWeight.w600,
+            color: highlight ? FdColors.redInk : FdColors.ink),
       ),
     );
   }

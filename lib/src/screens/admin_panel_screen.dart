@@ -7,311 +7,680 @@ import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/lab.dart';
 import '../providers/providers.dart';
-import '../utils/actions.dart';
-import 'register_entity_screen.dart';
+import '../widgets/theme.dart';
+import 'manage_entity_screen.dart';
 
-/// Admin dashboard: counts, pending approvals, entity management,
-/// and editable config lists.
+/// Admin panel (page-16): live counts, pending approvals with
+/// approve/reject, full CRUD over all records, editable config lists.
+/// Guarded by the admin flag (or the demo admin-preview toggle).
 class AdminPanelScreen extends ConsumerWidget {
   const AdminPanelScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final ur = fdIsUrdu(ref.watch(localeProvider));
     final repo = ref.watch(repositoryProvider);
     final user = ref.watch(authProvider);
     final isAdmin = (user?.isAdmin ?? false) ||
         (repo.isDemo && ref.watch(demoAdminPreviewProvider));
+
+    if (!isAdmin) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Text(tr(ref, 'admin.adminOnly'),
+                style: FdType.body(ur, size: 16),
+                textAlign: TextAlign.center),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(title: Text(tr(ref, 'adminPanel'))),
-      body: isAdmin
-          ? const _AdminBody()
-          : Center(
-              child: Text('${tr(ref, 'adminPanel')} - ${tr(ref, 'login')}'),
-            ),
-    );
-  }
-}
-
-class _AdminBody extends ConsumerWidget {
-  const _AdminBody();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final repo = ref.watch(repositoryProvider);
-    final locale = ref.watch(localeProvider);
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(tr(ref, 'admin.title'),
+                style: FdType.title(ur, size: 22)),
+            Text(tr(ref, 'admin.liveCounts'),
+                style: FdType.body(ur, size: 13)),
+          ],
+        ),
+      ),
+      body: ListView(
+        padding:
+            const EdgeInsets.fromLTRB(FdDim.page, 8, FdDim.page, 32),
         children: [
-          StreamBuilder<AdminCounts>(
-            stream: repo.watchAdminCounts(),
-            builder: (context, snap) {
-              final c = snap.data ?? const AdminCounts();
-              final cards = [
-                (tr(ref, 'totalDoctors'), c.doctors),
-                (tr(ref, 'totalLabs'), c.labs),
-                (tr(ref, 'totalHospitals'), c.hospitals),
-                (tr(ref, 'pendingApprovals'), c.pending),
-                (tr(ref, 'totalUsers'), c.users),
-                (tr(ref, 'totalReviews'), c.reviews),
-              ];
-              return GridView.count(
-                crossAxisCount: 3,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                children: [
-                  for (final (label, count) in cards)
-                    Card(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            '$count',
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            label,
-                            style: const TextStyle(fontSize: 11),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              );
-            },
+          _CountsGrid(ur: ur),
+          const SizedBox(height: 26),
+          _PendingSection(ur: ur),
+          const SizedBox(height: 26),
+          _SearchSection<Doctor>(
+            ur: ur,
+            title: tr(ref, 'admin.allDoctors'),
+            stream: repo.watchDoctors,
+            nameOf: (d) => d.name,
+            subOf: (d) =>
+                '${specialtyLabel(ref.watch(localeProvider), d.specialty)} · ${d.city}',
+            tileOf: (d) => FdAvatarTile(
+                name: d.name, size: 54, bg: FdColors.peach),
+            onEdit: (d) => _goManage(context, doctor: d),
+            onDelete: (d) => repo.deleteDoctor(d.id),
           ),
-          const SizedBox(height: 16),
-          _pendingSection<Doctor>(
-            ref: ref,
-            titleKey: 'pendingDoctors',
-            stream: repo.watchPendingDoctors(),
-            titleOf: (d) => d.name,
-            subtitleOf: (d) =>
-                '${d.city} · ${specialtyLabel(locale, d.specialty)}',
-            idOf: (d) => d.id,
-            decide: (id, approve) =>
-                ref.read(repositoryProvider).approveDoctor(id, approve: approve),
+          const SizedBox(height: 26),
+          _SearchSection<Lab>(
+            ur: ur,
+            title: tr(ref, 'admin.allLabs'),
+            stream: repo.watchLabs,
+            nameOf: (l) => l.name,
+            subOf: (l) => l.city,
+            tileOf: (_) => const _TileIcon(
+                bg: FdColors.lavender,
+                icon: Icons.science_outlined,
+                iconColor: FdColors.lavenderInk),
+            onEdit: (l) => _goManage(context, lab: l),
+            onDelete: (l) => repo.deleteLab(l.id),
           ),
-          _pendingSection<Lab>(
-            ref: ref,
-            titleKey: 'pendingLabs',
-            stream: repo.watchPendingLabs(),
-            titleOf: (l) => l.name,
-            subtitleOf: (l) => l.city,
-            idOf: (l) => l.id,
-            decide: (id, approve) =>
-                ref.read(repositoryProvider).approveLab(id, approve: approve),
+          const SizedBox(height: 26),
+          _SearchSection<Hospital>(
+            ur: ur,
+            title: tr(ref, 'admin.allHospitals'),
+            stream: repo.watchHospitals,
+            nameOf: (h) => h.name,
+            subOf: (h) => h.city,
+            tileOf: (_) => const _TileIcon(
+                bg: FdColors.redSoft,
+                icon: Icons.add,
+                iconColor: FdColors.redInk),
+            onEdit: (h) => _goManage(context, hospital: h),
+            onDelete: (h) => repo.deleteHospital(h.id),
           ),
-          _pendingSection<Hospital>(
-            ref: ref,
-            titleKey: 'pendingHospitals',
-            stream: repo.watchPendingHospitals(),
-            titleOf: (h) => h.name,
-            subtitleOf: (h) => h.city,
-            idOf: (h) => h.id,
-            decide: (id, approve) => ref
-                .read(repositoryProvider)
-                .approveHospital(id, approve: approve),
+          const SizedBox(height: 26),
+          Text(tr(ref, 'admin.manageLists'),
+              style: FdType.title(ur, size: 21)),
+          const SizedBox(height: 12),
+          _ListEditor(
+            ur: ur,
+            title: tr(ref, 'admin.cities'),
+            watch: repo.watchCities,
+            save: repo.setCities,
           ),
-          const SizedBox(height: 8),
-          _manageHeader(
-            context,
-            ref,
-            'manageDoctors',
-            () => const RegisterEntityScreen(kind: EntityKind.doctor),
+          const SizedBox(height: 12),
+          _ListEditor(
+            ur: ur,
+            title: tr(ref, 'admin.specialties'),
+            watch: repo.watchSpecialties,
+            save: repo.setSpecialties,
           ),
-          StreamBuilder<List<Doctor>>(
-            stream: repo.watchDoctors(),
-            builder: (context, snap) {
-              final items = snap.data ?? const <Doctor>[];
-              return Column(
-                children: [
-                  for (final d in items)
-                    ListTile(
-                      title: Text(d.name),
-                      subtitle: Text(
-                        '${d.city} · ${specialtyLabel(locale, d.specialty)}',
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _confirmDelete(
-                          context,
-                          () => repo.deleteDoctor(d.id),
-                        ),
-                      ),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => RegisterEntityScreen(
-                            kind: EntityKind.doctor,
-                            doctor: d,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          _manageHeader(
-            context,
-            ref,
-            'manageLabs',
-            () => const RegisterEntityScreen(kind: EntityKind.lab),
-          ),
-          StreamBuilder<List<Lab>>(
-            stream: repo.watchLabs(),
-            builder: (context, snap) {
-              final items = snap.data ?? const <Lab>[];
-              return Column(
-                children: [
-                  for (final l in items)
-                    ListTile(
-                      title: Text(l.name),
-                      subtitle: Text(l.city),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _confirmDelete(
-                          context,
-                          () => repo.deleteLab(l.id),
-                        ),
-                      ),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => RegisterEntityScreen(
-                            kind: EntityKind.lab,
-                            lab: l,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          _manageHeader(
-            context,
-            ref,
-            'manageHospitals',
-            () => const RegisterEntityScreen(kind: EntityKind.hospital),
-          ),
-          StreamBuilder<List<Hospital>>(
-            stream: repo.watchHospitals(),
-            builder: (context, snap) {
-              final items = snap.data ?? const <Hospital>[];
-              return Column(
-                children: [
-                  for (final h in items)
-                    ListTile(
-                      title: Text(h.name),
-                      subtitle: Text(h.city),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _confirmDelete(
-                          context,
-                          () => repo.deleteHospital(h.id),
-                        ),
-                      ),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => RegisterEntityScreen(
-                            kind: EntityKind.hospital,
-                            hospital: h,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.location_city_outlined),
-            title: Text(tr(ref, 'editCities')),
-            onTap: () => _editList(
-              context,
-              'editCities',
-              repo.watchCities(),
-              repo.setCities,
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.medical_services_outlined),
-            title: Text(tr(ref, 'editSpecialties')),
-            onTap: () => _editList(
-              context,
-              'editSpecialties',
-              repo.watchSpecialties(),
-              repo.setSpecialties,
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.science_outlined),
-            title: Text(tr(ref, 'editTestCategories')),
-            onTap: () => _editList(
-              context,
-              'editTestCategories',
-              repo.watchTestCategories(),
-              repo.setTestCategories,
-            ),
+          const SizedBox(height: 12),
+          _ListEditor(
+            ur: ur,
+            title: tr(ref, 'admin.testCategories'),
+            watch: repo.watchTestCategories,
+            save: repo.setTestCategories,
           ),
         ],
       ),
     );
   }
 
-  Widget _pendingSection<T>({
-    required WidgetRef ref,
-    required String titleKey,
-    required Stream<List<T>> stream,
-    required String Function(T) titleOf,
-    required String Function(T) subtitleOf,
-    required String Function(T) idOf,
-    required Future<void> Function(String id, bool approve) decide,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 12, 4, 4),
-          child: Text(
-            tr(ref, titleKey),
-            style: const TextStyle(fontWeight: FontWeight.w800),
-          ),
+  void _goManage(BuildContext context,
+      {Doctor? doctor, Lab? lab, Hospital? hospital}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => ManageEntityScreen(
+            doctor: doctor, lab: lab, hospital: hospital)));
+  }
+}
+
+String _commas(int n) {
+  final s = n.toString();
+  final buf = StringBuffer();
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
+    buf.write(s[i]);
+  }
+  return buf.toString();
+}
+
+String _ago(WidgetRef ref, DateTime dt) {
+  final days = DateTime.now().difference(dt).inDays;
+  if (days <= 0) return tr(ref, 'admin.today');
+  if (days == 1) return tr(ref, 'admin.yesterday');
+  return fill(tr(ref, 'admin.daysAgo'), {'n': '$days'});
+}
+
+/// 3x2 live-count tiles.
+class _CountsGrid extends ConsumerWidget {
+  final bool ur;
+  const _CountsGrid({required this.ur});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<AdminCounts>(
+      stream: ref.watch(repositoryProvider).watchAdminCounts(),
+      builder: (context, snap) {
+        final c = snap.data ?? const AdminCounts();
+        final tiles = [
+          _CountTile(
+              value: _commas(c.doctors),
+              label: tr(ref, 'admin.doctors'),
+              ur: ur),
+          _CountTile(
+              value: _commas(c.labs),
+              label: tr(ref, 'admin.labs'),
+              ur: ur),
+          _CountTile(
+              value: _commas(c.hospitals),
+              label: tr(ref, 'admin.hospitals'),
+              ur: ur),
+          _CountTile(
+              value: _commas(c.pending),
+              label: tr(ref, 'admin.pending'),
+              ur: ur,
+              highlight: true),
+          _CountTile(
+              value: _commas(c.users),
+              label: tr(ref, 'admin.users'),
+              ur: ur),
+          _CountTile(
+              value: _commas(c.reviews),
+              label: tr(ref, 'admin.reviews'),
+              ur: ur),
+        ];
+        return GridView.count(
+          crossAxisCount: 3,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.04,
+          children: tiles,
+        );
+      },
+    );
+  }
+}
+
+class _CountTile extends StatelessWidget {
+  final String value;
+  final String label;
+  final bool ur;
+  final bool highlight;
+
+  const _CountTile({
+    required this.value,
+    required this.label,
+    required this.ur,
+    this.highlight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: highlight ? FdColors.amberSoft : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+            color: highlight ? FdColors.amberSoft : FdColors.line),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(value,
+              style: TextStyle(
+                fontFamily: FdType.latin,
+                fontSize: 27,
+                fontWeight: FontWeight.w800,
+                color:
+                    highlight ? FdColors.amberInk : FdColors.ink,
+              ),
+              overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 2),
+          Text(label,
+              style: FdType.body(
+                ur,
+                size: 13.5,
+                color: highlight ? FdColors.amberInk : FdColors.muted,
+              ),
+              overflow: TextOverflow.ellipsis),
+        ],
+      ),
+    );
+  }
+}
+
+enum _PendingKind { doctor, lab, hospital }
+
+class _PendingItem {
+  final _PendingKind kind;
+  final String id;
+  final String name;
+  final String city;
+  final String sub;
+  final DateTime createdAt;
+  const _PendingItem({
+    required this.kind,
+    required this.id,
+    required this.name,
+    required this.city,
+    required this.sub,
+    required this.createdAt,
+  });
+}
+
+/// Pending approval cards with Approve / Reject / detail.
+class _PendingSection extends ConsumerWidget {
+  final bool ur;
+  const _PendingSection({required this.ur});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final repo = ref.watch(repositoryProvider);
+    return StreamBuilder<List<Doctor>>(
+      stream: repo.watchPendingDoctors(),
+      builder: (context, dSnap) => StreamBuilder<List<Lab>>(
+        stream: repo.watchPendingLabs(),
+        builder: (context, lSnap) => StreamBuilder<List<Hospital>>(
+          stream: repo.watchPendingHospitals(),
+          builder: (context, hSnap) {
+            final items = <_PendingItem>[
+              for (final d in (dSnap.data ?? const <Doctor>[]))
+                _PendingItem(
+                  kind: _PendingKind.doctor,
+                  id: d.id,
+                  name: d.name,
+                  city: d.city,
+                  sub: d.specialty,
+                  createdAt: d.createdAt,
+                ),
+              for (final l in (lSnap.data ?? const <Lab>[]))
+                _PendingItem(
+                  kind: _PendingKind.lab,
+                  id: l.id,
+                  name: l.name,
+                  city: l.city,
+                  sub: '',
+                  createdAt: l.createdAt,
+                ),
+              for (final h in (hSnap.data ?? const <Hospital>[]))
+                _PendingItem(
+                  kind: _PendingKind.hospital,
+                  id: h.id,
+                  name: h.name,
+                  city: h.city,
+                  sub: '',
+                  createdAt: h.createdAt,
+                ),
+            ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(tr(ref, 'admin.pendingApproval'),
+                          style: FdType.title(ur, size: 21)),
+                    ),
+                    Text(
+                      fill(tr(ref, 'admin.waiting'),
+                          {'n': '${items.length}'}),
+                      style: FdType.body(ur,
+                          size: 15,
+                          w: FontWeight.w700,
+                          color: FdColors.amberInk),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                for (final it in items)
+                  _PendingCard(ur: ur, item: it),
+              ],
+            );
+          },
         ),
+      ),
+    );
+  }
+}
+
+class _PendingCard extends ConsumerWidget {
+  final bool ur;
+  final _PendingItem item;
+  const _PendingCard({required this.ur, required this.item});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final repo = ref.read(repositoryProvider);
+    final typeLabel = switch (item.kind) {
+      _PendingKind.doctor => tr(ref, 'prof.typeDoctor'),
+      _PendingKind.lab => tr(ref, 'prof.typeLab'),
+      _PendingKind.hospital => tr(ref, 'prof.typeHospital'),
+    };
+    final tile = switch (item.kind) {
+      _PendingKind.doctor =>
+        FdAvatarTile(name: item.name, size: 58, bg: FdColors.peach),
+      _PendingKind.lab => const _TileIcon(
+          bg: FdColors.lavender,
+          icon: Icons.science_outlined,
+          iconColor: FdColors.lavenderInk),
+      _PendingKind.hospital => const _TileIcon(
+          bg: FdColors.redSoft, icon: Icons.add, iconColor: FdColors.redInk),
+    };
+
+    Future<void> approve() async {
+      switch (item.kind) {
+        case _PendingKind.doctor:
+          await repo.approveDoctor(item.id, approve: true);
+        case _PendingKind.lab:
+          await repo.approveLab(item.id, approve: true);
+        case _PendingKind.hospital:
+          await repo.approveHospital(item.id, approve: true);
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(tr(ref, 'admin.approvedMsg'))));
+      }
+    }
+
+    Future<void> reject() async {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(item.name),
+          content: Text(tr(ref, 'admin.confirmDelete')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(tr(ref, 'admin.cancel')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(tr(ref, 'admin.delete'),
+                  style: const TextStyle(color: FdColors.redInk)),
+            ),
+          ],
+        ),
+      );
+      if (ok != true) return;
+      switch (item.kind) {
+        case _PendingKind.doctor:
+          await repo.deleteDoctor(item.id);
+        case _PendingKind.lab:
+          await repo.deleteLab(item.id);
+        case _PendingKind.hospital:
+          await repo.deleteHospital(item.id);
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(tr(ref, 'admin.rejected'))));
+      }
+    }
+
+    void openDetail() async {
+      if (item.kind == _PendingKind.doctor) {
+        final d = await repo.getDoctor(item.id);
+        if (d != null && context.mounted) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => ManageEntityScreen(doctor: d)));
+        }
+      } else if (item.kind == _PendingKind.lab) {
+        final l = await repo.getLab(item.id);
+        if (l != null && context.mounted) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => ManageEntityScreen(lab: l)));
+        }
+      } else {
+        final h = await repo.getHospital(item.id);
+        if (h != null && context.mounted) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => ManageEntityScreen(hospital: h)));
+        }
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        border: Border.all(color: FdColors.line),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              tile,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.name,
+                        style: FdType.title(ur, size: 18),
+                        overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 3),
+                    Text(
+                      fill(tr(ref, 'admin.submitted'), {
+                        'type': typeLabel,
+                        'city': item.city,
+                        'ago': _ago(ref, item.createdAt),
+                      }),
+                      style: FdType.body(ur, size: 13.5),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: SizedBox(
+                  height: 52,
+                  child: FdButton(
+                    label: tr(ref, 'admin.approve'),
+                    isUrdu: ur,
+                    onTap: approve,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 2,
+                child: SizedBox(
+                  height: 52,
+                  child: FdButton(
+                    label: tr(ref, 'admin.reject'),
+                    style: FdButtonStyle.dangerOutline,
+                    isUrdu: ur,
+                    onTap: reject,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: openDetail,
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: FdColors.line),
+                  ),
+                  child: const Icon(Icons.chevron_right,
+                      color: FdColors.ink, size: 26),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TileIcon extends StatelessWidget {
+  final Color bg;
+  final IconData icon;
+  final Color iconColor;
+  final double size;
+
+  const _TileIcon({
+    required this.bg,
+    required this.icon,
+    required this.iconColor,
+    this.size = 58,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(size * 0.3),
+      ),
+      child: Icon(icon, color: iconColor, size: size * 0.5),
+    );
+  }
+}
+
+/// Searchable "all records" section with edit/delete per row.
+class _SearchSection<T> extends ConsumerStatefulWidget {
+  final bool ur;
+  final String title;
+  final Stream<List<T>> Function() stream;
+  final String Function(T) nameOf;
+  final String Function(T) subOf;
+  final Widget Function(T) tileOf;
+  final void Function(T) onEdit;
+  final Future<void> Function(T) onDelete;
+
+  const _SearchSection({
+    required this.ur,
+    required this.title,
+    required this.stream,
+    required this.nameOf,
+    required this.subOf,
+    required this.tileOf,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  ConsumerState<_SearchSection<T>> createState() =>
+      _SearchSectionState<T>();
+}
+
+class _SearchSectionState<T>
+    extends ConsumerState<_SearchSection<T>> {
+  final _ctrl = TextEditingController();
+  String _q = '';
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(widget.title, style: FdType.title(widget.ur, size: 21)),
+        const SizedBox(height: 10),
+        FdSearchField(
+          hint: tr(ref, 'admin.searchHint'),
+          isUrdu: widget.ur,
+          controller: _ctrl,
+          onChanged: (v) => setState(() => _q = v.trim().toLowerCase()),
+        ),
+        const SizedBox(height: 10),
         StreamBuilder<List<T>>(
-          stream: stream,
+          stream: widget.stream(),
           builder: (context, snap) {
-            final items = snap.data ?? <T>[];
-            if (items.isEmpty) return const SizedBox.shrink();
+            final all = snap.data ?? const <T>[];
+            final items = _q.isEmpty
+                ? all
+                : all
+                    .where((e) => widget
+                        .nameOf(e)
+                        .toLowerCase()
+                        .contains(_q))
+                    .toList();
+            if (items.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text('—',
+                    style: FdType.body(widget.ur, size: 14),
+                    textAlign: TextAlign.center),
+              );
+            }
             return Column(
               children: [
-                for (final e in items)
-                  ListTile(
-                    title: Text(titleOf(e)),
-                    subtitle: Text(subtitleOf(e)),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
+                for (final it in items.take(30))
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: FdColors.line),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    child: Row(
                       children: [
-                        TextButton(
-                          onPressed: () => decide(idOf(e), true),
-                          child: Text(tr(ref, 'approve')),
+                        widget.tileOf(it),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            children: [
+                              Text(widget.nameOf(it),
+                                  style:
+                                      FdType.title(widget.ur, size: 16),
+                                  overflow: TextOverflow.ellipsis),
+                              Text(widget.subOf(it),
+                                  style: FdType.body(widget.ur,
+                                      size: 13),
+                                  overflow: TextOverflow.ellipsis),
+                            ],
+                          ),
                         ),
-                        TextButton(
-                          onPressed: () => decide(idOf(e), false),
-                          child: Text(tr(ref, 'reject')),
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined,
+                              color: FdColors.primary, size: 22),
+                          tooltip: tr(ref, 'admin.edit'),
+                          onPressed: () => widget.onEdit(it),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline,
+                              color: FdColors.redInk, size: 22),
+                          tooltip: tr(ref, 'admin.delete'),
+                          onPressed: () =>
+                              _confirmDelete(context, ref, it),
                         ),
                       ],
                     ),
                   ),
+                if (items.length > 30)
+                  Text('+${items.length - 30}',
+                      style: FdType.body(widget.ur, size: 13)),
               ],
             );
           },
@@ -320,104 +689,192 @@ class _AdminBody extends ConsumerWidget {
     );
   }
 
-  Widget _manageHeader(
-    BuildContext context,
-    WidgetRef ref,
-    String titleKey,
-    Widget Function() create,
-  ) {
-    return Row(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 12, 4, 4),
-          child: Text(
-            tr(ref, titleKey),
-            style: const TextStyle(fontWeight: FontWeight.w800),
-          ),
-        ),
-        const Spacer(),
-        TextButton.icon(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => create()),
-          ),
-          icon: const Icon(Icons.add),
-          label: Text(tr(ref, 'createDirectly')),
-        ),
-      ],
-    );
-  }
-
-  static Future<void> _confirmDelete(
-    BuildContext context,
-    Future<void> Function() action,
-  ) async {
+  Future<void> _confirmDelete(
+      BuildContext context, WidgetRef ref, T it) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        content: Text(translateOf(ctx, 'confirmDelete')),
+        title: Text(widget.nameOf(it)),
+        content: Text(tr(ref, 'admin.confirmDelete')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(translateOf(ctx, 'cancel')),
+            child: Text(tr(ref, 'admin.cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(translateOf(ctx, 'delete')),
+            child: Text(tr(ref, 'admin.delete'),
+                style: const TextStyle(color: FdColors.redInk)),
           ),
         ],
       ),
     );
-    if (ok == true) {
-      await action();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(translateOf(context, 'deleted'))),
-        );
-      }
+    if (ok != true || !context.mounted) return;
+    await widget.onDelete(it);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr(ref, 'admin.deleted'))));
     }
   }
+}
 
-  static Future<void> _editList(
-    BuildContext context,
-    String titleKey,
-    Stream<List<String>> stream,
-    Future<void> Function(List<String>) save,
-  ) async {
-    final current = await stream.first;
-    if (!context.mounted) return;
-    final ctrl = TextEditingController(text: current.join('\n'));
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(translateOf(ctx, titleKey)),
-        content: TextField(
-          controller: ctrl,
-          maxLines: 8,
-          decoration: InputDecoration(
-            hintText: translateOf(ctx, 'onePerLine'),
+/// Chips editor for cities / specialties / test categories.
+class _ListEditor extends ConsumerStatefulWidget {
+  final bool ur;
+  final String title;
+  final Stream<List<String>> Function() watch;
+  final Future<void> Function(List<String>) save;
+
+  const _ListEditor({
+    required this.ur,
+    required this.title,
+    required this.watch,
+    required this.save,
+  });
+
+  @override
+  ConsumerState<_ListEditor> createState() => _ListEditorState();
+}
+
+class _ListEditorState extends ConsumerState<_ListEditor> {
+  final _ctrl = TextEditingController();
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        border: Border.all(color: FdColors.line),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(widget.title, style: FdType.title(widget.ur, size: 17)),
+          const SizedBox(height: 10),
+          StreamBuilder<List<String>>(
+            stream: widget.watch(),
+            builder: (context, snap) {
+              final items = snap.data ?? const <String>[];
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final it in items)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: FdColors.mint,
+                        borderRadius:
+                            BorderRadius.circular(FdDim.pillRadius),
+                      ),
+                      padding: const EdgeInsets.only(
+                          left: 14, right: 6, top: 8, bottom: 8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(it,
+                              style: FdType.body(widget.ur,
+                                  size: 14,
+                                  w: FontWeight.w600,
+                                  color: FdColors.ink)),
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: _busy
+                                ? null
+                                : () async {
+                                    setState(() => _busy = true);
+                                    try {
+                                      await widget.save(items
+                                          .where((e) => e != it)
+                                          .toList());
+                                    } finally {
+                                      if (mounted) {
+                                        setState(() => _busy = false);
+                                      }
+                                    }
+                                  },
+                            child: const Icon(Icons.close,
+                                color: FdColors.muted, size: 18),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(translateOf(ctx, 'cancel')),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(translateOf(ctx, 'save')),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 50,
+                  child: TextField(
+                    controller: _ctrl,
+                    style: FdType.body(widget.ur,
+                        size: 15, color: FdColors.ink),
+                    decoration: InputDecoration(
+                      hintText: tr(ref, 'admin.add'),
+                      hintStyle: FdType.body(widget.ur,
+                          size: 15, color: FdColors.muted),
+                      filled: true,
+                      fillColor: FdColors.bg,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide:
+                            const BorderSide(color: FdColors.line),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide:
+                            const BorderSide(color: FdColors.line),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                height: 50,
+                child: FdButton(
+                  label: tr(ref, 'admin.add'),
+                  isUrdu: widget.ur,
+                  onTap: _busy
+                      ? null
+                      : () async {
+                          final v = _ctrl.text.trim();
+                          if (v.isEmpty) return;
+                          setState(() => _busy = true);
+                          try {
+                            final cur =
+                                await widget.watch().first;
+                            if (!cur.contains(v)) {
+                              await widget
+                                  .save([...cur, v]);
+                            }
+                            _ctrl.clear();
+                          } finally {
+                            if (mounted) {
+                              setState(() => _busy = false);
+                            }
+                          }
+                        },
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
-    final text = ctrl.text;
-    ctrl.dispose();
-    if (ok == true) {
-      final items = text
-          .split('\n')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
-      await save(items);
-    }
   }
 }

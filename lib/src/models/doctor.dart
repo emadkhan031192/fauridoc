@@ -16,6 +16,7 @@ class Doctor {
   final double? lng;
   final Map<String, DayHours> hours;
   final List<String> languages;
+  final String hoursText; // display text, e.g. "Mon–Fri 5–8 PM"
   final String? photoUrl; // network URL or local file path
   final List<String> clinicPhotos; // up to 3
   final bool verified;
@@ -42,6 +43,7 @@ class Doctor {
     this.lng,
     Map<String, DayHours>? hours,
     this.languages = const [],
+    this.hoursText = '',
     this.photoUrl,
     this.clinicPhotos = const [],
     this.verified = false,
@@ -70,6 +72,7 @@ class Doctor {
         lng: (json['lng'] as num?)?.toDouble(),
         hours: hoursFromJson(json['hours'] as Map<String, dynamic>?),
         languages: (json['languages'] as List?)?.map((e) => e.toString()).toList() ?? const [],
+        hoursText: (json['hoursText'] as String?) ?? '',
         photoUrl: json['photoUrl'] as String?,
         clinicPhotos:
             (json['clinicPhotos'] as List?)?.map((e) => e.toString()).toList() ?? const [],
@@ -98,6 +101,7 @@ class Doctor {
         'lng': lng,
         'hours': hoursToJson(hours),
         'languages': languages,
+        'hoursText': hoursText,
         'photoUrl': photoUrl,
         'clinicPhotos': clinicPhotos,
         'verified': verified,
@@ -124,6 +128,7 @@ class Doctor {
     double? lng,
     Map<String, DayHours>? hours,
     List<String>? languages,
+    String? hoursText,
     String? photoUrl,
     List<String>? clinicPhotos,
     bool? verified,
@@ -149,6 +154,7 @@ class Doctor {
         lng: lng ?? this.lng,
         hours: hours ?? this.hours,
         languages: languages ?? this.languages,
+        hoursText: hoursText ?? this.hoursText,
         photoUrl: photoUrl ?? this.photoUrl,
         clinicPhotos: clinicPhotos ?? this.clinicPhotos,
         verified: verified ?? this.verified,

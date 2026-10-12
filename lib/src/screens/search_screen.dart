@@ -2,21 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
-import '../data/repository.dart';
 import '../l10n/strings.dart';
+import '../l10n/strings_b.dart';
 import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/lab.dart';
 import '../providers/providers.dart';
+import '../utils/actions.dart';
 import '../utils/geo.dart';
-import '../widgets/entity_cards.dart';
+import '../utils/open_status.dart';
+import '../widgets/theme.dart';
 import 'doctor_detail_screen.dart';
 import 'hospital_detail_screen.dart';
 import 'lab_detail_screen.dart';
 
-/// Search tab: segmented Doctors / Labs / Hospitals, text query, city,
-/// specialty (doctors), sort, lab test-category chips, and a 5 km filter.
-/// Browsing is open — no login wall.
+/// Search tab (design page 05): title, live search field, Doctors / Lab Tests
+/// / Hospitals segmented control, filter chips, and result cards.
+/// Body-only — the bottom nav lives in HomeShell.
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
@@ -24,458 +26,932 @@ class SearchScreen extends ConsumerStatefulWidget {
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
+// ---------------------------------------------------------------------------
+// Stream providers (file-private).
+// ---------------------------------------------------------------------------
+
+final _searchDoctorsProvider = StreamProvider.autoDispose.family<
+    List<Doctor>, ({String city, String? specialty, String query})>(
+  (ref, args) => ref.watch(repositoryProvider).watchDoctors(
+        city: args.city,
+        specialty: args.specialty,
+        query: args.query.isEmpty ? null : args.query,
+      ),
+);
+
+final _searchLabsProvider = StreamProvider.autoDispose
+    .family<List<Lab>, ({String city, String query})>(
+  (ref, args) => ref.watch(repositoryProvider).watchLabs(
+        city: args.city,
+        query: args.query.isEmpty ? null : args.query,
+      ),
+);
+
+final _searchHospitalsProvider = StreamProvider.autoDispose
+    .family<List<Hospital>, ({String city, String query})>(
+  (ref, args) => ref.watch(repositoryProvider).watchHospitals(
+        city: args.city,
+        query: args.query.isEmpty ? null : args.query,
+      ),
+);
+
+final _searchCitiesProvider = StreamProvider.autoDispose<List<String>>(
+  (ref) => ref.watch(repositoryProvider).watchCities(),
+);
+
+final _searchSpecialtiesProvider = StreamProvider.autoDispose<List<String>>(
+  (ref) => ref.watch(repositoryProvider).watchSpecialties(),
+);
+
 class _SearchScreenState extends ConsumerState<SearchScreen> {
-  int _tab = 0; // 0 = doctors, 1 = labs, 2 = hospitals
-  final _queryController = TextEditingController();
+  int _tab = 0; // 0 doctors, 1 labs, 2 hospitals
   String _query = '';
-  String? _cityFilter; // null = all cities
-  String? _specialtyFilter; // doctors tab only, null = all
-  EntitySort _sort = EntitySort.rating;
-  String? _selectedCategory; // labs tab only, null = all
+  String? _specialty; // null = all
   bool _within5km = false;
-  Position? _position;
+  Position? _pos;
 
-  @override
-  void dispose() {
-    _queryController.dispose();
-    super.dispose();
-  }
-
-  /// True when the entity passes the optional 5 km filter.
-  bool _passesDistance(double? lat, double? lng) {
-    final p = _position;
-    if (!_within5km || p == null) return true;
-    if (lat == null || lng == null) return false;
-    return haversineKm(p.latitude, p.longitude, lat, lng) <= 5;
+  Future<void> _ensurePosition() async {
+    if (_pos != null) return;
+    try {
+      final perm = await Geolocator.requestPermission();
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(trB(ref, 'search.locationNeeded'))),
+          );
+        }
+        return;
+      }
+      final p = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low,
+      );
+      if (mounted) setState(() => _pos = p);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(trB(ref, 'search.locationNeeded'))),
+        );
+      }
+    }
   }
 
   double? _distanceKm(double? lat, double? lng) {
-    final p = _position;
+    final p = _pos;
     if (p == null || lat == null || lng == null) return null;
     return haversineKm(p.latitude, p.longitude, lat, lng);
   }
 
-  Future<void> _onWithin5kmChanged(bool value) async {
-    if (!value) {
-      setState(() {
-        _within5km = false;
-        _position = null;
-      });
-      return;
-    }
-    final perm = await Geolocator.requestPermission();
-    if (perm == LocationPermission.denied ||
-        perm == LocationPermission.deniedForever) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            translate(ref.read(localeProvider), 'locationNeeded'),
-          ),
-        ),
-      );
-      return;
-    }
-    try {
-      final pos = await Geolocator.getCurrentPosition();
-      if (!mounted) return;
-      setState(() {
-        _within5km = true;
-        _position = pos;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            translate(ref.read(localeProvider), 'locationNeeded'),
-          ),
-        ),
-      );
-    }
+  bool _passes5km(double? lat, double? lng) {
+    if (!_within5km) return true;
+    final d = _distanceKm(lat, lng);
+    if (d == null) return false;
+    return d <= 5;
   }
 
-  int _compare(
-    double ratingA,
-    int reviewsA,
-    DateTime createdA,
-    double ratingB,
-    int reviewsB,
-    DateTime createdB,
-  ) {
-    switch (_sort) {
-      case EntitySort.rating:
-        return ratingB.compareTo(ratingA);
-      case EntitySort.mostReviewed:
-        return reviewsB.compareTo(reviewsA);
-      case EntitySort.newest:
-        return createdB.compareTo(createdA);
-    }
+  String _fmtTime(String hhmm) {
+    final parts = hhmm.split(':');
+    final h = int.tryParse(parts[0]) ?? 0;
+    final m = parts.length > 1 ? parts[1] : '00';
+    final suffix = h >= 12 ? 'PM' : 'AM';
+    var h12 = h % 12;
+    if (h12 == 0) h12 = 12;
+    return m == '00' ? '$h12 $suffix' : '$h12:$m $suffix';
   }
 
-  String _searchHint(String locale) {
-    switch (_tab) {
-      case 1:
-        return translate(locale, 'searchHintLabs');
-      case 2:
-        return translate(locale, 'searchHintHospitals');
-      default:
-        return translate(locale, 'searchHintDoctors');
+  String _openText(Doctor d, WidgetRef ref) {
+    final st = computeOpenStatus(d.hours, DateTime.now());
+    if (st.isOpen && st.transitionAt != null) {
+      return fill(
+          trB(ref, 'home.openNowUntil'), {'time': _fmtTime(st.transitionAt!)});
     }
+    if (!st.isOpen && st.transitionAt != null) {
+      return fill(trB(ref, 'home.closedOpensAt'),
+          {'time': _fmtTime(st.transitionAt!)});
+    }
+    return trB(ref, 'home.closed');
+  }
+
+  bool _isOpen(Doctor d) => computeOpenStatus(d.hours, DateTime.now()).isOpen;
+
+  Future<void> _showCitySheet() async {
+    final cities = await ref
+        .read(_searchCitiesProvider.future)
+        .catchError((_) => <String>[]);
+    if (!mounted) return;
+    final current = ref.read(cityProvider);
+    final ur = fdIsUrdu(ref.read(localeProvider));
+    await showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 44,
+              height: 5,
+              decoration: BoxDecoration(
+                color: FdColors.line,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(trB(ref, 'home.chooseCity'),
+                  style: FdType.title(ur, size: 20)),
+            ),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final c in cities)
+                    ListTile(
+                      title: Text(c,
+                          style: FdType.body(ur,
+                              size: 16,
+                              w: FontWeight.w600,
+                              color: FdColors.ink)),
+                      trailing: c == current
+                          ? const Icon(Icons.check, color: FdColors.primary)
+                          : null,
+                      onTap: () {
+                        ref.read(cityProvider.notifier).setCity(c);
+                        Navigator.of(ctx).pop();
+                      },
+                    ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showSpecialtySheet(List<String> specs) async {
+    final locale = ref.read(localeProvider);
+    final ur = fdIsUrdu(locale);
+    await showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 44,
+              height: 5,
+              decoration: BoxDecoration(
+                color: FdColors.line,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(trB(ref, 'search.allSpecialties'),
+                  style: FdType.title(ur, size: 20)),
+            ),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  ListTile(
+                    title: Text(trB(ref, 'home.all'),
+                        style: FdType.body(ur,
+                            size: 16,
+                            w: FontWeight.w600,
+                            color: FdColors.ink)),
+                    trailing: _specialty == null
+                        ? const Icon(Icons.check, color: FdColors.primary)
+                        : null,
+                    onTap: () {
+                      setState(() => _specialty = null);
+                      Navigator.of(ctx).pop();
+                    },
+                  ),
+                  for (final s in specs)
+                    ListTile(
+                      title: Text(specialtyLabel(locale, s),
+                          style: FdType.body(ur,
+                              size: 16,
+                              w: FontWeight.w600,
+                              color: FdColors.ink)),
+                      trailing: _specialty == s
+                          ? const Icon(Icons.check, color: FdColors.primary)
+                          : null,
+                      onTap: () {
+                        setState(() => _specialty = s);
+                        Navigator.of(ctx).pop();
+                      },
+                    ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openDoctor(String id) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => DoctorDetailScreen(doctorId: id)),
+    );
+  }
+
+  void _openLab(String id) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => LabDetailScreen(labId: id)));
+  }
+
+  void _openHospital(String id) {
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => HospitalDetailScreen(hospitalId: id)));
   }
 
   @override
   Widget build(BuildContext context) {
     final locale = ref.watch(localeProvider);
-    final repo = ref.watch(repositoryProvider);
-    final q = _query.trim();
-    final queryParam = q.isEmpty ? null : q;
+    final ur = fdIsUrdu(locale);
+    final city = ref.watch(cityProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(tr(ref, 'appName'))),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: SegmentedButton<int>(
-              segments: [
-                ButtonSegment(
-                  value: 0,
-                  label: Text(translate(locale, 'tabDoctors')),
-                ),
-                ButtonSegment(
-                  value: 1,
-                  label: Text(translate(locale, 'tabLabs')),
-                ),
-                ButtonSegment(
-                  value: 2,
-                  label: Text(translate(locale, 'tabHospitals')),
-                ),
-              ],
-              selected: {_tab},
-              onSelectionChanged: (s) => setState(() => _tab = s.first),
+      backgroundColor: FdColors.bg,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  FdDim.page, 14, FdDim.page, 0),
+              child: Text(trB(ref, 'search.title'),
+                  style: FdType.display(ur, size: 34)),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: TextField(
-              controller: _queryController,
-              onChanged: (v) => setState(() => _query = v),
-              decoration: InputDecoration(
-                hintText: _searchHint(locale),
-                prefixIcon: const Icon(Icons.search),
-                border: const OutlineInputBorder(),
-                isDense: true,
+            const SizedBox(height: 14),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: FdDim.page),
+              child: FdSearchField(
+                hint: trB(ref, 'search.hint'),
+                isUrdu: ur,
+                onChanged: (v) => setState(() => _query = v.trim()),
               ),
             ),
-          ),
-          // Filter row.
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                StreamBuilder<List<String>>(
-                  stream: repo.watchCities(),
-                  builder: (context, snapshot) {
-                    final cities = snapshot.data ?? const <String>[];
-                    return DropdownButton<String?>(
-                      value: _cityFilter,
-                      hint: Text(translate(locale, 'filterCity')),
-                      items: [
-                        DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text(translate(locale, 'allCities')),
-                        ),
-                        ...cities.map(
-                          (c) => DropdownMenuItem<String?>(
-                            value: c,
-                            child: Text(c),
-                          ),
-                        ),
-                      ],
-                      onChanged: (v) =>
-                          setState(() => _cityFilter = v),
-                    );
-                  },
-                ),
-                if (_tab == 0) ...[
-                  const SizedBox(width: 12),
-                  StreamBuilder<List<String>>(
-                    stream: repo.watchSpecialties(),
-                    builder: (context, snapshot) {
-                      final specs = snapshot.data ?? const <String>[];
-                      return DropdownButton<String?>(
-                        value: _specialtyFilter,
-                        hint: Text(translate(locale, 'filterSpecialty')),
-                        items: [
-                          DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text(translate(locale, 'all')),
-                          ),
-                          ...specs.map(
-                            (s) => DropdownMenuItem<String?>(
-                              value: s,
-                              child: Text(specialtyLabel(locale, s)),
+            const SizedBox(height: 14),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: FdDim.page),
+              child: _segmented(ur),
+            ),
+            const SizedBox(height: 14),
+            _filterChips(city, locale, ur),
+            const SizedBox(height: 6),
+            Expanded(child: _results(city, locale, ur)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // -- segmented control -------------------------------------------------------
+
+  Widget _segmented(bool ur) {
+    final tabs = [
+      trB(ref, 'search.doctors'),
+      trB(ref, 'search.labTests'),
+      trB(ref, 'search.hospitals'),
+    ];
+    return Container(
+      height: 62,
+      decoration: BoxDecoration(
+        color: FdColors.mint,
+        borderRadius: BorderRadius.circular(FdDim.pillRadius),
+      ),
+      padding: const EdgeInsets.all(6),
+      child: Row(
+        children: [
+          for (var i = 0; i < 3; i++)
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _tab = i),
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: _tab == i ? Colors.white : Colors.transparent,
+                    borderRadius:
+                        BorderRadius.circular(FdDim.pillRadius),
+                    boxShadow: _tab == i
+                        ? [
+                            BoxShadow(
+                              color:
+                                  Colors.black.withValues(alpha: 0.06),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                        ],
-                        onChanged: (v) =>
-                            setState(() => _specialtyFilter = v),
-                      );
-                    },
+                          ]
+                        : null,
                   ),
-                ],
-                const SizedBox(width: 12),
-                DropdownButton<EntitySort>(
-                  value: _sort,
-                  items: [
-                    DropdownMenuItem(
-                      value: EntitySort.rating,
-                      child: Text(translate(locale, 'sortRating')),
+                  child: Text(
+                    tabs[i],
+                    style: FdType.body(
+                      ur,
+                      size: 15,
+                      w: FontWeight.w700,
+                      color: _tab == i ? FdColors.primary : FdColors.muted,
                     ),
-                    DropdownMenuItem(
-                      value: EntitySort.mostReviewed,
-                      child: Text(translate(locale, 'sortReviewed')),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // -- filter chips ------------------------------------------------------------
+
+  Widget _filterChips(String city, String locale, bool ur) {
+    final specsAsync = ref.watch(_searchSpecialtiesProvider);
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: FdDim.page),
+      child: Row(
+        children: [
+          _dropdownChip(
+            label: city,
+            onTap: _showCitySheet,
+            ur: ur,
+          ),
+          if (_tab == 0) ...[
+            const SizedBox(width: 10),
+            specsAsync.when(
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+              data: (specs) => _dropdownChip(
+                label: _specialty == null
+                    ? trB(ref, 'search.allSpecialties')
+                    : specialtyLabel(locale, _specialty!),
+                onTap: () => _showSpecialtySheet(specs),
+                ur: ur,
+              ),
+            ),
+          ],
+          const SizedBox(width: 10),
+          _toggleChip(
+            label: trB(ref, 'search.within5km'),
+            icon: Icons.location_on_outlined,
+            selected: _within5km,
+            ur: ur,
+            onTap: () async {
+              if (!_within5km) await _ensurePosition();
+              setState(() => _within5km = !_within5km);
+            },
+          ),
+          const SizedBox(width: FdDim.page),
+        ],
+      ),
+    );
+  }
+
+  Widget _dropdownChip({
+    required String label,
+    required VoidCallback onTap,
+    required bool ur,
+  }) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(FdDim.pillRadius),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(FdDim.pillRadius),
+        onTap: onTap,
+        child: Container(
+          height: FdDim.chipHeight,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(FdDim.pillRadius),
+            border: Border.all(color: FdColors.line, width: 1.4),
+          ),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: FdType.body(ur,
+                    size: 15, w: FontWeight.w600, color: FdColors.ink),
+              ),
+              const SizedBox(width: 6),
+              const Icon(Icons.keyboard_arrow_down,
+                  color: FdColors.muted, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _toggleChip({
+    required String label,
+    required IconData icon,
+    required bool selected,
+    required bool ur,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: selected ? FdColors.primary : Colors.white,
+      borderRadius: BorderRadius.circular(FdDim.pillRadius),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(FdDim.pillRadius),
+        onTap: onTap,
+        child: Container(
+          height: FdDim.chipHeight,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(FdDim.pillRadius),
+            border: selected
+                ? null
+                : Border.all(color: FdColors.line, width: 1.4),
+          ),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon,
+                  size: 20,
+                  color: selected ? Colors.white : FdColors.muted),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: FdType.body(ur,
+                    size: 15,
+                    w: FontWeight.w600,
+                    color: selected ? Colors.white : FdColors.ink),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // -- results ------------------------------------------------------------------
+
+  Widget _results(String city, String locale, bool ur) {
+    if (_tab == 0) {
+      final async = ref.watch(_searchDoctorsProvider(
+          (city: city, specialty: _specialty, query: _query)));
+      return async.when(
+        loading: () => const Center(
+            child: CircularProgressIndicator(color: FdColors.primary)),
+        error: (_, __) => const SizedBox.shrink(),
+        data: (list) {
+          final doctors =
+              list.where((d) => _passes5km(d.lat, d.lng)).toList();
+          return _listShell(
+            countText: fill(trB(ref, 'search.doctorsIn'),
+                {'count': '${doctors.length}', 'city': city}),
+            ur: ur,
+            empty: doctors.isEmpty,
+            children: [
+              for (var i = 0; i < doctors.length; i++) ...[
+                _doctorCard(doctors[i], i, locale, ur),
+                const SizedBox(height: 14),
+              ],
+            ],
+          );
+        },
+      );
+    }
+    if (_tab == 1) {
+      final async =
+          ref.watch(_searchLabsProvider((city: city, query: _query)));
+      return async.when(
+        loading: () => const Center(
+            child: CircularProgressIndicator(color: FdColors.primary)),
+        error: (_, __) => const SizedBox.shrink(),
+        data: (list) {
+          final labs = list.where((l) => _passes5km(l.lat, l.lng)).toList();
+          return _listShell(
+            countText: fill(trB(ref, 'search.labsIn'),
+                {'count': '${labs.length}', 'city': city}),
+            ur: ur,
+            empty: labs.isEmpty,
+            children: [
+              for (var i = 0; i < labs.length; i++) ...[
+                _labCard(labs[i], i, ur),
+                const SizedBox(height: 14),
+              ],
+            ],
+          );
+        },
+      );
+    }
+    final async =
+        ref.watch(_searchHospitalsProvider((city: city, query: _query)));
+    return async.when(
+      loading: () => const Center(
+          child: CircularProgressIndicator(color: FdColors.primary)),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (list) {
+        final hospitals =
+            list.where((h) => _passes5km(h.lat, h.lng)).toList();
+        return _listShell(
+          countText: fill(trB(ref, 'search.hospitalsIn'),
+              {'count': '${hospitals.length}', 'city': city}),
+          ur: ur,
+          empty: hospitals.isEmpty,
+          children: [
+            for (var i = 0; i < hospitals.length; i++) ...[
+              _hospitalCard(hospitals[i], i, ur),
+              const SizedBox(height: 14),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _listShell({
+    required String countText,
+    required bool ur,
+    required bool empty,
+    required List<Widget> children,
+  }) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+          FdDim.page, 8, FdDim.page, 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(countText,
+              style: FdType.body(ur, size: 15, color: FdColors.inkSoft)),
+          const SizedBox(height: 12),
+          if (empty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              child: Text(
+                trB(ref, 'search.noResults'),
+                style: FdType.body(ur, color: FdColors.muted),
+              ),
+            )
+          else
+            ...children,
+        ],
+      ),
+    );
+  }
+
+  // -- cards ---------------------------------------------------------------------
+
+  Widget _doctorCard(Doctor d, int index, String locale, bool ur) {
+    final dist = _distanceKm(d.lat, d.lng);
+    final open = _isOpen(d);
+    return Container(
+      decoration: BoxDecoration(
+        color: FdColors.tintForIndex(index),
+        borderRadius: BorderRadius.circular(28),
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FdAvatarTile(name: d.name, size: 76, bg: Colors.white),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child:
+                              Text(d.name, style: FdType.title(ur, size: 18)),
+                        ),
+                        if (d.verified) ...[
+                          const SizedBox(width: 6),
+                          const FdVerifiedBadge(size: 20),
+                        ],
+                      ],
                     ),
-                    DropdownMenuItem(
-                      value: EntitySort.newest,
-                      child: Text(translate(locale, 'sortNewest')),
+                    const SizedBox(height: 2),
+                    Text(
+                      specialtyLabel(locale, d.specialty),
+                      style:
+                          FdType.body(ur, size: 15, color: FdColors.inkSoft),
                     ),
                   ],
-                  onChanged: (v) {
-                    if (v != null) setState(() => _sort = v);
-                  },
                 ),
-                const SizedBox(width: 12),
-                FilterChip(
-                  label: Text(translate(locale, 'within5km')),
-                  selected: _within5km,
-                  onSelected: _onWithin5kmChanged,
+              ),
+              if (d.reviewCount > 0)
+                FdRatingPill(rating: d.rating, isUrdu: ur)
+              else
+                FdNewPill(label: trB(ref, 'home.new'), isUrdu: ur),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(FdDim.bannerRadius),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 13),
+            child: Row(
+              children: [
+                if (d.fee != null) _stat(trB(ref, 'home.fee'), 'Rs ${d.fee}', ur),
+                if (d.fee != null && dist != null) _statDivider(),
+                if (dist != null)
+                  _stat(trB(ref, 'home.distance'), formatDistance(dist), ur),
+                if (dist != null) _statDivider(),
+                _stat(
+                  trB(ref, 'home.reviews'),
+                  d.reviewCount > 0 ? '${d.reviewCount}' : '–',
+                  ur,
                 ),
               ],
             ),
           ),
-          // Lab test-category chips.
-          if (_tab == 1)
-            SizedBox(
-              height: 48,
-              child: StreamBuilder<List<String>>(
-                stream: repo.watchTestCategories(),
-                builder: (context, snapshot) {
-                  final cats = snapshot.data ?? const <String>[];
-                  return ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    itemCount: cats.length + 1,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(width: 8),
-                    itemBuilder: (context, i) {
-                      final cat = i == 0 ? null : cats[i - 1];
-                      return ChoiceChip(
-                        label: Text(
-                          cat ?? translate(locale, 'all'),
-                        ),
-                        selected: _selectedCategory == cat,
-                        onSelected: (_) =>
-                            setState(() => _selectedCategory = cat),
-                      );
-                    },
-                  );
-                },
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Container(
+                width: 13,
+                height: 13,
+                decoration: BoxDecoration(
+                  color: open ? FdColors.primary : FdColors.muted,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2.5),
+                ),
               ),
-            ),
-          const SizedBox(height: 4),
-          // Results.
-          Expanded(
-            child: _tab == 0
-                ? _buildDoctors(repo, queryParam, locale)
-                : _tab == 1
-                    ? _buildLabs(repo, queryParam, locale)
-                    : _buildHospitals(repo, queryParam, locale),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  _openText(d, ref),
+                  style: FdType.body(ur,
+                      size: 15, w: FontWeight.w700, color: FdColors.ink),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(Icons.location_on_outlined,
+                  size: 16, color: FdColors.inkSoft),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  [
+                    if (d.clinicName.isNotEmpty) d.clinicName,
+                    if (d.address.isNotEmpty) d.address,
+                    d.city,
+                  ].where((s) => s.isNotEmpty).join(', '),
+                  style: FdType.body(ur, size: 14, color: FdColors.inkSoft),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: FdButton(
+                  label: trB(ref, 'home.viewProfile'),
+                  style: FdButtonStyle.white,
+                  icon: Icons.visibility_outlined,
+                  isUrdu: ur,
+                  onTap: () => _openDoctor(d.id),
+                ),
+              ),
+              if (d.phone.trim().isNotEmpty) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FdButton(
+                    label: trB(ref, 'search.callNow'),
+                    style: FdButtonStyle.dark,
+                    icon: Icons.phone_outlined,
+                    isUrdu: ur,
+                    onTap: () => callNumber(context, d.phone),
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDoctors(
-    FauridocRepository repo,
-    String? query,
-    String locale,
-  ) {
-    return StreamBuilder<List<Doctor>>(
-      stream: repo.watchDoctors(
-        city: _cityFilter,
-        specialty: _specialtyFilter,
-        query: query,
+  Widget _stat(String label, String value, bool ur) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(label, style: FdType.body(ur, size: 13, color: FdColors.muted)),
+          const SizedBox(height: 3),
+          Text(
+            value,
+            style: FdType.body(ur,
+                size: 17, w: FontWeight.w800, color: FdColors.ink),
+          ),
+        ],
       ),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final doctors = (snapshot.data ?? const <Doctor>[])
-            .where((d) => _passesDistance(d.lat, d.lng))
-            .toList()
-          ..sort(
-            (a, b) => _compare(
-              a.rating,
-              a.reviewCount,
-              a.createdAt,
-              b.rating,
-              b.reviewCount,
-              b.createdAt,
-            ),
-          );
-        if (doctors.isEmpty) return _empty(locale);
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-          itemCount: doctors.length,
-          itemBuilder: (context, i) {
-            final doctor = doctors[i];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: DoctorCard(
-                doctor: doctor,
-                showDistance: _within5km,
-                distanceKm: _distanceKm(doctor.lat, doctor.lng),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        DoctorDetailScreen(doctorId: doctor.id),
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
     );
   }
 
-  Widget _buildLabs(
-    FauridocRepository repo,
-    String? query,
-    String locale,
-  ) {
-    return StreamBuilder<List<Lab>>(
-      stream: repo.watchLabs(
-        city: _cityFilter,
-        query: query,
-        testQuery: query,
-      ),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final labs = (snapshot.data ?? const <Lab>[])
-            .where((l) {
-              if (_selectedCategory != null &&
-                  !l.tests.any(
-                      (t) => t.category == _selectedCategory)) {
-                return false;
-              }
-              return _passesDistance(l.lat, l.lng);
-            })
-            .toList()
-          ..sort(
-            (a, b) => _compare(
-              a.rating,
-              a.reviewCount,
-              a.createdAt,
-              b.rating,
-              b.reviewCount,
-              b.createdAt,
-            ),
-          );
-        if (labs.isEmpty) return _empty(locale);
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-          itemCount: labs.length,
-          itemBuilder: (context, i) {
-            final lab = labs[i];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: LabCard(
-                lab: lab,
-                testQuery: _query,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => LabDetailScreen(labId: lab.id),
-                  ),
+  Widget _statDivider() {
+    return Container(width: 1.2, height: 34, color: FdColors.line);
+  }
+
+  Widget _labCard(Lab l, int index, bool ur) {
+    final dist = _distanceKm(l.lat, l.lng);
+    final minPrice = l.tests.isEmpty
+        ? null
+        : l.tests.map((t) => t.price).reduce((a, b) => a < b ? a : b);
+    return Material(
+      color: FdColors.tintForIndex(index),
+      borderRadius: BorderRadius.circular(28),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(28),
+        onTap: () => _openLab(l.id),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 76,
+                height: 76,
+                decoration: BoxDecoration(
+                  color: FdColors.lavender,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: const Icon(Icons.science_outlined,
+                    color: FdColors.lavenderInk, size: 36),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(l.name,
+                              style: FdType.title(ur, size: 18)),
+                        ),
+                        if (l.verified) ...[
+                          const SizedBox(width: 6),
+                          const FdVerifiedBadge(size: 20),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      [
+                        l.city,
+                        if (dist != null) formatDistance(dist),
+                      ].join(' · '),
+                      style:
+                          FdType.body(ur, size: 14, color: FdColors.inkSoft),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        if (l.reviewCount > 0)
+                          FdRatingPill(rating: l.rating, isUrdu: ur)
+                        else
+                          FdNewPill(
+                              label: trB(ref, 'home.new'), isUrdu: ur),
+                        const Spacer(),
+                        if (minPrice != null)
+                          Text(
+                            fill(trB(ref, 'search.testsFrom'), {
+                              'count': '${l.tests.length}',
+                              'price': '$minPrice'
+                            }),
+                            style: FdType.body(ur,
+                                size: 14,
+                                w: FontWeight.w700,
+                                color: FdColors.primary),
+                          ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            );
-          },
-        );
-      },
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  Widget _buildHospitals(
-    FauridocRepository repo,
-    String? query,
-    String locale,
-  ) {
-    return StreamBuilder<List<Hospital>>(
-      stream: repo.watchHospitals(
-        city: _cityFilter,
-        query: query,
-      ),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final hospitals = (snapshot.data ?? const <Hospital>[])
-            .where((h) => _passesDistance(h.lat, h.lng))
-            .toList()
-          ..sort(
-            (a, b) => _compare(
-              a.rating,
-              a.reviewCount,
-              a.createdAt,
-              b.rating,
-              b.reviewCount,
-              b.createdAt,
-            ),
-          );
-        if (hospitals.isEmpty) return _empty(locale);
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-          itemCount: hospitals.length,
-          itemBuilder: (context, i) {
-            final hospital = hospitals[i];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: HospitalCard(
-                hospital: hospital,
-                distanceKm:
-                    _within5km ? _distanceKm(hospital.lat, hospital.lng) : null,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        HospitalDetailScreen(hospitalId: hospital.id),
-                  ),
+  Widget _hospitalCard(Hospital h, int index, bool ur) {
+    final dist = _distanceKm(h.lat, h.lng);
+    return Material(
+      color: FdColors.tintForIndex(index),
+      borderRadius: BorderRadius.circular(28),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(28),
+        onTap: () => _openHospital(h.id),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 76,
+                height: 76,
+                decoration: BoxDecoration(
+                  color: FdColors.redSoft,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: const Icon(Icons.add,
+                    color: FdColors.redInk, size: 38),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(h.name,
+                              style: FdType.title(ur, size: 18)),
+                        ),
+                        if (h.verified) ...[
+                          const SizedBox(width: 6),
+                          const FdVerifiedBadge(size: 20),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      [
+                        h.city,
+                        if (dist != null) formatDistance(dist),
+                      ].join(' · '),
+                      style:
+                          FdType.body(ur, size: 14, color: FdColors.inkSoft),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        if (h.reviewCount > 0)
+                          FdRatingPill(rating: h.rating, isUrdu: ur)
+                        else
+                          FdNewPill(
+                              label: trB(ref, 'home.new'), isUrdu: ur),
+                        if (h.emergency247) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: FdColors.redSoft,
+                              borderRadius:
+                                  BorderRadius.circular(FdDim.pillRadius),
+                            ),
+                            child: Text(
+                              trB(ref, 'search.emergency247'),
+                              style: FdType.body(ur,
+                                  size: 13,
+                                  w: FontWeight.w700,
+                                  color: FdColors.redInk),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (h.departments.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        h.departments.take(3).join(' · '),
+                        style: FdType.body(ur,
+                            size: 13, color: FdColors.muted),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _empty(String locale) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          translate(locale, 'noResults'),
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey[600]),
+            ],
+          ),
         ),
       ),
     );

@@ -12,6 +12,7 @@ class Hospital {
   final double? lng;
   final List<String> departments;
   final String visitingHours;
+  final String opdHours;
   final bool emergency247;
   final String? photoUrl;
   final bool verified;
@@ -33,6 +34,7 @@ class Hospital {
     this.lng,
     this.departments = const [],
     this.visitingHours = '',
+    this.opdHours = '',
     this.emergency247 = false,
     this.photoUrl,
     this.verified = false,
@@ -56,6 +58,7 @@ class Hospital {
         departments:
             (json['departments'] as List?)?.map((e) => e.toString()).toList() ?? const [],
         visitingHours: (json['visitingHours'] as String?) ?? '',
+        opdHours: (json['opdHours'] as String?) ?? '',
         emergency247: (json['emergency247'] as bool?) ?? false,
         photoUrl: json['photoUrl'] as String?,
         verified: (json['verified'] as bool?) ?? false,
@@ -78,6 +81,7 @@ class Hospital {
         'lng': lng,
         'departments': departments,
         'visitingHours': visitingHours,
+        'opdHours': opdHours,
         'emergency247': emergency247,
         'photoUrl': photoUrl,
         'verified': verified,
@@ -99,6 +103,7 @@ class Hospital {
     double? lng,
     List<String>? departments,
     String? visitingHours,
+    String? opdHours,
     bool? emergency247,
     String? photoUrl,
     bool? verified,
@@ -119,6 +124,7 @@ class Hospital {
         lng: lng ?? this.lng,
         departments: departments ?? this.departments,
         visitingHours: visitingHours ?? this.visitingHours,
+        opdHours: opdHours ?? this.opdHours,
         emergency247: emergency247 ?? this.emergency247,
         photoUrl: photoUrl ?? this.photoUrl,
         verified: verified ?? this.verified,

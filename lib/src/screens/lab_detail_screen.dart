@@ -5,13 +5,39 @@ import '../l10n/strings.dart';
 import '../models/day_hours.dart';
 import '../models/lab.dart';
 import '../providers/providers.dart';
+import '../providers/user_location.dart';
 import '../utils/actions.dart';
 import '../utils/open_status.dart';
-import '../widgets/rating_stars.dart';
 import '../widgets/theme.dart';
 
-/// Full profile of one lab: header, live open status, contact, searchable
-/// test list with prices, working hours, call/map actions.
+/// Compact weekly summary, e.g. "Mon–Sat 8 AM–10 PM · Sun closed".
+String _hoursSummary(Map<String, DayHours> hours) {
+  const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  final groups = <String>[];
+  var i = 0;
+  while (i < 7) {
+    final h = hours[weekdayKeys[i]] ?? DayHours.closedDay();
+    var j = i;
+    while (j + 1 < 7) {
+      final n = hours[weekdayKeys[j + 1]] ?? DayHours.closedDay();
+      if (n.closed == h.closed && n.open == h.open && n.close == h.close) {
+        j++;
+      } else {
+        break;
+      }
+    }
+    final label = i == j ? names[i] : '${names[i]}–${names[j]}';
+    groups.add(h.closed
+        ? '$label: closed'
+        : '$label ${formatTime12(h.open)}–${formatTime12(h.close)}');
+    i = j + 1;
+  }
+  return groups.join(' · ');
+}
+
+/// Lab profile — design page-08: lavender header with flask outline, rating
+/// row + open pill, info card, searchable tests & prices with category chips,
+/// sticky Call / View on Map bar.
 class LabDetailScreen extends ConsumerStatefulWidget {
   final String labId;
 
@@ -22,360 +48,397 @@ class LabDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _LabDetailScreenState extends ConsumerState<LabDetailScreen> {
-  Lab? _lab;
-  bool _loading = true;
-  bool _failed = false;
-  final _search = TextEditingController();
   String _query = '';
+  String _category = 'All';
+  late final Future<Lab?> _labFuture;
 
   @override
   void initState() {
     super.initState();
-    _load();
-  }
-
-  @override
-  void dispose() {
-    _search.dispose();
-    super.dispose();
-  }
-
-  Future<void> _load() async {
-    try {
-      final lab = await ref.read(repositoryProvider).getLab(widget.labId);
-      if (!mounted) return;
-      setState(() {
-        _lab = lab;
-        _loading = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _failed = true;
-      });
-    }
-  }
-
-  void _retry() {
-    setState(() {
-      _loading = true;
-      _failed = false;
-    });
-    _load();
+    _labFuture = ref.read(repositoryProvider).getLab(widget.labId);
   }
 
   @override
   Widget build(BuildContext context) {
-    final lab = _lab;
+    final locale = ref.watch(localeProvider);
+    final ur = fdIsUrdu(locale);
+    final pos = ref.watch(userLocationProvider).valueOrNull;
+
     return Scaffold(
-      appBar: AppBar(title: Text(lab?.name ?? '')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _failed
-              ? _errorBody()
-              : lab == null
-                  ? Center(child: Text(tr(ref, 'noResults')))
-                  : _detailBody(lab),
-    );
-  }
-
-  Widget _errorBody() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
-            const SizedBox(height: 12),
-            Text(tr(ref, 'error')),
-            const SizedBox(height: 12),
-            FilledButton(onPressed: _retry, child: Text(tr(ref, 'retry'))),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _detailBody(Lab lab) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _headerCard(lab),
-          _actionsCard(lab),
-          _testsCard(lab),
-          _hoursCard(lab),
-        ],
-      ),
-    );
-  }
-
-  Widget _card(Widget child) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: child,
-      ),
-    );
-  }
-
-  TextStyle _sectionTitle(BuildContext context) {
-    return Theme.of(context)
-        .textTheme
-        .titleMedium!
-        .copyWith(fontWeight: FontWeight.w800);
-  }
-
-  // ---------- header ----------
-
-  Widget _headerCard(Lab lab) {
-    final status = computeOpenStatus(lab.hours, DateTime.now());
-    final String statusText;
-    if (status.transitionAt != null) {
-      statusText = fill(
-        tr(ref, status.isOpen ? 'statusOpen' : 'statusClosed'),
-        {'time': formatTime12(status.transitionAt!)},
-      );
-    } else {
-      statusText = tr(ref, status.isOpen ? 'open' : 'closed');
-    }
-
-    return _card(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: FdColors.bg,
+      body: FutureBuilder<Lab?>(
+        future: _labFuture,
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final lab = snap.data;
+          if (lab == null) {
+            return Center(child: Text(tr(ref, 'error')));
+          }
+          final status = computeOpenStatus(lab.hours, DateTime.now());
+          final dist = distanceText(pos, lab.lat, lab.lng);
+          final categories = <String>{
+            for (final t in lab.tests)
+              if (t.category.trim().isNotEmpty) t.category.trim()
+          }.toList()
+            ..sort();
+          final tests = lab.tests.where((t) {
+            final q = _query.trim().toLowerCase();
+            final okQ = q.isEmpty ||
+                t.test.toLowerCase().contains(q) ||
+                t.category.toLowerCase().contains(q);
+            final okC = _category == 'All' || t.category == _category;
+            return okQ && okC;
+          }).toList();
+          return Column(
             children: [
-              EntityAvatar(
-                  photoUrl: lab.photoUrl, name: lab.name, radius: 32),
-              const SizedBox(width: 16),
+              _header(context),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                      FdDim.page, 20, FdDim.page, 24),
                   children: [
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          lab.name,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                        if (lab.verified)
-                          Pill(
-                            label: tr(ref, 'verified'),
-                            icon: Icons.verified,
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.location_on,
-                            size: 14, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(lab.city,
-                            style: TextStyle(color: Colors.grey[700])),
+                        Expanded(
+                          child: Text(lab.name,
+                              style: FdType.title(ur, size: 26)),
+                        ),
+                        if (lab.verified) ...[
+                          const SizedBox(width: 10),
+                          const FdVerifiedBadge(size: 26),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 6),
-                    RatingStars(
-                      rating: lab.rating,
-                      reviewCount: lab.reviewCount,
+                    Text(
+                      [
+                        tr(ref, 'lab.clinicalLab'),
+                        lab.city,
+                        if (dist != null)
+                          fill(tr(ref, 'lab.away'), {'d': dist}),
+                      ].join(' · '),
+                      style: FdType.body(ur,
+                          size: 16, color: FdColors.muted),
                     ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        if (lab.reviewCount > 0) ...[
+                          const Icon(Icons.star,
+                              color: FdColors.starGold, size: 22),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${lab.rating.toStringAsFixed(1)}  (${fill(tr(ref, 'doc.reviewsCount'), {'n': '${lab.reviewCount}'})})',
+                            style: FdType.body(ur,
+                                size: 17,
+                                w: FontWeight.w700,
+                                color: FdColors.ink),
+                          ),
+                          const SizedBox(width: 14),
+                        ] else ...[
+                          FdNewPill(
+                              label: tr(ref, 'doc.newReviews'),
+                              isUrdu: ur),
+                          const SizedBox(width: 14),
+                        ],
+                        _openPill(ref, ur, status),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    FdInfoCard(
+                      isUrdu: ur,
+                      rows: [
+                        if (lab.address.trim().isNotEmpty)
+                          FdInfoRow(
+                              tr(ref, 'doc.address'), lab.address),
+                        if (lab.phone.trim().isNotEmpty)
+                          FdInfoRow(tr(ref, 'doc.phone'), lab.phone),
+                        FdInfoRow(tr(ref, 'doc.hours'),
+                            _hoursSummary(lab.hours)),
+                        FdInfoRow(
+                          tr(ref, 'doc.parking'),
+                          lab.hasParking
+                              ? tr(ref, 'doc.available')
+                              : tr(ref, 'doc.notAvailable'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            tr(ref, 'lab.testsAndPrices'),
+                            style: FdType.title(ur, size: 21),
+                          ),
+                        ),
+                        Text(
+                          fill(tr(ref, 'lab.testsCount'),
+                              {'n': '${lab.tests.length}'}),
+                          style: FdType.body(ur,
+                              size: 15,
+                              w: FontWeight.w600,
+                              color: FdColors.muted),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    FdSearchField(
+                      hint: tr(ref, 'lab.searchTest'),
+                      isUrdu: ur,
+                      onChanged: (v) =>
+                          setState(() => _query = v),
+                    ),
+                    const SizedBox(height: 12),
+                    if (categories.isNotEmpty)
+                      SizedBox(
+                        height: FdDim.chipHeight,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: categories.length + 1,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 10),
+                          itemBuilder: (_, i) {
+                            final c =
+                                i == 0 ? 'All' : categories[i - 1];
+                            final selected = _category == c;
+                            final label = c == 'All'
+                                ? tr(ref, 'lab.all')
+                                : c;
+                            return _catChip(
+                                label, selected, () => setState(() {
+                                      _category = c;
+                                    }));
+                          },
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    if (tests.isEmpty)
+                      Padding(
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 24),
+                        child: Center(
+                          child: Text(tr(ref, 'lab.noTests'),
+                              style: FdType.body(ur,
+                                  color: FdColors.muted)),
+                        ),
+                      )
+                    else
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(
+                              FdDim.cardRadius),
+                          border: Border.all(color: FdColors.line),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 6),
+                        child: Column(
+                          children: [
+                            for (var i = 0; i < tests.length; i++) ...[
+                              _testRow(ur, tests[i]),
+                              if (i < tests.length - 1)
+                                const Divider(
+                                    color: FdColors.line, height: 1),
+                            ],
+                          ],
+                        ),
+                      ),
                   ],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(
-                Icons.circle,
-                size: 10,
-                color: status.isOpen ? Colors.green : Colors.red,
+          );
+        },
+      ),
+      bottomNavigationBar: FutureBuilder<Lab?>(
+        future: _labFuture,
+        builder: (context, snap) {
+          final lab = snap.data;
+          if (lab == null) return const SizedBox.shrink();
+          final hasCall = lab.phone.trim().isNotEmpty;
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(top: BorderSide(color: FdColors.line)),
+            ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                child: Row(
+                  children: [
+                    if (hasCall)
+                      Expanded(
+                        child: FdButton(
+                          label: tr(ref, 'doc.call'),
+                          icon: Icons.phone_outlined,
+                          isUrdu: ur,
+                          onTap: () => callNumber(context, lab.phone),
+                        ),
+                      ),
+                    if (hasCall) const SizedBox(width: 12),
+                    Expanded(
+                      child: FdButton(
+                        label: tr(ref, 'lab.viewOnMap'),
+                        icon: Icons.location_on_outlined,
+                        style: FdButtonStyle.outline,
+                        isUrdu: ur,
+                        onTap: () => openDirections(
+                            context, lab.lat, lab.lng, lab.name),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  statusText,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: status.isOpen ? Colors.green[800] : Colors.red[800],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _header(BuildContext context) {
+    return Container(
+      height: 240,
+      color: FdColors.labHeader,
+      child: Stack(
+        children: [
+          Center(
+            child: Icon(
+              Icons.science_outlined,
+              size: 110,
+              color: FdColors.lavenderInk.withValues(alpha: 0.35),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Material(
+                  color: Colors.white,
+                  shape: const CircleBorder(),
+                  elevation: 2,
+                  shadowColor: Colors.black26,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => Navigator.of(context).pop(),
+                    child: SizedBox(
+                      width: 52,
+                      height: 52,
+                      child: Icon(
+                        Directionality.of(context) == TextDirection.rtl
+                            ? Icons.chevron_right
+                            : Icons.chevron_left,
+                        color: FdColors.ink,
+                        size: 30,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ],
-          ),
-          if (lab.address.trim().isNotEmpty) ...[
-            const SizedBox(height: 8),
-            _infoRow(tr(ref, 'address'), lab.address, Icons.location_on),
-          ],
-          if (lab.phone.trim().isNotEmpty) ...[
-            const SizedBox(height: 4),
-            _infoRow(tr(ref, 'phone'), lab.phone, Icons.phone),
-          ],
-          if (lab.hasParking) ...[
-            const SizedBox(height: 8),
-            Pill(
-              label: tr(ref, 'parking'),
-              icon: Icons.local_parking,
-              color: Colors.green,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _infoRow(String label, String value, IconData icon) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 18, color: FauridocTheme.tealDark),
-        const SizedBox(width: 10),
-        SizedBox(
-          width: 120,
-          child: Text(label, style: TextStyle(color: Colors.grey[700])),
-        ),
-        Expanded(
-          child:
-              Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ),
-      ],
-    );
-  }
-
-  // ---------- actions ----------
-
-  Widget _actionsCard(Lab lab) {
-    return _card(
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          FilledButton.icon(
-            onPressed: () => callNumber(context, lab.phone),
-            icon: const Icon(Icons.call),
-            label: Text(tr(ref, 'call')),
-          ),
-          OutlinedButton.icon(
-            onPressed: () =>
-                openDirections(context, lab.lat, lab.lng, lab.name),
-            icon: const Icon(Icons.map),
-            label: Text(tr(ref, 'viewOnMap')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ---------- tests ----------
-
-  Widget _testsCard(Lab lab) {
-    final filtered = lab.tests
-        .where((t) => t.test.toLowerCase().contains(_query))
-        .toList();
-    return _card(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(tr(ref, 'testsOffered'), style: _sectionTitle(context)),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _search,
-            onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
-            decoration: InputDecoration(
-              hintText: tr(ref, 'searchHintLabs'),
-              prefixIcon: const Icon(Icons.search),
-              border: const OutlineInputBorder(),
             ),
           ),
-          const SizedBox(height: 8),
-          if (filtered.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(tr(ref, 'noResults'),
-                  style: TextStyle(color: Colors.grey[600])),
-            )
-          else
-            for (final t in filtered)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(t.test,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w600)),
-                          Text(t.category,
-                              style: TextStyle(
-                                  color: Colors.grey[600], fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      fill(tr(ref, 'rs'), {'p': '${t.price}'}),
-                      style: const TextStyle(
-                        color: FauridocTheme.tealDark,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
         ],
       ),
     );
   }
 
-  // ---------- working hours ----------
-
-  Widget _hoursCard(Lab lab) {
-    return _card(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(tr(ref, 'workingHours'), style: _sectionTitle(context)),
-          const SizedBox(height: 8),
-          for (final k in weekdayKeys) _hoursRow(k, lab.hours[k]),
-        ],
+  /// Mint "Open until 10 PM" pill, or a soft closed variant.
+  Widget _openPill(WidgetRef ref, bool ur, OpenStatus status) {
+    final open = status.isOpen;
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: open ? FdColors.mint : FdColors.redSoft,
+        borderRadius: BorderRadius.circular(FdDim.pillRadius),
+      ),
+      child: Text(
+        open
+            ? fill(tr(ref, 'lab.openUntil'), {
+                'time': status.transitionAt != null
+                    ? formatTime12(status.transitionAt!)
+                    : ''
+              })
+            : fill(tr(ref, 'lab.closedOpens'), {
+                'time': status.transitionAt != null
+                    ? formatTime12(status.transitionAt!)
+                    : ''
+              }),
+        style: FdType.body(ur,
+            size: 14,
+            w: FontWeight.w700,
+            color: open ? FdColors.primary : FdColors.redInk),
       ),
     );
   }
 
-  Widget _hoursRow(String key, DayHours? dh) {
-    final closed = dh == null || dh.closed;
-    final text = closed
-        ? tr(ref, 'closed')
-        : '${formatTime12(dh.open)} – ${formatTime12(dh.close)}';
+  /// Category chip: dark ink when selected (matches the design).
+  Widget _catChip(String label, bool selected, VoidCallback onTap) {
+    return Material(
+      color: selected ? FdColors.ink : Colors.white,
+      borderRadius: BorderRadius.circular(FdDim.pillRadius),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(FdDim.pillRadius),
+        onTap: onTap,
+        child: Container(
+          height: FdDim.chipHeight,
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(FdDim.pillRadius),
+            border: selected
+                ? null
+                : Border.all(color: FdColors.line, width: 1.4),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: FdType.latin,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: selected ? Colors.white : FdColors.ink,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _testRow(bool ur, LabTestPrice t) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(
-              tr(ref, 'weekdays_short_$key'),
-              style: const TextStyle(fontWeight: FontWeight.w600),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(t.test,
+                    style: FdType.body(ur,
+                        size: 17,
+                        w: FontWeight.w700,
+                        color: FdColors.ink)),
+                if (t.category.trim().isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(t.category,
+                      style: FdType.body(ur,
+                          size: 14, color: FdColors.muted)),
+                ],
+              ],
             ),
           ),
+          const SizedBox(width: 12),
           Text(
-            text,
-            style: TextStyle(
-                color: closed ? Colors.grey[600] : FauridocTheme.ink),
+            fill(tr(ref, 'rs'), {'p': '${t.price}'}),
+            style: FdType.body(ur,
+                size: 18, w: FontWeight.w700, color: FdColors.primary),
           ),
         ],
       ),

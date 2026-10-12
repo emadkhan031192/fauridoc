@@ -19,13 +19,15 @@ void main() {
     repo = DemoRepository(prefs);
   });
 
-  test('seeds 10 approved doctors', () async {
+  test('seeds approved doctors (legacy dart seeds, then JSON bundle)', () async {
     // watch* streams only emit on mutation, so subscribe first, then poke
     // with a no-op mutation (state-equal, but emits a tick).
     final doctorsFuture = repo.watchDoctors().first;
     await repo.setCities(defaultCities);
     final doctors = await doctorsFuture;
-    expect(doctors.length, 10);
+    // 10 legacy dart seeds; the researched JSON bundle (~189) replaces the
+    // legacy seed_* records asynchronously once assets load.
+    expect(doctors.length, greaterThanOrEqualTo(10));
     expect(doctors.every((d) => d.approved), isTrue);
   });
 
@@ -112,9 +114,9 @@ void main() {
     expect((await voteAndRead(-1)).downvotes, 1);
   });
 
-  test('admin counts show 10 approved seed doctors', () async {
+  test('admin counts show seeded doctors', () async {
     final countsFuture = repo.watchAdminCounts().first;
     await repo.setCities(defaultCities); // harmless no-op that emits a tick
-    expect((await countsFuture).doctors, 10);
+    expect((await countsFuture).doctors, greaterThanOrEqualTo(10));
   });
 }

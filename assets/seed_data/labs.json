@@ -1,0 +1,531 @@
+[
+  {
+    "id": "l001",
+    "name": "Chughtai Lab",
+    "city": "Peshawar",
+    "address": "Khattak Medical Center, Dabgari Garden; Abaseen Hospital, Dabgari Garden; Near Children Medical Center, Opp Mission Hospital, Dabgari Garden; Opp Hayatabad Medical Complex, Doctor Plaza; Opp Gyne & Emergency Block, Lady Reading Hospital; Akbar Medical Center, Ramdas Chowk; Pak Medical Center, Khyber Bazaar; Shop 05, Opp KTH Doctor Hostel, University Town",
+    "phone": "0912218560",
+    "phoneKind": "direct",
+    "hoursText": "Open 24/7 (main labs)",
+    "tests": [
+      {
+        "test": "CBC",
+        "category": "Blood",
+        "price": 400
+      },
+      {
+        "test": "Lipid Profile",
+        "category": "Blood",
+        "price": 1300
+      },
+      {
+        "test": "HbA1c",
+        "category": "Blood",
+        "price": 1000
+      },
+      {
+        "test": "LFT",
+        "category": "Blood",
+        "price": 1050
+      },
+      {
+        "test": "TFT",
+        "category": "Blood",
+        "price": 1800
+      },
+      {
+        "test": "Urine Routine",
+        "category": "Urine",
+        "price": 200
+      },
+      {
+        "test": "Vitamin D",
+        "category": "Blood",
+        "price": 2800
+      },
+      {
+        "test": "RFT",
+        "category": "Blood",
+        "price": 1440
+      }
+    ],
+    "verified": true,
+    "approved": true,
+    "source": "https://branches.pk/branches/Chughtai-Lab-&location=Peshawar · https://chughtaislab.com/medical-center/locations-4/ · https://hamariweb.com/directories/chughtai_lab_test_rates_list__wp4229.aspx",
+    "sourceNote": "Chain UAN 0311-1456789; home sampling available. Branch numbers: 091-2218560, 091-2581424, 0345-8406714, 091-7085415, 0335-1113209, 091-2580085, 0340-8883249, 0345-4005128, 091-7087278. Test prices from hamariweb 2026 rate list. PRICE CONFLICTS — re-verify before publishing: CBC also appears as 680 (page header), 1300 (alllabtests.com), 800–1500 (searchit.com.pk); HbA1c also 2100 (searchit); LFT also 1950 (searchit); RFT listed as range 1440–1800."
+  },
+  {
+    "id": "l002",
+    "name": "Chughtai Lab",
+    "city": "Mardan",
+    "address": "Shop 23, Bismillah Plaza, Jail Road, Opp Aga Khan Lab; Near Bicket Gunj Gate, Shamsi Road",
+    "phone": "03444479540",
+    "phoneKind": "direct",
+    "hoursText": "Open 24/7 (main labs)",
+    "tests": [
+      {
+        "test": "CBC",
+        "category": "Blood",
+        "price": 400
+      },
+      {
+        "test": "Lipid Profile",
+        "category": "Blood",
+        "price": 1300
+      },
+      {
+        "test": "HbA1c",
+        "category": "Blood",
+        "price": 1000
+      },
+      {
+        "test": "LFT",
+        "category": "Blood",
+        "price": 1050
+      },
+      {
+        "test": "TFT",
+        "category": "Blood",
+        "price": 1800
+      },
+      {
+        "test": "Urine Routine",
+        "category": "Urine",
+        "price": 200
+      },
+      {
+        "test": "Vitamin D",
+        "category": "Blood",
+        "price": 2800
+      },
+      {
+        "test": "RFT",
+        "category": "Blood",
+        "price": 1440
+      }
+    ],
+    "verified": true,
+    "approved": true,
+    "source": "https://branches.pk/branches/Chughtai-Lab-&location=Peshawar · https://chughtaislab.com/medical-center/locations-4/ · https://hamariweb.com/directories/chughtai_lab_test_rates_list__wp4229.aspx",
+    "sourceNote": "Chain UAN 0311-1456789; home sampling available. Also 0937-872210. Test prices from hamariweb 2026 rate list. PRICE CONFLICTS — re-verify before publishing: CBC also appears as 680 (page header), 1300 (alllabtests.com), 800–1500 (searchit.com.pk); HbA1c also 2100 (searchit); LFT also 1950 (searchit); RFT listed as range 1440–1800."
+  },
+  {
+    "id": "l003",
+    "name": "Chughtai Lab",
+    "city": "Abbottabad",
+    "address": "Aamir Plaza, Opp Ayub Medical Complex, Phool Gulab Road; Shafiq Medical Plaza, Near Mid City CNG, Mandian; Opp WCH, Zarbat Plaza, Gami Adda",
+    "phone": "03458448299",
+    "phoneKind": "direct",
+    "hoursText": "Open 24/7 (main labs)",
+    "tests": [
+      {
+        "test": "CBC",
+        "category": "Blood",
+        "price": 400
+      },
+      {
+        "test": "Lipid Profile",
+        "category": "Blood",
+        "price": 1300
+      },
+      {
+        "test": "HbA1c",
+        "category": "Blood",
+        "price": 1000
+      },
+      {
+        "test": "LFT",
+        "category": "Blood",
+        "price": 1050
+      },
+      {
+        "test": "TFT",
+        "category": "Blood",
+        "price": 1800
+      },
+      {
+        "test": "Urine Routine",
+        "category": "Urine",
+        "price": 200
+      },
+      {
+        "test": "Vitamin D",
+        "category": "Blood",
+        "price": 2800
+      },
+      {
+        "test": "RFT",
+        "category": "Blood",
+        "price": 1440
+      }
+    ],
+    "verified": true,
+    "approved": true,
+    "source": "https://branches.pk/branches/Chughtai-Lab-&location=Peshawar · https://chughtaislab.com/medical-center/locations-4/ · https://hamariweb.com/directories/chughtai_lab_test_rates_list__wp4229.aspx",
+    "sourceNote": "Chain UAN 0311-1456789; home sampling available. Also 0992-412608, 0345-4005023, 0345-8406679. Test prices from hamariweb 2026 rate list. PRICE CONFLICTS — re-verify before publishing: CBC also appears as 680 (page header), 1300 (alllabtests.com), 800–1500 (searchit.com.pk); HbA1c also 2100 (searchit); LFT also 1950 (searchit); RFT listed as range 1440–1800."
+  },
+  {
+    "id": "l004",
+    "name": "Chughtai Lab",
+    "city": "Nowshera",
+    "address": "Tahir Khan Plaza, Umarz Colony, Kabul River, Nowshera Kalan",
+    "phone": "03111456789",
+    "phoneKind": "direct",
+    "hoursText": "Open 24/7 (main labs)",
+    "tests": [
+      {
+        "test": "CBC",
+        "category": "Blood",
+        "price": 400
+      },
+      {
+        "test": "Lipid Profile",
+        "category": "Blood",
+        "price": 1300
+      },
+      {
+        "test": "HbA1c",
+        "category": "Blood",
+        "price": 1000
+      },
+      {
+        "test": "LFT",
+        "category": "Blood",
+        "price": 1050
+      },
+      {
+        "test": "TFT",
+        "category": "Blood",
+        "price": 1800
+      },
+      {
+        "test": "Urine Routine",
+        "category": "Urine",
+        "price": 200
+      },
+      {
+        "test": "Vitamin D",
+        "category": "Blood",
+        "price": 2800
+      },
+      {
+        "test": "RFT",
+        "category": "Blood",
+        "price": 1440
+      }
+    ],
+    "verified": true,
+    "approved": true,
+    "source": "https://branches.pk/branches/Chughtai-Lab-&location=Peshawar · https://chughtaislab.com/medical-center/locations-4/ · https://hamariweb.com/directories/chughtai_lab_test_rates_list__wp4229.aspx",
+    "sourceNote": "Chain UAN 0311-1456789; home sampling available. Test prices from hamariweb 2026 rate list. PRICE CONFLICTS — re-verify before publishing: CBC also appears as 680 (page header), 1300 (alllabtests.com), 800–1500 (searchit.com.pk); HbA1c also 2100 (searchit); LFT also 1950 (searchit); RFT listed as range 1440–1800."
+  },
+  {
+    "id": "l005",
+    "name": "Chughtai Lab",
+    "city": "Kohat",
+    "address": "Poly Clinic, KDA Hospital; Shop 06, Committee Plaza, Opp TMA Office; Shop 06, Cantt Shopping Plaza, Hangu Road",
+    "phone": "0922512658",
+    "phoneKind": "direct",
+    "hoursText": "Open 24/7 (main labs)",
+    "tests": [
+      {
+        "test": "CBC",
+        "category": "Blood",
+        "price": 400
+      },
+      {
+        "test": "Lipid Profile",
+        "category": "Blood",
+        "price": 1300
+      },
+      {
+        "test": "HbA1c",
+        "category": "Blood",
+        "price": 1000
+      },
+      {
+        "test": "LFT",
+        "category": "Blood",
+        "price": 1050
+      },
+      {
+        "test": "TFT",
+        "category": "Blood",
+        "price": 1800
+      },
+      {
+        "test": "Urine Routine",
+        "category": "Urine",
+        "price": 200
+      },
+      {
+        "test": "Vitamin D",
+        "category": "Blood",
+        "price": 2800
+      },
+      {
+        "test": "RFT",
+        "category": "Blood",
+        "price": 1440
+      }
+    ],
+    "verified": true,
+    "approved": true,
+    "source": "https://branches.pk/branches/Chughtai-Lab-&location=Peshawar · https://chughtaislab.com/medical-center/locations-4/ · https://hamariweb.com/directories/chughtai_lab_test_rates_list__wp4229.aspx",
+    "sourceNote": "Chain UAN 0311-1456789; home sampling available. Also 0340-3334944. Test prices from hamariweb 2026 rate list. PRICE CONFLICTS — re-verify before publishing: CBC also appears as 680 (page header), 1300 (alllabtests.com), 800–1500 (searchit.com.pk); HbA1c also 2100 (searchit); LFT also 1950 (searchit); RFT listed as range 1440–1800."
+  },
+  {
+    "id": "l006",
+    "name": "Chughtai Lab",
+    "city": "Swabi",
+    "address": "DHQ Hospital Swabi",
+    "phone": "03111456789",
+    "phoneKind": "direct",
+    "hoursText": "Open 24/7 (main labs)",
+    "tests": [
+      {
+        "test": "CBC",
+        "category": "Blood",
+        "price": 400
+      },
+      {
+        "test": "Lipid Profile",
+        "category": "Blood",
+        "price": 1300
+      },
+      {
+        "test": "HbA1c",
+        "category": "Blood",
+        "price": 1000
+      },
+      {
+        "test": "LFT",
+        "category": "Blood",
+        "price": 1050
+      },
+      {
+        "test": "TFT",
+        "category": "Blood",
+        "price": 1800
+      },
+      {
+        "test": "Urine Routine",
+        "category": "Urine",
+        "price": 200
+      },
+      {
+        "test": "Vitamin D",
+        "category": "Blood",
+        "price": 2800
+      },
+      {
+        "test": "RFT",
+        "category": "Blood",
+        "price": 1440
+      }
+    ],
+    "verified": true,
+    "approved": true,
+    "source": "https://branches.pk/branches/Chughtai-Lab-&location=Peshawar · https://chughtaislab.com/medical-center/locations-4/ · https://hamariweb.com/directories/chughtai_lab_test_rates_list__wp4229.aspx",
+    "sourceNote": "Chain UAN 0311-1456789; home sampling available. Test prices from hamariweb 2026 rate list. PRICE CONFLICTS — re-verify before publishing: CBC also appears as 680 (page header), 1300 (alllabtests.com), 800–1500 (searchit.com.pk); HbA1c also 2100 (searchit); LFT also 1950 (searchit); RFT listed as range 1440–1800."
+  },
+  {
+    "id": "l007",
+    "name": "Islamabad Diagnostic Centre (IDC)",
+    "city": "Peshawar",
+    "address": "Ground Floor, Mall Tower, Mall Road, Near State Life Building, Peshawar Cantt; Ground Floor, Mubarak Plaza, Hakeem Ullah Jan Rd, Hashtnagri (Opp LRH)",
+    "phone": "051111000432",
+    "phoneKind": "direct",
+    "hoursText": "8:00 AM–10:00 PM daily",
+    "tests": [],
+    "verified": true,
+    "approved": true,
+    "source": "https://idc.net.pk/best-lab-in-peshawar/",
+    "sourceNote": "UAN 051-111-000-432 / 0311-1000432. Free home sampling (\"IDC on Wheels\": X-ray, ultrasound, ECG, Holter at home; limited cities). Services: lab, X-ray, ultrasound/Doppler, MRI, 128-slice CT, OPG. IDC publishes no public per-test rates. Other KP branches: D.I. Khan (East Circular Road, Opp Haq Nawaz Park), Saidu Sharif Swat (Opp Saidu Group of Teaching Hospital, Marghazar Road), Abbottabad (Small Industry Chowk, Mandian, Near Ayub Medical Complex)."
+  },
+  {
+    "id": "l008",
+    "name": "Dr. Essa Laboratory & Diagnostic Centre",
+    "city": "Peshawar",
+    "address": "LRH OPD Gate; Main University Road; Warsak Road, Putwar Payan; Hayatabad Phase 5; Hussainabad, Gulbahar No.1; Iqbal Colony, Dalazak Road",
+    "phone": "021111786986",
+    "phoneKind": "direct",
+    "hoursText": "9:00 AM–9:00 PM; Sunday 9:00 AM–5:00 PM",
+    "tests": [
+      {
+        "test": "CBC",
+        "category": "Blood",
+        "price": 690
+      },
+      {
+        "test": "FBS",
+        "category": "Blood",
+        "price": 290
+      },
+      {
+        "test": "RBS",
+        "category": "Blood",
+        "price": 290
+      },
+      {
+        "test": "HbA1c",
+        "category": "Blood",
+        "price": 1750
+      },
+      {
+        "test": "LFT",
+        "category": "Blood",
+        "price": 1650
+      },
+      {
+        "test": "Lipid Profile",
+        "category": "Blood",
+        "price": 2190
+      },
+      {
+        "test": "Urine D/R",
+        "category": "Urine",
+        "price": 450
+      },
+      {
+        "test": "CRP",
+        "category": "Blood",
+        "price": 1690
+      },
+      {
+        "test": "Vitamin D",
+        "category": "Blood",
+        "price": 3090
+      },
+      {
+        "test": "Uric Acid",
+        "category": "Blood",
+        "price": 690
+      }
+    ],
+    "verified": true,
+    "approved": true,
+    "source": "https://dressalab.com · https://hamariweb.com/directories/essa_lab_test_rates_list_wp4201.aspx",
+    "sourceNote": "UAN 021-111-786-986. Free home sample collection on online bookings. Branch numbers: 0344-3750261 / 0335-5577151 (LRH OPD Gate), 0345-9242108, 0333-9172484, 0317-9772180, 0324-9376375. Prices from hamariweb rate list — re-verify."
+  },
+  {
+    "id": "l009",
+    "name": "Excel Labs",
+    "city": "Peshawar",
+    "address": "The Mall Tower, 35 Mall Road, Peshawar Cantt (adjacent Shaheen Chemist); Shop 1, Peshawar Medical Tower, Opp Emergency Gate, Lady Reading Hospital, PTCL Colony; Opp Hayatabad Medical Complex, Doctor Plaza, Shulaman Market, Hayatabad",
+    "phone": "0915261066",
+    "phoneKind": "direct",
+    "hoursText": "Mon–Sat 8:00 AM–1:00 AM, Sunday closed",
+    "tests": [
+      {
+        "test": "CBC",
+        "category": "Blood",
+        "price": 1000
+      },
+      {
+        "test": "TFT",
+        "category": "Blood",
+        "price": 4000
+      },
+      {
+        "test": "TSH",
+        "category": "Blood",
+        "price": 1900
+      },
+      {
+        "test": "CRP",
+        "category": "Blood",
+        "price": 1900
+      },
+      {
+        "test": "Uric Acid",
+        "category": "Blood",
+        "price": 900
+      },
+      {
+        "test": "Calcium",
+        "category": "Blood",
+        "price": 900
+      },
+      {
+        "test": "Blood Group",
+        "category": "Blood",
+        "price": 900
+      }
+    ],
+    "verified": true,
+    "approved": true,
+    "source": "https://hamariweb.com/directories/usa_consulate_general_peshawar_embassy/excel_lab_report_wp4190.aspx · https://instacare.pk/lab/excel-labs/peshawar/cantt/excel-lab-cantt",
+    "sourceNote": "Hours conflict: hamariweb says Mon–Sat 8 AM–1 AM / Sunday closed; oladoc says 24/7 — re-verify. Abbottabad branch: Mandian, 0992-412734. Prices from hamariweb rate list — re-verify."
+  },
+  {
+    "id": "l010",
+    "name": "Aga Khan University Hospital — Laboratory",
+    "city": "Mardan",
+    "address": "Shamsi Road, Opposite Bicket Gunj Bazar; Jail Road, Opposite Mardan Medical Complex Emergency Gate",
+    "phone": "0937875110",
+    "phoneKind": "direct",
+    "hoursText": "Mon–Fri 8 AM–9 PM, Sat 8 AM–2:30 PM, Sun 8 AM–9 PM",
+    "tests": [],
+    "verified": true,
+    "approved": true,
+    "source": "https://branches.pk/branches/Aga-Khan-Laboratory&location=Mardan",
+    "sourceNote": "Collection units. Also 0937-844667 (Jail Road). Other KP units: Kohat (0922-513192, street address not published — flag), Bannu (Al-Faqir Plaza, Kohat Road, Kot Adil, +92-345-5504593, listed open 24 hours), Peshawar (specimen collection unit exists, address not listed — flag)."
+  },
+  {
+    "id": "l011",
+    "name": "Shaukat Khanum Laboratory",
+    "city": "Mardan",
+    "address": "Umer Medical Centre, Shamsi Road, Mardan",
+    "phone": "0937876099",
+    "phoneKind": "direct",
+    "hoursText": "",
+    "tests": [],
+    "verified": true,
+    "approved": true,
+    "source": "https://hamariweb.com/directories/shaukat_khanum_laboratory_umer_medical_centre,_shamsi_road_mardan_collection_centre_mardan_laboratories_number14466.aspx",
+    "sourceNote": "Collection centres. Other KP centres: Peshawar (address not listed in source — flag), Swat (Near Police Station, Opposite Saidu Hospital, Saidu Sharif), Kohat (Nadeem Shinwari Market, Opp Awami Paint, Hangu Road, +92-922-517422), Bannu (Opposite Khalifa Gul Nawaz Hospital, Gate No. 1, Township)."
+  },
+  {
+    "id": "l012",
+    "name": "Nayab Labs & Diagnostic Center",
+    "city": "Mardan",
+    "address": "Shamsi Road, Mardan",
+    "phone": "0937867360",
+    "phoneKind": "direct",
+    "hoursText": "",
+    "tests": [],
+    "verified": true,
+    "approved": true,
+    "source": "https://www.top-rated.online/cities/Baghdada/place/p/15493997/Nayab+Labs+and+Diagnostic+Center+-+Mardan+Branch",
+    "sourceNote": "Rating 4.9 (166 reviews) on top-rated.online. Website nayablabs.com."
+  },
+  {
+    "id": "l013",
+    "name": "Citi Lab",
+    "city": "Kohat",
+    "address": "Pir Habib Shah Complex, Near Hangu Phatak, Hangu Road, Kohat",
+    "phone": "0922860397",
+    "phoneKind": "direct",
+    "hoursText": "",
+    "tests": [],
+    "verified": true,
+    "approved": true,
+    "source": "https://www.scribd.com/document/467019235/OPD-Discount-Centers-updated-on-July-2018",
+    "sourceNote": "Also 0333-5518778."
+  },
+  {
+    "id": "l014",
+    "name": "Government / MTI Hospital Laboratories",
+    "city": "Multiple",
+    "address": "Lady Reading Hospital Peshawar; Hayatabad Medical Complex; Khyber Teaching Hospital; Mardan Medical Complex; Ayub Teaching Hospital Abbottabad; DHQ hospitals (Swabi, Kohat, Bannu, D.I. Khan, Nowshera, Charsadda); Saidu Group of Teaching Hospitals, Swat",
+    "phone": "",
+    "phoneKind": "none",
+    "hoursText": "",
+    "tests": [],
+    "verified": true,
+    "approved": true,
+    "source": "https://tribune.com.pk/story/2583337/implementation-of-uniform-diagnostic-test-rates-stalled-in-k-p-mti-hospitals?amp=1",
+    "sourceNote": "In-house hospital labs; per-test prices not published — show as \"nominal/subsidized, confirm at hospital\". LRH lab rates \"significantly lower than the market\" per hospital officials; all diagnostic tests FREE for patients admitted under Sehat Card Plus. HMC implemented the KP government uniform revised lab charges; KTH revision pending."
+  }
+]

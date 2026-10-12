@@ -28,6 +28,7 @@ class Lab {
   final double? lat;
   final double? lng;
   final Map<String, DayHours> hours;
+  final String hoursText; // display text, e.g. "Mon–Sat 8 AM – 10 PM"
   final String? photoUrl;
   final bool verified;
   final bool approved;
@@ -47,6 +48,7 @@ class Lab {
     this.lat,
     this.lng,
     Map<String, DayHours>? hours,
+    this.hoursText = '',
     this.photoUrl,
     this.verified = false,
     this.approved = false,
@@ -77,6 +79,7 @@ class Lab {
         lat: (json['lat'] as num?)?.toDouble(),
         lng: (json['lng'] as num?)?.toDouble(),
         hours: hoursFromJson(json['hours'] as Map<String, dynamic>?),
+        hoursText: (json['hoursText'] as String?) ?? '',
         photoUrl: json['photoUrl'] as String?,
         verified: (json['verified'] as bool?) ?? false,
         approved: (json['approved'] as bool?) ?? false,
@@ -100,6 +103,7 @@ class Lab {
         'lat': lat,
         'lng': lng,
         'hours': hoursToJson(hours),
+        'hoursText': hoursText,
         'photoUrl': photoUrl,
         'verified': verified,
         'approved': approved,
@@ -119,6 +123,7 @@ class Lab {
     double? lat,
     double? lng,
     Map<String, DayHours>? hours,
+    String? hoursText,
     String? photoUrl,
     bool? verified,
     bool? approved,
@@ -137,6 +142,7 @@ class Lab {
         lat: lat ?? this.lat,
         lng: lng ?? this.lng,
         hours: hours ?? this.hours,
+        hoursText: hoursText ?? this.hoursText,
         photoUrl: photoUrl ?? this.photoUrl,
         verified: verified ?? this.verified,
         approved: approved ?? this.approved,

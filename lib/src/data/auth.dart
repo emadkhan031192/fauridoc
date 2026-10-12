@@ -17,6 +17,17 @@ abstract class AuthBackend {
   Future<AppUser> registerWithEmail(String email, String password, String name);
   Future<AppUser> signInWithGoogle();
   Future<AppUser> signInDemo(String name, String phone);
+
+  /// Phone OTP (Firebase only). [onCodeSent] receives the verificationId to
+  /// keep until the user types the SMS code; [onError] gets a user-facing
+  /// message. [onAutoVerified] fires on Android auto-retrieval.
+  Future<void> sendPhoneCode(
+    String phoneNumber, {
+    required void Function(String verificationId) onCodeSent,
+    required void Function(String message) onError,
+    void Function(AppUser user)? onAutoVerified,
+  });
+  Future<AppUser> verifyPhoneCode(String verificationId, String smsCode, {String? name});
   Future<void> signOut();
 }
 
@@ -67,6 +78,19 @@ class DemoAuthBackend implements AuthBackend {
   @override
   Future<AppUser> signInWithGoogle() =>
       throw UnsupportedError('Google sign-in needs Firebase (see SETUP.md).');
+
+  @override
+  Future<void> sendPhoneCode(
+    String phoneNumber, {
+    required void Function(String verificationId) onCodeSent,
+    required void Function(String message) onError,
+    void Function(AppUser user)? onAutoVerified,
+  }) =>
+      throw UnsupportedError('Phone sign-in needs Firebase (see SETUP.md).');
+
+  @override
+  Future<AppUser> verifyPhoneCode(String verificationId, String smsCode, {String? name}) =>
+      throw UnsupportedError('Phone sign-in needs Firebase (see SETUP.md).');
 
   @override
   Future<void> signOut() async {
@@ -143,6 +167,46 @@ class FirebaseAuthBackend implements AuthBackend {
       throw UnsupportedError('Demo sign-in is only available without Firebase.');
 
   @override
+  Future<void> sendPhoneCode(
+    String phoneNumber, {
+    required void Function(String verificationId) onCodeSent,
+    required void Function(String message) onError,
+    void Function(AppUser user)? onAutoVerified,
+  }) async {
+    await _auth.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      timeout: const Duration(seconds: 60),
+      verificationCompleted: (fb.PhoneAuthCredential credential) async {
+        try {
+          final cred = await _auth.signInWithCredential(credential);
+          final user = await _mapUser(cred.user);
+          if (user != null) onAutoVerified?.call(user);
+        } catch (_) {}
+      },
+      verificationFailed: (fb.FirebaseAuthException e) {
+        onError(e.message ?? 'Phone verification failed.');
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        onCodeSent(verificationId);
+      },
+      codeAutoRetrievalTimeout: (_) {},
+    );
+  }
+
+  @override
+  Future<AppUser> verifyPhoneCode(String verificationId, String smsCode, {String? name}) async {
+    final credential = fb.PhoneAuthProvider.credential(
+      verificationId: verificationId,
+      smsCode: smsCode,
+    );
+    final cred = await _auth.signInWithCredential(credential);
+    if (name != null && name.isNotEmpty && cred.user?.displayName == null) {
+      await cred.user?.updateDisplayName(name);
+    }
+    return (await _mapUser(cred.user))!;
+  }
+
+  @override
   Future<void> signOut() async {
     await GoogleSignIn().signOut();
     await _auth.signOut();
@@ -170,6 +234,7 @@ class AuthController extends Notifier<AppUser?> {
 
   bool get canUseGoogle => _backend is FirebaseAuthBackend;
   bool get canUseEmail => _backend is FirebaseAuthBackend;
+  bool get canUsePhone => _backend is FirebaseAuthBackend;
   bool get isDemoBackend => _backend is DemoAuthBackend;
 
   Future<AppUser> signInDemo(String name, String phone) =>
@@ -182,6 +247,22 @@ class AuthController extends Notifier<AppUser?> {
       _backend!.registerWithEmail(email, password, name);
 
   Future<AppUser> signInWithGoogle() => _backend!.signInWithGoogle();
+
+  Future<void> sendPhoneCode(
+    String phoneNumber, {
+    required void Function(String verificationId) onCodeSent,
+    required void Function(String message) onError,
+    void Function(AppUser user)? onAutoVerified,
+  }) =>
+      _backend!.sendPhoneCode(
+        phoneNumber,
+        onCodeSent: onCodeSent,
+        onError: onError,
+        onAutoVerified: onAutoVerified,
+      );
+
+  Future<AppUser> verifyPhoneCode(String verificationId, String smsCode, {String? name}) =>
+      _backend!.verifyPhoneCode(verificationId, smsCode, name: name);
 
   Future<void> signOut() => _backend!.signOut();
 }

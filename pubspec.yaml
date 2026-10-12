@@ -33,7 +33,22 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icon_mark.png
+    - assets/seed_data/doctors.json
+    - assets/seed_data/labs.json
+    - assets/seed_data/hospitals.json
   fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-ExtraBold.ttf
+          weight: 800
     - family: NotoNastaliqUrdu
       fonts:
         - asset: assets/fonts/NotoNastaliqUrdu-Regular.ttf

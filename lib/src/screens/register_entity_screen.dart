@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,281 +11,131 @@ import '../models/hospital.dart';
 import '../models/lab.dart';
 import '../providers/providers.dart';
 import '../widgets/theme.dart';
+import 'auth_screen.dart';
 
-/// Which entity type this registration form is for.
-enum EntityKind { doctor, lab, hospital }
+/// Add a listing (page-14): Doctor / Lab / Hospital tabs, photo boxes,
+/// caps-labeled fields, sticky "Submit for approval" footer.
+/// New registrations only; editing lives in ManageEntityScreen.
+class RegisterEntityScreen extends ConsumerStatefulWidget {
+  /// 0 = Doctor, 1 = Lab, 2 = Hospital.
+  final int initialTab;
 
-/// Register a new doctor/lab/hospital, or edit an existing one
-/// (edit mode when [doctor]/[lab]/[hospital] is given).
-class RegisterEntityScreen extends ConsumerWidget {
-  final EntityKind kind;
-  final Doctor? doctor;
-  final Lab? lab;
-  final Hospital? hospital;
-
-  const RegisterEntityScreen({
-    super.key,
-    required this.kind,
-    this.doctor,
-    this.lab,
-    this.hospital,
-  });
-
-  bool get _isEdit => doctor != null || lab != null || hospital != null;
+  const RegisterEntityScreen({super.key, this.initialTab = 0});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final Widget form;
-    switch (kind) {
-      case EntityKind.doctor:
-        form = _DoctorForm(doctor: doctor);
-      case EntityKind.lab:
-        form = _LabForm(lab: lab);
-      case EntityKind.hospital:
-        form = _HospitalForm(hospital: hospital);
-    }
-    return Scaffold(
-      appBar: AppBar(title: Text(tr(ref, _isEdit ? 'edit' : 'registerTitle'))),
-      body: form,
-    );
-  }
+  ConsumerState<RegisterEntityScreen> createState() =>
+      _RegisterEntityScreenState();
 }
 
-/// Shared weekly-hours editor: 7 rows, one switch + two HH:MM fields each.
-class HoursEditor extends ConsumerStatefulWidget {
-  final Map<String, DayHours> initial;
-  final ValueChanged<Map<String, DayHours>> onChanged;
-
-  const HoursEditor({
-    super.key,
-    required this.initial,
-    required this.onChanged,
-  });
-
-  @override
-  ConsumerState<HoursEditor> createState() => _HoursEditorState();
-}
-
-class _HoursEditorState extends ConsumerState<HoursEditor> {
-  late final Map<String, DayHours> _hours;
-  final Map<String, TextEditingController> _open = {};
-  final Map<String, TextEditingController> _close = {};
-
-  @override
-  void initState() {
-    super.initState();
-    _hours = {
-      for (final k in weekdayKeys) k: widget.initial[k] ?? DayHours.closedDay(),
-    };
-    for (final k in weekdayKeys) {
-      _open[k] = TextEditingController(text: _hours[k]!.open);
-      _close[k] = TextEditingController(text: _hours[k]!.close);
-    }
-  }
-
-  @override
-  void dispose() {
-    for (final c in [..._open.values, ..._close.values]) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  void _emit() =>
-      widget.onChanged({for (final k in weekdayKeys) k: _hours[k]!});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          tr(ref, 'workingHours'),
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          tr(ref, 'hoursHint'),
-          style: TextStyle(color: Colors.grey[600], fontSize: 12),
-        ),
-        const SizedBox(height: 6),
-        for (final k in weekdayKeys) _dayRow(k),
-      ],
-    );
-  }
-
-  Widget _dayRow(String k) {
-    final h = _hours[k]!;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 40,
-            child: Text(tr(ref, 'weekdays_short_$k')),
-          ),
-          Switch(
-            value: !h.closed,
-            onChanged: (v) {
-              setState(() => _hours[k] = h.copyWith(closed: !v));
-              _emit();
-            },
-          ),
-          Expanded(
-            child: TextField(
-              controller: _open[k],
-              enabled: !h.closed,
-              decoration: const InputDecoration(
-                hintText: 'HH:MM',
-                isDense: true,
-              ),
-              onChanged: (v) {
-                _hours[k] = _hours[k]!.copyWith(open: v);
-                _emit();
-              },
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6),
-            child: Text('–'),
-          ),
-          Expanded(
-            child: TextField(
-              controller: _close[k],
-              enabled: !h.closed,
-              decoration: const InputDecoration(
-                hintText: 'HH:MM',
-                isDense: true,
-              ),
-              onChanged: (v) {
-                _hours[k] = _hours[k]!.copyWith(close: v);
-                _emit();
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Doctor form
-// ---------------------------------------------------------------------------
-
-class _DoctorForm extends ConsumerStatefulWidget {
-  final Doctor? doctor;
-
-  const _DoctorForm({this.doctor});
-
-  @override
-  ConsumerState<_DoctorForm> createState() => _DoctorFormState();
-}
-
-class _DoctorFormState extends ConsumerState<_DoctorForm> {
-  final _nameCtrl = TextEditingController();
-  final _qualCtrl = TextEditingController();
-  final _clinicCtrl = TextEditingController();
-  final _addrCtrl = TextEditingController();
-  final _phoneCtrl = TextEditingController();
-  final _waCtrl = TextEditingController();
-  final _feeCtrl = TextEditingController();
-  final _langCtrl = TextEditingController();
-  final _leaveCtrl = TextEditingController();
-  String? _city;
-  String? _specialty;
-  bool _hasParking = false;
-  late Map<String, DayHours> _hours;
-  String? _photoPath;
+class _RegisterEntityScreenState
+    extends ConsumerState<RegisterEntityScreen> {
+  late int _tab;
   bool _busy = false;
 
+  // photos
+  String? _photoPath; // profile / main photo
+  final List<String> _clinicPhotos = [];
+
+  // doctor fields
+  final _dName = TextEditingController();
+  final _dQual = TextEditingController();
+  final _dClinic = TextEditingController();
+  final _dPhone = TextEditingController();
+  final _dFee = TextEditingController();
+  final _dTimings = TextEditingController();
+  String? _dSpecialty;
+  String? _dCity;
+
+  // lab fields
+  final _lName = TextEditingController();
+  final _lAddr = TextEditingController();
+  final _lPhone = TextEditingController();
+  final _lHours = TextEditingController();
+  String? _lCity;
+
+  // hospital fields
+  final _hName = TextEditingController();
+  final _hAddr = TextEditingController();
+  final _hPhone = TextEditingController();
+  final _hEmergency = TextEditingController();
+  String? _hCity;
+  bool _hEmergency247 = false;
+
   @override
   void initState() {
     super.initState();
-    final d = widget.doctor;
-    _nameCtrl.text = d?.name ?? '';
-    _qualCtrl.text = d?.qualification ?? '';
-    _clinicCtrl.text = d?.clinicName ?? '';
-    _addrCtrl.text = d?.address ?? '';
-    _phoneCtrl.text = d?.phone ?? '';
-    _waCtrl.text = d?.whatsapp ?? '';
-    _feeCtrl.text = d?.fee?.toString() ?? '';
-    _langCtrl.text = d?.languages.join(', ') ?? '';
-    _leaveCtrl.text = d?.leaveTill ?? '';
-    _city = d?.city.isNotEmpty == true ? d!.city : null;
-    _specialty = d?.specialty.isNotEmpty == true ? d!.specialty : null;
-    _hasParking = d?.hasParking ?? false;
-    _hours = d != null
-        ? {for (final k in weekdayKeys) k: d.hours[k] ?? DayHours.closedDay()}
-        : defaultHours();
+    _tab = widget.initialTab.clamp(0, 2);
   }
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
-    _qualCtrl.dispose();
-    _clinicCtrl.dispose();
-    _addrCtrl.dispose();
-    _phoneCtrl.dispose();
-    _waCtrl.dispose();
-    _feeCtrl.dispose();
-    _langCtrl.dispose();
-    _leaveCtrl.dispose();
+    _dName.dispose();
+    _dQual.dispose();
+    _dClinic.dispose();
+    _dPhone.dispose();
+    _dFee.dispose();
+    _dTimings.dispose();
+    _lName.dispose();
+    _lAddr.dispose();
+    _lPhone.dispose();
+    _lHours.dispose();
+    _hName.dispose();
+    _hAddr.dispose();
+    _hPhone.dispose();
+    _hEmergency.dispose();
     super.dispose();
   }
 
-  Future<void> _pickPhoto() async {
-    final x = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (x != null) setState(() => _photoPath = x.path);
+  void _snack(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  Future<void> _pickPhoto({required bool main}) async {
+    final x =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (x == null || !mounted) return;
+    setState(() {
+      if (main) {
+        _photoPath = x.path;
+      } else if (_clinicPhotos.length < 3) {
+        _clinicPhotos.add(x.path);
+      }
+    });
   }
 
   Future<void> _submit() async {
-    final name = _nameCtrl.text.trim();
-    final city = _city ?? '';
-    if (name.isEmpty || city.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr(ref, 'fillAllFields'))),
-      );
-      return;
-    }
     final user = ref.read(authProvider);
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr(ref, 'loginSubtitle'))),
-      );
+      _snack(tr(ref, 'add.signInRequired'));
       return;
     }
+    final repo = ref.read(repositoryProvider);
     setState(() => _busy = true);
     try {
-      final repo = ref.read(repositoryProvider);
-      final languages = _langCtrl.text
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
-      final fee = int.tryParse(_feeCtrl.text.trim());
-      final leave = _leaveCtrl.text.trim();
-      final editing = widget.doctor;
-      if (editing == null) {
-        final id = await repo.registerDoctor(
-          Doctor(
-            id: '',
-            name: name,
-            specialty: _specialty ?? '',
-            city: city,
-            qualification: _qualCtrl.text.trim(),
-            clinicName: _clinicCtrl.text.trim(),
-            address: _addrCtrl.text.trim(),
-            phone: _phoneCtrl.text.trim(),
-            whatsapp: _waCtrl.text.trim(),
-            hours: Map.of(_hours),
-            languages: languages,
-            leaveTill: leave.isEmpty ? null : leave,
-            hasParking: _hasParking,
-            fee: fee,
-            ownerUid: user.uid,
-          ),
-        );
+      if (_tab == 0) {
+        final name = _dName.text.trim();
+        final city = _dCity ?? '';
+        if (name.isEmpty || city.isEmpty) {
+          _snack(tr(ref, 'add.fillRequired'));
+          return;
+        }
+        final id = await repo.registerDoctor(Doctor(
+          id: '',
+          name: name,
+          specialty: _dSpecialty ?? '',
+          city: city,
+          qualification: _dQual.text.trim(),
+          clinicName: _dClinic.text.trim(),
+          phone: _dPhone.text.trim(),
+          fee: int.tryParse(_dFee.text.trim()),
+          hours: defaultHours(),
+          hoursText: _dTimings.text.trim(),
+          photoUrl: _photoPath,
+          clinicPhotos: List.of(_clinicPhotos),
+          ownerUid: user.uid,
+          createdAt: DateTime.now(),
+        ));
         if (_photoPath != null) {
           final url = await repo.uploadPhoto('doctor', id, _photoPath!);
           final saved = await repo.getDoctor(id);
@@ -291,673 +143,870 @@ class _DoctorFormState extends ConsumerState<_DoctorForm> {
             await repo.updateDoctor(saved.copyWith(photoUrl: url));
           }
         }
-        if (user.isAdmin) await repo.approveDoctor(id, approve: true);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr(ref, 'submittedPending'))),
-        );
-        Navigator.of(context).pop();
-      } else {
-        var updated = editing.copyWith(
-          name: name,
-          specialty: _specialty ?? '',
-          city: city,
-          qualification: _qualCtrl.text.trim(),
-          clinicName: _clinicCtrl.text.trim(),
-          address: _addrCtrl.text.trim(),
-          phone: _phoneCtrl.text.trim(),
-          whatsapp: _waCtrl.text.trim(),
-          hours: Map.of(_hours),
-          languages: languages,
-          leaveTill: leave.isEmpty ? editing.leaveTill : leave,
-          hasParking: _hasParking,
-          fee: fee,
-        );
-        if (_photoPath != null) {
-          final url = await repo.uploadPhoto('doctor', updated.id, _photoPath!);
-          updated = updated.copyWith(photoUrl: url);
+      } else if (_tab == 1) {
+        final name = _lName.text.trim();
+        final city = _lCity ?? '';
+        if (name.isEmpty || city.isEmpty) {
+          _snack(tr(ref, 'add.fillRequired'));
+          return;
         }
-        await repo.updateDoctor(updated);
-        if (!mounted) return;
-        Navigator.of(context).pop();
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final repo = ref.watch(repositoryProvider);
-    final locale = ref.watch(localeProvider);
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Row(
-          children: [
-            AnyPhoto(
-              photoUrl: _photoPath ?? widget.doctor?.photoUrl,
-              width: 72,
-              height: 72,
-              fallback: Container(
-                width: 72,
-                height: 72,
-                color: FauridocTheme.teal.withValues(alpha: 0.15),
-                child: const Icon(
-                  Icons.person,
-                  size: 36,
-                  color: FauridocTheme.teal,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            OutlinedButton.icon(
-              onPressed: _pickPhoto,
-              icon: const Icon(Icons.add_a_photo_outlined),
-              label: Text(tr(ref, 'addPhoto')),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _nameCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'doctorName')),
-        ),
-        const SizedBox(height: 12),
-        StreamBuilder<List<String>>(
-          stream: repo.watchSpecialties(),
-          builder: (context, snap) {
-            final specialties = snap.data ?? const <String>[];
-            return DropdownButtonFormField<String>(
-              initialValue: specialties.contains(_specialty) ? _specialty : null,
-              decoration: InputDecoration(labelText: tr(ref, 'specialty')),
-              items: [
-                for (final s in specialties)
-                  DropdownMenuItem(
-                    value: s,
-                    child: Text(specialtyLabel(locale, s)),
-                  ),
-              ],
-              onChanged: (v) => setState(() => _specialty = v),
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        StreamBuilder<List<String>>(
-          stream: repo.watchCities(),
-          builder: (context, snap) {
-            final cities = snap.data ?? const <String>[];
-            return DropdownButtonFormField<String>(
-              initialValue: cities.contains(_city) ? _city : null,
-              decoration: InputDecoration(labelText: tr(ref, 'city')),
-              items: [
-                for (final c in cities)
-                  DropdownMenuItem(value: c, child: Text(c)),
-              ],
-              onChanged: (v) => setState(() => _city = v),
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _qualCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'qualification')),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _clinicCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'clinicName')),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _addrCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'address')),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _phoneCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'phone')),
-          keyboardType: TextInputType.phone,
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _waCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'whatsapp')),
-          keyboardType: TextInputType.phone,
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _feeCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'consultationFee')),
-          keyboardType: TextInputType.number,
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _langCtrl,
-          decoration: InputDecoration(
-            labelText: tr(ref, 'languages'),
-            hintText: tr(ref, 'languagesHint'),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _leaveCtrl,
-          decoration: InputDecoration(
-            labelText: tr(ref, 'leaveTillHint'),
-          ),
-        ),
-        SwitchListTile(
-          title: Text(tr(ref, 'hasParking')),
-          value: _hasParking,
-          onChanged: (v) => setState(() => _hasParking = v),
-        ),
-        const SizedBox(height: 8),
-        HoursEditor(
-          initial: _hours,
-          onChanged: (h) => setState(() => _hours = h),
-        ),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: _busy ? null : _submit,
-          child: _busy
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  tr(
-                    ref,
-                    widget.doctor == null ? 'submitForApproval' : 'save',
-                  ),
-                ),
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Lab form
-// ---------------------------------------------------------------------------
-
-class _TestRow {
-  final TextEditingController name = TextEditingController();
-  final TextEditingController price = TextEditingController();
-  String? category;
-
-  _TestRow({String? test, int? priceValue, this.category}) {
-    name.text = test ?? '';
-    if (priceValue != null) price.text = priceValue.toString();
-  }
-
-  void dispose() {
-    name.dispose();
-    price.dispose();
-  }
-}
-
-class _LabForm extends ConsumerStatefulWidget {
-  final Lab? lab;
-
-  const _LabForm({this.lab});
-
-  @override
-  ConsumerState<_LabForm> createState() => _LabFormState();
-}
-
-class _LabFormState extends ConsumerState<_LabForm> {
-  final _nameCtrl = TextEditingController();
-  final _addrCtrl = TextEditingController();
-  final _phoneCtrl = TextEditingController();
-  String? _city;
-  bool _hasParking = false;
-  late Map<String, DayHours> _hours;
-  final List<_TestRow> _rows = [];
-  bool _busy = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final l = widget.lab;
-    _nameCtrl.text = l?.name ?? '';
-    _addrCtrl.text = l?.address ?? '';
-    _phoneCtrl.text = l?.phone ?? '';
-    _city = l?.city.isNotEmpty == true ? l!.city : null;
-    _hasParking = l?.hasParking ?? false;
-    _hours = l != null
-        ? {for (final k in weekdayKeys) k: l.hours[k] ?? DayHours.closedDay()}
-        : defaultHours();
-    for (final t in l?.tests ?? const <LabTestPrice>[]) {
-      _rows.add(
-        _TestRow(test: t.test, priceValue: t.price, category: t.category),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _addrCtrl.dispose();
-    _phoneCtrl.dispose();
-    for (final r in _rows) {
-      r.dispose();
-    }
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final name = _nameCtrl.text.trim();
-    final city = _city ?? '';
-    if (name.isEmpty || city.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr(ref, 'fillAllFields'))),
-      );
-      return;
-    }
-    final user = ref.read(authProvider);
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr(ref, 'loginSubtitle'))),
-      );
-      return;
-    }
-    setState(() => _busy = true);
-    try {
-      final repo = ref.read(repositoryProvider);
-      final tests = [
-        for (final r in _rows)
-          if (r.name.text.trim().isNotEmpty)
-            LabTestPrice(
-              test: r.name.text.trim(),
-              category: r.category ?? '',
-              price: int.tryParse(r.price.text.trim()) ?? 0,
-            ),
-      ];
-      final editing = widget.lab;
-      if (editing == null) {
-        final id = await repo.registerLab(
-          Lab(
-            id: '',
-            name: name,
-            city: city,
-            address: _addrCtrl.text.trim(),
-            phone: _phoneCtrl.text.trim(),
-            hours: Map.of(_hours),
-            hasParking: _hasParking,
-            tests: tests,
-            ownerUid: user.uid,
-          ),
-        );
-        if (user.isAdmin) await repo.approveLab(id, approve: true);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr(ref, 'submittedPending'))),
-        );
-        Navigator.of(context).pop();
+        final id = await repo.registerLab(Lab(
+          id: '',
+          name: name,
+          city: city,
+          address: _lAddr.text.trim(),
+          phone: _lPhone.text.trim(),
+          hours: defaultHours(),
+          hoursText: _lHours.text.trim(),
+          photoUrl: _photoPath,
+          ownerUid: user.uid,
+          createdAt: DateTime.now(),
+        ));
+        if (_photoPath != null) {
+          final url = await repo.uploadPhoto('lab', id, _photoPath!);
+          final saved = await repo.getLab(id);
+          if (saved != null) {
+            await repo.updateLab(saved.copyWith(photoUrl: url));
+          }
+        }
       } else {
-        await repo.updateLab(
-          editing.copyWith(
-            name: name,
-            city: city,
-            address: _addrCtrl.text.trim(),
-            phone: _phoneCtrl.text.trim(),
-            hours: Map.of(_hours),
-            hasParking: _hasParking,
-            tests: tests,
-          ),
-        );
-        if (!mounted) return;
-        Navigator.of(context).pop();
+        final name = _hName.text.trim();
+        final city = _hCity ?? '';
+        if (name.isEmpty || city.isEmpty) {
+          _snack(tr(ref, 'add.fillRequired'));
+          return;
+        }
+        final id = await repo.registerHospital(Hospital(
+          id: '',
+          name: name,
+          city: city,
+          address: _hAddr.text.trim(),
+          phone: _hPhone.text.trim(),
+          emergencyPhone: _hEmergency.text.trim(),
+          emergency247: _hEmergency247,
+          photoUrl: _photoPath,
+          ownerUid: user.uid,
+          createdAt: DateTime.now(),
+        ));
+        if (_photoPath != null) {
+          final url =
+              await repo.uploadPhoto('hospital', id, _photoPath!);
+          final saved = await repo.getHospital(id);
+          if (saved != null) {
+            await repo.updateHospital(saved.copyWith(photoUrl: url));
+          }
+        }
       }
+      if (!mounted) return;
+      _snack(tr(ref, 'add.submitted'));
+      Navigator.of(context).pop();
+    } catch (e) {
+      _snack(e.toString());
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final repo = ref.watch(repositoryProvider);
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        TextField(
-          controller: _nameCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'labName')),
-        ),
-        const SizedBox(height: 12),
-        StreamBuilder<List<String>>(
-          stream: repo.watchCities(),
-          builder: (context, snap) {
-            final cities = snap.data ?? const <String>[];
-            return DropdownButtonFormField<String>(
-              initialValue: cities.contains(_city) ? _city : null,
-              decoration: InputDecoration(labelText: tr(ref, 'city')),
-              items: [
-                for (final c in cities)
-                  DropdownMenuItem(value: c, child: Text(c)),
-              ],
-              onChanged: (v) => setState(() => _city = v),
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _addrCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'address')),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _phoneCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'phone')),
-          keyboardType: TextInputType.phone,
-        ),
-        SwitchListTile(
-          title: Text(tr(ref, 'hasParking')),
-          value: _hasParking,
-          onChanged: (v) => setState(() => _hasParking = v),
-        ),
-        const SizedBox(height: 8),
-        HoursEditor(
-          initial: _hours,
-          onChanged: (h) => setState(() => _hours = h),
-        ),
-        const SizedBox(height: 16),
-        StreamBuilder<List<String>>(
-          stream: repo.watchTestCategories(),
-          builder: (context, snap) {
-            final categories = snap.data ?? const <String>[];
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ur = fdIsUrdu(ref.watch(localeProvider));
+    final user = ref.watch(authProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+          title:
+              Text(tr(ref, 'add.title'), style: FdType.title(ur, size: 22))),
+      body: user == null
+          ? _SignInRequired(ur: ur)
+          : Column(
               children: [
-                Text(
-                  tr(ref, 'testsOffered'),
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(
+                        FdDim.page, 8, FdDim.page, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _TypeTabs(
+                            ur: ur,
+                            tab: _tab,
+                            onTap: (i) => setState(() => _tab = i)),
+                        const SizedBox(height: 22),
+                        _Caps(tr(ref, 'add.photos'), ur),
+                        const SizedBox(height: 10),
+                        _PhotoRow(
+                          ur: ur,
+                          mainPath: _photoPath,
+                          extra: _clinicPhotos,
+                          onMain: () => _pickPhoto(main: true),
+                          onExtra: () => _pickPhoto(main: false),
+                        ),
+                        const SizedBox(height: 22),
+                        if (_tab == 0)
+                          _DoctorFields(
+                              ur: ur,
+                              name: _dName,
+                              qual: _dQual,
+                              clinic: _dClinic,
+                              phone: _dPhone,
+                              fee: _dFee,
+                              timings: _dTimings,
+                              specialty: _dSpecialty,
+                              city: _dCity,
+                              onSpecialty: (v) =>
+                                  setState(() => _dSpecialty = v),
+                              onCity: (v) =>
+                                  setState(() => _dCity = v)),
+                        if (_tab == 1)
+                          _LabFields(
+                              ur: ur,
+                              name: _lName,
+                              addr: _lAddr,
+                              phone: _lPhone,
+                              hours: _lHours,
+                              city: _lCity,
+                              onCity: (v) =>
+                                  setState(() => _lCity = v)),
+                        if (_tab == 2)
+                          _HospitalFields(
+                            ur: ur,
+                            name: _hName,
+                            addr: _hAddr,
+                            phone: _hPhone,
+                            emergency: _hEmergency,
+                            city: _hCity,
+                            emergency247: _hEmergency247,
+                            onCity: (v) =>
+                                setState(() => _hCity = v),
+                            onEmergency247: (v) =>
+                                setState(() => _hEmergency247 = v),
+                          ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 6),
-                for (var i = 0; i < _rows.length; i++) _testRow(_rows[i], i, categories),
-                TextButton.icon(
-                  onPressed: () => setState(() => _rows.add(_TestRow())),
-                  icon: const Icon(Icons.add),
-                  label: Text(tr(ref, 'addTest')),
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(top: BorderSide(color: FdColors.line)),
+                  ),
+                  padding: EdgeInsets.fromLTRB(
+                      FdDim.page,
+                      14,
+                      FdDim.page,
+                      14 + MediaQuery.of(context).padding.bottom),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.access_time,
+                              color: FdColors.amberInk, size: 22),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(tr(ref, 'add.note'),
+                                style: FdType.body(ur,
+                                    size: 13.5,
+                                    color: FdColors.inkSoft)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      FdButton(
+                        label: tr(ref, 'add.submit'),
+                        isUrdu: ur,
+                        onTap: _busy ? null : _submit,
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            );
-          },
-        ),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: _busy ? null : _submit,
-          child: _busy
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  tr(ref, widget.lab == null ? 'submitForApproval' : 'save'),
-                ),
-        ),
-      ],
+            ),
     );
   }
+}
 
-  Widget _testRow(_TestRow row, int index, List<String> categories) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
+/// Login gate for the registration form.
+class _SignInRequired extends StatelessWidget {
+  final bool ur;
+  const _SignInRequired({required this.ur});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(tr(ref, 'add.signInRequired'),
+                  style: FdType.body(ur, size: 16),
+                  textAlign: TextAlign.center),
+              const SizedBox(height: 20),
+              FdButton(
+                label: tr(ref, 'prof.signIn'),
+                isUrdu: ur,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const AuthScreen())),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Caps extends StatelessWidget {
+  final String label;
+  final bool ur;
+  const _Caps(this.label, this.ur);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(label.toUpperCase(),
+        style: FdType.label(ur, size: 13, w: FontWeight.w700));
+  }
+}
+
+/// Doctor | Lab | Hospital segmented tabs on a mint track.
+class _TypeTabs extends StatelessWidget {
+  final bool ur;
+  final int tab;
+  final ValueChanged<int> onTap;
+
+  const _TypeTabs(
+      {required this.ur, required this.tab, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final labels = [
+          tr(ref, 'add.doctor'),
+          tr(ref, 'add.lab'),
+          tr(ref, 'add.hospital'),
+        ];
+        return Container(
+          decoration: BoxDecoration(
+            color: FdColors.mint,
+            borderRadius: BorderRadius.circular(22),
+          ),
+          padding: const EdgeInsets.all(6),
+          child: Row(
+            children: [
+              for (var i = 0; i < 3; i++)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => onTap(i),
+                    child: Container(
+                      height: 56,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: tab == i
+                            ? Colors.white
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: tab == i
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black
+                                      .withValues(alpha: 0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Text(
+                        labels[i],
+                        style: FdType.body(
+                          ur,
+                          size: 16,
+                          w: FontWeight.w700,
+                          color: tab == i
+                              ? FdColors.primary
+                              : FdColors.muted,
+                        ),
+                      ),
+                    ),
+                  ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Photo boxes: teal-dashed main + 3 grey-dashed extras.
+class _PhotoRow extends StatelessWidget {
+  final bool ur;
+  final String? mainPath;
+  final List<String> extra;
+  final VoidCallback onMain;
+  final VoidCallback onExtra;
+
+  const _PhotoRow({
+    required this.ur,
+    required this.mainPath,
+    required this.extra,
+    required this.onMain,
+    required this.onExtra,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) => Row(
         children: [
           Expanded(
-            flex: 3,
-            child: TextField(
-              controller: row.name,
-              decoration: InputDecoration(
-                labelText: tr(ref, 'testName'),
-                isDense: true,
+            child: _DashedBox(
+              color: FdColors.primary,
+              onTap: onMain,
+              child: mainPath == null
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.camera_alt_outlined,
+                            color: FdColors.primary, size: 30),
+                        const SizedBox(height: 6),
+                        Text(tr(ref, 'add.yourPhoto'),
+                            style: FdType.body(ur,
+                                size: 14,
+                                w: FontWeight.w700,
+                                color: FdColors.primary),
+                            textAlign: TextAlign.center),
+                      ],
+                    )
+                  : SizedBox.expand(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: _PickedImage(path: mainPath!),
+                      ),
+                    ),
+            ),
+          ),
+          for (var i = 0; i < 3; i++) ...[
+            const SizedBox(width: 10),
+            Expanded(
+              child: _DashedBox(
+                color: FdColors.muted,
+                onTap: onExtra,
+                child: i < extra.length
+                    ? SizedBox.expand(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: _PickedImage(path: extra[i]),
+                        ),
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.add,
+                              color: FdColors.muted, size: 30),
+                          const SizedBox(height: 4),
+                          Text(
+                              fill(tr(ref, 'add.photo'),
+                                  {'n': '${i + 1}'}),
+                              style: FdType.body(ur,
+                                  size: 14, color: FdColors.muted),
+                              textAlign: TextAlign.center),
+                        ],
+                      ),
               ),
             ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            flex: 2,
-            child: TextField(
-              controller: row.price,
-              decoration: InputDecoration(
-                labelText: tr(ref, 'testPrice'),
-                isDense: true,
-              ),
-              keyboardType: TextInputType.number,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            flex: 2,
-            child: DropdownButtonFormField<String>(
-              initialValue: categories.contains(row.category) ? row.category : null,
-              decoration: InputDecoration(
-                labelText: tr(ref, 'testCategory'),
-                isDense: true,
-              ),
-              items: [
-                for (final c in categories)
-                  DropdownMenuItem(value: c, child: Text(c)),
-              ],
-              onChanged: (v) => setState(() => row.category = v),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.remove_circle_outline,
-              color: FauridocTheme.emergencyRed,
-            ),
-            onPressed: () => setState(() {
-              row.dispose();
-              _rows.removeAt(index);
-            }),
-          ),
+          ],
         ],
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Hospital form
-// ---------------------------------------------------------------------------
+class _DashedBox extends StatelessWidget {
+  final Color color;
+  final Widget child;
+  final VoidCallback onTap;
 
-class _HospitalForm extends ConsumerStatefulWidget {
-  final Hospital? hospital;
-
-  const _HospitalForm({this.hospital});
-
-  @override
-  ConsumerState<_HospitalForm> createState() => _HospitalFormState();
-}
-
-class _HospitalFormState extends ConsumerState<_HospitalForm> {
-  final _nameCtrl = TextEditingController();
-  final _addrCtrl = TextEditingController();
-  final _phoneCtrl = TextEditingController();
-  final _emgCtrl = TextEditingController();
-  final _deptCtrl = TextEditingController();
-  final _visitingCtrl = TextEditingController();
-  String? _city;
-  bool _emergency247 = false;
-  bool _busy = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final h = widget.hospital;
-    _nameCtrl.text = h?.name ?? '';
-    _addrCtrl.text = h?.address ?? '';
-    _phoneCtrl.text = h?.phone ?? '';
-    _emgCtrl.text = h?.emergencyPhone ?? '';
-    _deptCtrl.text = h?.departments.join(', ') ?? '';
-    _visitingCtrl.text = h?.visitingHours ?? '';
-    _city = h?.city.isNotEmpty == true ? h!.city : null;
-    _emergency247 = h?.emergency247 ?? false;
-  }
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _addrCtrl.dispose();
-    _phoneCtrl.dispose();
-    _emgCtrl.dispose();
-    _deptCtrl.dispose();
-    _visitingCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final name = _nameCtrl.text.trim();
-    final city = _city ?? '';
-    if (name.isEmpty || city.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr(ref, 'fillAllFields'))),
-      );
-      return;
-    }
-    final user = ref.read(authProvider);
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr(ref, 'loginSubtitle'))),
-      );
-      return;
-    }
-    setState(() => _busy = true);
-    try {
-      final repo = ref.read(repositoryProvider);
-      final departments = _deptCtrl.text
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
-      final editing = widget.hospital;
-      if (editing == null) {
-        final id = await repo.registerHospital(
-          Hospital(
-            id: '',
-            name: name,
-            city: city,
-            address: _addrCtrl.text.trim(),
-            phone: _phoneCtrl.text.trim(),
-            emergencyPhone: _emgCtrl.text.trim(),
-            departments: departments,
-            visitingHours: _visitingCtrl.text.trim(),
-            emergency247: _emergency247,
-            ownerUid: user.uid,
-          ),
-        );
-        if (user.isAdmin) await repo.approveHospital(id, approve: true);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr(ref, 'submittedPending'))),
-        );
-        Navigator.of(context).pop();
-      } else {
-        await repo.updateHospital(
-          editing.copyWith(
-            name: name,
-            city: city,
-            address: _addrCtrl.text.trim(),
-            phone: _phoneCtrl.text.trim(),
-            emergencyPhone: _emgCtrl.text.trim(),
-            departments: departments,
-            visitingHours: _visitingCtrl.text.trim(),
-            emergency247: _emergency247,
-          ),
-        );
-        if (!mounted) return;
-        Navigator.of(context).pop();
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
+  const _DashedBox(
+      {required this.color, required this.child, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final repo = ref.watch(repositoryProvider);
-    return ListView(
-      padding: const EdgeInsets.all(16),
+    return AspectRatio(
+      aspectRatio: 0.92,
+      child: GestureDetector(
+        onTap: onTap,
+        child: CustomPaint(
+          painter: _DashedPainter(color),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Center(child: child),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PickedImage extends StatelessWidget {
+  final String path;
+  const _PickedImage({required this.path});
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.file(
+      File(path),
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) =>
+          const Icon(Icons.broken_image_outlined, color: FdColors.muted),
+    );
+  }
+}
+
+class _DashedPainter extends CustomPainter {
+  final Color color;
+  _DashedPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.8
+      ..style = PaintingStyle.stroke;
+    const dash = 7.0;
+    const gap = 5.0;
+    final rrect = RRect.fromRectAndRadius(
+        Offset.zero & size, const Radius.circular(18));
+    final path = Path()..addRRect(rrect);
+    final metrics = path.computeMetrics().first;
+    final total = metrics.length;
+    var dist = 0.0;
+    final dashed = Path();
+    while (dist < total) {
+      dashed.addPath(
+          metrics.extractPath(dist, (dist + dash).clamp(0, total)),
+          Offset.zero);
+      dist += dash + gap;
+    }
+    canvas.drawPath(dashed, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedPainter old) =>
+      old.color != color;
+}
+
+/// Caps-labeled text field.
+class _LabeledField extends StatelessWidget {
+  final bool ur;
+  final String label;
+  final TextEditingController controller;
+  final String hint;
+  final TextInputType keyboardType;
+  final int maxLines;
+
+  const _LabeledField({
+    required this.ur,
+    required this.label,
+    required this.controller,
+    required this.hint,
+    this.keyboardType = TextInputType.text,
+    this.maxLines = 1,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        _Caps(label, ur),
+        const SizedBox(height: 8),
         TextField(
-          controller: _nameCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'hospitalName')),
-        ),
-        const SizedBox(height: 12),
-        StreamBuilder<List<String>>(
-          stream: repo.watchCities(),
-          builder: (context, snap) {
-            final cities = snap.data ?? const <String>[];
-            return DropdownButtonFormField<String>(
-              initialValue: cities.contains(_city) ? _city : null,
-              decoration: InputDecoration(labelText: tr(ref, 'city')),
-              items: [
-                for (final c in cities)
-                  DropdownMenuItem(value: c, child: Text(c)),
-              ],
-              onChanged: (v) => setState(() => _city = v),
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _addrCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'address')),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _phoneCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'phone')),
-          keyboardType: TextInputType.phone,
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _emgCtrl,
-          decoration: InputDecoration(labelText: tr(ref, 'emergencyPhone')),
-          keyboardType: TextInputType.phone,
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _deptCtrl,
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          style: FdType.body(ur, size: 16, color: FdColors.ink),
           decoration: InputDecoration(
-            labelText: tr(ref, 'departments'),
-            hintText: tr(ref, 'departmentsHint'),
+            hintText: hint,
+            hintStyle:
+                FdType.body(ur, size: 16, color: FdColors.muted),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20, vertical: 17),
+            border: OutlineInputBorder(
+              borderRadius:
+                  BorderRadius.circular(FdDim.fieldRadius),
+              borderSide: const BorderSide(color: FdColors.line),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius:
+                  BorderRadius.circular(FdDim.fieldRadius),
+              borderSide: const BorderSide(color: FdColors.line),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius:
+                  BorderRadius.circular(FdDim.fieldRadius),
+              borderSide:
+                  const BorderSide(color: FdColors.primary, width: 1.6),
+            ),
           ),
         ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _visitingCtrl,
-          decoration: InputDecoration(
-            labelText: tr(ref, 'visitingHours'),
-            hintText: tr(ref, 'visitingHoursHint'),
-          ),
-        ),
-        SwitchListTile(
-          title: Text(tr(ref, 'emergency247')),
-          value: _emergency247,
-          onChanged: (v) => setState(() => _emergency247 = v),
-        ),
-        const SizedBox(height: 12),
-        ElevatedButton(
-          onPressed: _busy ? null : _submit,
-          child: _busy
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  tr(
-                    ref,
-                    widget.hospital == null ? 'submitForApproval' : 'save',
-                  ),
-                ),
-        ),
+        const SizedBox(height: 18),
       ],
+    );
+  }
+}
+
+/// Caps-labeled dropdown (cities / specialties).
+class _LabeledDropdown extends StatelessWidget {
+  final bool ur;
+  final String label;
+  final String hint;
+  final String? value;
+  final List<String> items;
+  final ValueChanged<String?> onChanged;
+
+  const _LabeledDropdown({
+    required this.ur,
+    required this.label,
+    required this.hint,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _Caps(label, ur),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: value,
+          items: [
+            for (final it in items)
+              DropdownMenuItem(value: it, child: Text(it))
+          ],
+          onChanged: onChanged,
+          style: FdType.body(ur, size: 16, color: FdColors.ink),
+          icon: const Icon(Icons.keyboard_arrow_down,
+              color: FdColors.ink, size: 26),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle:
+                FdType.body(ur, size: 16, color: FdColors.muted),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20, vertical: 17),
+            border: OutlineInputBorder(
+              borderRadius:
+                  BorderRadius.circular(FdDim.fieldRadius),
+              borderSide: const BorderSide(color: FdColors.line),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius:
+                  BorderRadius.circular(FdDim.fieldRadius),
+              borderSide: const BorderSide(color: FdColors.line),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius:
+                  BorderRadius.circular(FdDim.fieldRadius),
+              borderSide:
+                  const BorderSide(color: FdColors.primary, width: 1.6),
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+      ],
+    );
+  }
+}
+
+class _CityDropdown extends ConsumerWidget {
+  final bool ur;
+  final String label;
+  final String? value;
+  final ValueChanged<String?> onChanged;
+
+  const _CityDropdown({
+    required this.ur,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<List<String>>(
+      stream: ref.read(repositoryProvider).watchCities(),
+      builder: (context, snap) => _LabeledDropdown(
+        ur: ur,
+        label: label,
+        hint: label,
+        value: value,
+        items: snap.data ?? const [],
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+class _SpecialtyDropdown extends ConsumerWidget {
+  final bool ur;
+  final String? value;
+  final ValueChanged<String?> onChanged;
+
+  const _SpecialtyDropdown({
+    required this.ur,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<List<String>>(
+      stream: ref.read(repositoryProvider).watchSpecialties(),
+      builder: (context, snap) => _LabeledDropdown(
+        ur: ur,
+        label: tr(ref, 'add.specialization'),
+        hint: tr(ref, 'add.chooseSpecialty'),
+        value: value,
+        items: snap.data ?? const [],
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+class _DoctorFields extends StatelessWidget {
+  final bool ur;
+  final TextEditingController name;
+  final TextEditingController qual;
+  final TextEditingController clinic;
+  final TextEditingController phone;
+  final TextEditingController fee;
+  final TextEditingController timings;
+  final String? specialty;
+  final String? city;
+  final ValueChanged<String?> onSpecialty;
+  final ValueChanged<String?> onCity;
+
+  const _DoctorFields({
+    required this.ur,
+    required this.name,
+    required this.qual,
+    required this.clinic,
+    required this.phone,
+    required this.fee,
+    required this.timings,
+    required this.specialty,
+    required this.city,
+    required this.onSpecialty,
+    required this.onCity,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.doctorName'),
+              controller: name,
+              hint: tr(ref, 'add.doctorNameHint')),
+          _SpecialtyDropdown(
+              ur: ur, value: specialty, onChanged: onSpecialty),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.qualification'),
+              controller: qual,
+              hint: tr(ref, 'add.qualificationHint')),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.clinicName'),
+              controller: clinic,
+              hint: tr(ref, 'add.clinicNameHint')),
+          _CityDropdown(
+              ur: ur,
+              label: tr(ref, 'add.city'),
+              value: city,
+              onChanged: onCity),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.phone'),
+              controller: phone,
+              hint: tr(ref, 'add.phoneHint'),
+              keyboardType: TextInputType.phone),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.fee'),
+              controller: fee,
+              hint: tr(ref, 'add.feeHint'),
+              keyboardType: TextInputType.number),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.timings'),
+              controller: timings,
+              hint: tr(ref, 'add.timingsHint')),
+        ],
+      ),
+    );
+  }
+}
+
+class _LabFields extends StatelessWidget {
+  final bool ur;
+  final TextEditingController name;
+  final TextEditingController addr;
+  final TextEditingController phone;
+  final TextEditingController hours;
+  final String? city;
+  final ValueChanged<String?> onCity;
+
+  const _LabFields({
+    required this.ur,
+    required this.name,
+    required this.addr,
+    required this.phone,
+    required this.hours,
+    required this.city,
+    required this.onCity,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.labName'),
+              controller: name,
+              hint: tr(ref, 'add.labName')),
+          _CityDropdown(
+              ur: ur,
+              label: tr(ref, 'add.city'),
+              value: city,
+              onChanged: onCity),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.address'),
+              controller: addr,
+              hint: tr(ref, 'add.addressHint'),
+              maxLines: 2),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.phone'),
+              controller: phone,
+              hint: tr(ref, 'add.phoneHint'),
+              keyboardType: TextInputType.phone),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.hours'),
+              controller: hours,
+              hint: tr(ref, 'add.hoursHint')),
+        ],
+      ),
+    );
+  }
+}
+
+class _HospitalFields extends StatelessWidget {
+  final bool ur;
+  final TextEditingController name;
+  final TextEditingController addr;
+  final TextEditingController phone;
+  final TextEditingController emergency;
+  final String? city;
+  final bool emergency247;
+  final ValueChanged<String?> onCity;
+  final ValueChanged<bool> onEmergency247;
+
+  const _HospitalFields({
+    required this.ur,
+    required this.name,
+    required this.addr,
+    required this.phone,
+    required this.emergency,
+    required this.city,
+    required this.emergency247,
+    required this.onCity,
+    required this.onEmergency247,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.hospitalName'),
+              controller: name,
+              hint: tr(ref, 'add.hospitalName')),
+          _CityDropdown(
+              ur: ur,
+              label: tr(ref, 'add.city'),
+              value: city,
+              onChanged: onCity),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.address'),
+              controller: addr,
+              hint: tr(ref, 'add.addressHint'),
+              maxLines: 2),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.phone'),
+              controller: phone,
+              hint: tr(ref, 'add.phoneHint'),
+              keyboardType: TextInputType.phone),
+          _LabeledField(
+              ur: ur,
+              label: tr(ref, 'add.emergencyNumber'),
+              controller: emergency,
+              hint: tr(ref, 'add.phoneHint'),
+              keyboardType: TextInputType.phone),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius:
+                  BorderRadius.circular(FdDim.fieldRadius),
+              border: Border.all(color: FdColors.line),
+            ),
+            padding: const EdgeInsets.symmetric(
+                horizontal: 20, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(tr(ref, 'add.emergency247'),
+                      style: FdType.body(ur,
+                          size: 16,
+                          w: FontWeight.w600,
+                          color: FdColors.ink)),
+                ),
+                Switch(
+                  value: emergency247,
+                  activeThumbColor: FdColors.primary,
+                  onChanged: onEmergency247,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+        ],
+      ),
     );
   }
 }

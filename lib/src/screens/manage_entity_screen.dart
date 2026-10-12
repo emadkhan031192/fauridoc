@@ -1,128 +1,1003 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../l10n/strings.dart';
 import '../models/doctor.dart';
+import '../models/hospital.dart';
+import '../models/lab.dart';
 import '../providers/providers.dart';
-import 'doctor_detail_screen.dart';
-import 'register_entity_screen.dart';
+import '../widgets/theme.dart';
 
-/// A doctor's own dashboard: weekly stats, edit, leave mode, preview.
+/// Full CRUD editor for one doctor / lab / hospital (admin + doctor self-edit).
+/// AppBar: "Edit {Doctor|Lab|Hospital}". Hours maps are intentionally
+/// untouched here (see RegisterEntityScreen: defaultHours on creation).
 class ManageEntityScreen extends ConsumerStatefulWidget {
-  final String doctorId;
+  final Doctor? doctor;
+  final Lab? lab;
+  final Hospital? hospital;
 
-  const ManageEntityScreen({super.key, required this.doctorId});
+  const ManageEntityScreen(
+      {super.key, this.doctor, this.lab, this.hospital});
 
   @override
-  ConsumerState<ManageEntityScreen> createState() => _ManageEntityScreenState();
+  ConsumerState<ManageEntityScreen> createState() =>
+      _ManageEntityScreenState();
 }
 
-class _ManageEntityScreenState extends ConsumerState<ManageEntityScreen> {
-  final _leaveCtrl = TextEditingController();
-  bool _leaveInit = false;
-  int _refresh = 0;
+class _ManageEntityScreenState
+    extends ConsumerState<ManageEntityScreen> {
+  bool _busy = false;
+
+  // shared
+  final _name = TextEditingController();
+  final _city = TextEditingController();
+  final _address = TextEditingController();
+  final _phone = TextEditingController();
+  bool _hasParking = false;
+  bool _verified = false;
+  bool _approved = false;
+
+  // doctor
+  final _specialty = TextEditingController();
+  final _qualification = TextEditingController();
+  final _clinicName = TextEditingController();
+  final _whatsapp = TextEditingController();
+  final _fee = TextEditingController();
+  final _hoursText = TextEditingController();
+  String? _specialtyDrop;
+  String? _cityDrop;
+
+  // lab
+  List<LabTestPrice> _tests = [];
+
+  // hospital
+  final _emergencyPhone = TextEditingController();
+  final _visitingHours = TextEditingController();
+  bool _emergency247 = false;
+  List<String> _departments = [];
+
+  @override
+  void initState() {
+    super.initState();
+    final d = widget.doctor;
+    final l = widget.lab;
+    final h = widget.hospital;
+    if (d != null) {
+      _name.text = d.name;
+      _specialty.text = d.specialty;
+      _specialtyDrop = d.specialty.isEmpty ? null : d.specialty;
+      _city.text = d.city;
+      _cityDrop = d.city.isEmpty ? null : d.city;
+      _qualification.text = d.qualification;
+      _clinicName.text = d.clinicName;
+      _address.text = d.address;
+      _phone.text = d.phone;
+      _whatsapp.text = d.whatsapp;
+      _fee.text = d.fee?.toString() ?? '';
+      _hoursText.text = d.hoursText;
+      _hasParking = d.hasParking;
+      _verified = d.verified;
+      _approved = d.approved;
+    } else if (l != null) {
+      _name.text = l.name;
+      _city.text = l.city;
+      _cityDrop = l.city.isEmpty ? null : l.city;
+      _address.text = l.address;
+      _phone.text = l.phone;
+      _hoursText.text = l.hoursText;
+      _hasParking = l.hasParking;
+      _verified = l.verified;
+      _approved = l.approved;
+      _tests = List.of(l.tests);
+    } else if (h != null) {
+      _name.text = h.name;
+      _city.text = h.city;
+      _cityDrop = h.city.isEmpty ? null : h.city;
+      _address.text = h.address;
+      _phone.text = h.phone;
+      _emergencyPhone.text = h.emergencyPhone;
+      _visitingHours.text = h.visitingHours;
+      _emergency247 = h.emergency247;
+      _departments = List.of(h.departments);
+      _hasParking = h.hasParking;
+      _verified = h.verified;
+      _approved = h.approved;
+    }
+  }
 
   @override
   void dispose() {
-    _leaveCtrl.dispose();
+    _name.dispose();
+    _city.dispose();
+    _address.dispose();
+    _phone.dispose();
+    _specialty.dispose();
+    _qualification.dispose();
+    _clinicName.dispose();
+    _whatsapp.dispose();
+    _fee.dispose();
+    _hoursText.dispose();
+    _emergencyPhone.dispose();
+    _visitingHours.dispose();
     super.dispose();
   }
 
-  Future<void> _saveLeave() async {
+  void _snack(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  String get _kindTitle {
+    final ref2 = ref;
+    if (widget.doctor != null) return tr(ref2, 'admin.editDoctor');
+    if (widget.lab != null) return tr(ref2, 'admin.editLab');
+    return tr(ref2, 'admin.editHospital');
+  }
+
+  Future<void> _save() async {
     final repo = ref.read(repositoryProvider);
-    final d = await repo.getDoctor(widget.doctorId);
-    if (d == null || !mounted) return;
-    final v = _leaveCtrl.text.trim();
-    await repo.updateDoctor(d.copyWith(leaveTill: v.isEmpty ? d.leaveTill : v));
-    setState(() => _refresh++);
+    setState(() => _busy = true);
+    try {
+      if (widget.doctor != null) {
+        final d = widget.doctor!;
+        await repo.updateDoctor(d.copyWith(
+          name: _name.text.trim(),
+          specialty: _specialtyDrop ?? _specialty.text.trim(),
+          city: _cityDrop ?? _city.text.trim(),
+          qualification: _qualification.text.trim(),
+          clinicName: _clinicName.text.trim(),
+          address: _address.text.trim(),
+          phone: _phone.text.trim(),
+          whatsapp: _whatsapp.text.trim(),
+          fee: int.tryParse(_fee.text.trim()),
+          hoursText: _hoursText.text.trim(),
+          hasParking: _hasParking,
+          verified: _verified,
+          approved: _approved,
+        ));
+      } else if (widget.lab != null) {
+        final l = widget.lab!;
+        await repo.updateLab(l.copyWith(
+          name: _name.text.trim(),
+          city: _cityDrop ?? _city.text.trim(),
+          address: _address.text.trim(),
+          phone: _phone.text.trim(),
+          tests: List.of(_tests),
+          hoursText: _hoursText.text.trim(),
+          hasParking: _hasParking,
+          verified: _verified,
+          approved: _approved,
+        ));
+      } else if (widget.hospital != null) {
+        final h = widget.hospital!;
+        await repo.updateHospital(h.copyWith(
+          name: _name.text.trim(),
+          city: _cityDrop ?? _city.text.trim(),
+          address: _address.text.trim(),
+          phone: _phone.text.trim(),
+          emergencyPhone: _emergencyPhone.text.trim(),
+          visitingHours: _visitingHours.text.trim(),
+          emergency247: _emergency247,
+          departments: List.of(_departments),
+          hasParking: _hasParking,
+          verified: _verified,
+          approved: _approved,
+        ));
+      }
+      if (!mounted) return;
+      _snack(tr(ref, 'admin.saved'));
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      _snack(e.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _delete() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(_name.text),
+        content: Text(tr(ref, 'admin.confirmDelete')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(tr(ref, 'admin.cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(tr(ref, 'admin.delete'),
+                style: const TextStyle(color: FdColors.redInk)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final repo = ref.read(repositoryProvider);
+    setState(() => _busy = true);
+    try {
+      if (widget.doctor != null) {
+        await repo.deleteDoctor(widget.doctor!.id);
+      } else if (widget.lab != null) {
+        await repo.deleteLab(widget.lab!.id);
+      } else if (widget.hospital != null) {
+        await repo.deleteHospital(widget.hospital!.id);
+      }
+      if (!mounted) return;
+      _snack(tr(ref, 'admin.deleted'));
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      _snack(e.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ur = fdIsUrdu(ref.watch(localeProvider));
+    return Scaffold(
+      appBar: AppBar(
+          title: Text(_kindTitle, style: FdType.title(ur, size: 22))),
+      body: ListView(
+        padding:
+            const EdgeInsets.fromLTRB(FdDim.page, 8, FdDim.page, 28),
+        children: [
+          _Card(
+            ur: ur,
+            children: [
+              _Field(
+                  ur: ur,
+                  label: tr(ref, 'admin.name'),
+                  controller: _name,
+                  hint: tr(ref, 'admin.name')),
+              if (widget.doctor != null) ...[
+                _SpecialtyDrop(
+                  ur: ur,
+                  value: _specialtyDrop,
+                  fallback: _specialty.text,
+                  onChanged: (v) => setState(() => _specialtyDrop = v),
+                ),
+                _Field(
+                    ur: ur,
+                    label: tr(ref, 'admin.qualification'),
+                    controller: _qualification,
+                    hint: tr(ref, 'admin.qualification')),
+                _Field(
+                    ur: ur,
+                    label: tr(ref, 'admin.clinicName'),
+                    controller: _clinicName,
+                    hint: tr(ref, 'admin.clinicName')),
+              ],
+              _CityDrop(
+                ur: ur,
+                value: _cityDrop,
+                fallback: _city.text,
+                onChanged: (v) => setState(() => _cityDrop = v),
+              ),
+              _Field(
+                  ur: ur,
+                  label: tr(ref, 'admin.address'),
+                  controller: _address,
+                  hint: tr(ref, 'admin.address'),
+                  maxLines: 2),
+              _Field(
+                  ur: ur,
+                  label: tr(ref, 'admin.phone'),
+                  controller: _phone,
+                  hint: tr(ref, 'admin.phone'),
+                  keyboardType: TextInputType.phone),
+              if (widget.doctor != null) ...[
+                _Field(
+                    ur: ur,
+                    label: tr(ref, 'admin.whatsapp'),
+                    controller: _whatsapp,
+                    hint: tr(ref, 'admin.whatsapp'),
+                    keyboardType: TextInputType.phone),
+                _Field(
+                    ur: ur,
+                    label: tr(ref, 'admin.fee'),
+                    controller: _fee,
+                    hint: tr(ref, 'admin.fee'),
+                    keyboardType: TextInputType.number),
+                _Field(
+                    ur: ur,
+                    label: tr(ref, 'admin.hoursText'),
+                    controller: _hoursText,
+                    hint: tr(ref, 'admin.hoursText')),
+              ],
+              if (widget.lab != null)
+                _Field(
+                    ur: ur,
+                    label: tr(ref, 'admin.hoursText'),
+                    controller: _hoursText,
+                    hint: tr(ref, 'admin.hoursText')),
+              if (widget.hospital != null) ...[
+                _Field(
+                    ur: ur,
+                    label: tr(ref, 'admin.emergencyPhone'),
+                    controller: _emergencyPhone,
+                    hint: tr(ref, 'admin.emergencyPhone'),
+                    keyboardType: TextInputType.phone),
+                _Field(
+                    ur: ur,
+                    label: tr(ref, 'admin.visitingHours'),
+                    controller: _visitingHours,
+                    hint: tr(ref, 'admin.visitingHours')),
+                _SwitchRow(
+                  ur: ur,
+                  label: tr(ref, 'admin.emergency247'),
+                  value: _emergency247,
+                  onChanged: (v) =>
+                      setState(() => _emergency247 = v),
+                ),
+                _DepartmentsEditor(
+                  ur: ur,
+                  items: _departments,
+                  onChanged: (v) =>
+                      setState(() => _departments = v),
+                ),
+              ],
+            ],
+          ),
+          if (widget.lab != null) ...[
+            const SizedBox(height: 16),
+            _TestsEditor(
+              ur: ur,
+              tests: _tests,
+              onChanged: (v) => setState(() => _tests = v),
+            ),
+          ],
+          const SizedBox(height: 16),
+          _Card(
+            ur: ur,
+            children: [
+              _SwitchRow(
+                ur: ur,
+                label: tr(ref, 'admin.parking'),
+                value: _hasParking,
+                onChanged: (v) =>
+                    setState(() => _hasParking = v),
+              ),
+              _SwitchRow(
+                ur: ur,
+                label: tr(ref, 'admin.verified'),
+                value: _verified,
+                onChanged: (v) =>
+                    setState(() => _verified = v),
+              ),
+              _SwitchRow(
+                ur: ur,
+                label: tr(ref, 'admin.approved'),
+                value: _approved,
+                onChanged: (v) =>
+                    setState(() => _approved = v),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          FdButton(
+            label: tr(ref, 'admin.save'),
+            isUrdu: ur,
+            onTap: _busy ? null : _save,
+          ),
+          const SizedBox(height: 12),
+          FdButton(
+            label: tr(ref, 'admin.deleteRecord'),
+            style: FdButtonStyle.danger,
+            icon: Icons.delete_outline,
+            isUrdu: ur,
+            onTap: _busy ? null : _delete,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// White rounded card grouping form fields.
+class _Card extends StatelessWidget {
+  final bool ur;
+  final List<Widget> children;
+  const _Card({required this.ur, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        border: Border.all(color: FdColors.line),
+      ),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      ),
+    );
+  }
+}
+
+class _Cap extends StatelessWidget {
+  final bool ur;
+  final String label;
+  const _Cap({required this.ur, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 6),
+      child: Text(label.toUpperCase(),
+          style: FdType.label(ur, size: 12.5, w: FontWeight.w700)),
+    );
+  }
+}
+
+class _Field extends StatelessWidget {
+  final bool ur;
+  final String label;
+  final TextEditingController controller;
+  final String hint;
+  final TextInputType keyboardType;
+  final int maxLines;
+
+  const _Field({
+    required this.ur,
+    required this.label,
+    required this.controller,
+    required this.hint,
+    this.keyboardType = TextInputType.text,
+    this.maxLines = 1,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _Cap(ur: ur, label: label),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          style: FdType.body(ur, size: 15.5, color: FdColors.ink),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle:
+                FdType.body(ur, size: 15.5, color: FdColors.muted),
+            filled: true,
+            fillColor: FdColors.bg,
+            contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: FdColors.line),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: FdColors.line),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide:
+                  const BorderSide(color: FdColors.primary, width: 1.6),
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+}
+
+class _SwitchRow extends StatelessWidget {
+  final bool ur;
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _SwitchRow({
+    required this.ur,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label,
+                style: FdType.body(ur,
+                    size: 15.5,
+                    w: FontWeight.w600,
+                    color: FdColors.ink)),
+          ),
+          Switch(
+            value: value,
+            activeThumbColor: FdColors.primary,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Specialty dropdown that also accepts the stored free-text value.
+class _SpecialtyDrop extends ConsumerWidget {
+  final bool ur;
+  final String? value;
+  final String fallback;
+  final ValueChanged<String?> onChanged;
+
+  const _SpecialtyDrop({
+    required this.ur,
+    required this.value,
+    required this.fallback,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<List<String>>(
+      stream: ref.read(repositoryProvider).watchSpecialties(),
+      builder: (context, snap) {
+        final items = snap.data ?? const <String>[];
+        final effective =
+            (value != null && items.contains(value)) ? value : null;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _Cap(ur: ur, label: tr(ref, 'admin.specialization')),
+            DropdownButtonFormField<String>(
+              value: effective,
+              hint: Text(
+                  fallback.isEmpty
+                      ? tr(ref, 'admin.specialization')
+                      : fallback,
+                  style: FdType.body(ur,
+                      size: 15.5, color: FdColors.muted)),
+              items: [
+                for (final it in items)
+                  DropdownMenuItem(value: it, child: Text(it))
+              ],
+              onChanged: onChanged,
+              style:
+                  FdType.body(ur, size: 15.5, color: FdColors.ink),
+              icon: const Icon(Icons.keyboard_arrow_down,
+                  color: FdColors.ink),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: FdColors.bg,
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide:
+                      const BorderSide(color: FdColors.line),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide:
+                      const BorderSide(color: FdColors.line),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// City dropdown with free-text fallback.
+class _CityDrop extends ConsumerWidget {
+  final bool ur;
+  final String? value;
+  final String fallback;
+  final ValueChanged<String?> onChanged;
+
+  const _CityDrop({
+    required this.ur,
+    required this.value,
+    required this.fallback,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<List<String>>(
+      stream: ref.read(repositoryProvider).watchCities(),
+      builder: (context, snap) {
+        final items = snap.data ?? const <String>[];
+        final effective =
+            (value != null && items.contains(value)) ? value : null;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _Cap(ur: ur, label: tr(ref, 'admin.city')),
+            DropdownButtonFormField<String>(
+              value: effective,
+              hint: Text(
+                  fallback.isEmpty
+                      ? tr(ref, 'admin.city')
+                      : fallback,
+                  style: FdType.body(ur,
+                      size: 15.5, color: FdColors.muted)),
+              items: [
+                for (final it in items)
+                  DropdownMenuItem(value: it, child: Text(it))
+              ],
+              onChanged: onChanged,
+              style:
+                  FdType.body(ur, size: 15.5, color: FdColors.ink),
+              icon: const Icon(Icons.keyboard_arrow_down,
+                  color: FdColors.ink),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: FdColors.bg,
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide:
+                      const BorderSide(color: FdColors.line),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide:
+                      const BorderSide(color: FdColors.line),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Departments chips editor (hospital).
+class _DepartmentsEditor extends ConsumerStatefulWidget {
+  final bool ur;
+  final List<String> items;
+  final ValueChanged<List<String>> onChanged;
+
+  const _DepartmentsEditor({
+    required this.ur,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  ConsumerState<_DepartmentsEditor> createState() =>
+      _DepartmentsEditorState();
+}
+
+class _DepartmentsEditorState
+    extends ConsumerState<_DepartmentsEditor> {
+  final _ctrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final repo = ref.watch(repositoryProvider);
-    return Scaffold(
-      appBar: AppBar(title: Text(tr(ref, 'doctorStats'))),
-      body: FutureBuilder<Doctor?>(
-        key: ValueKey(_refresh),
-        future: repo.getDoctor(widget.doctorId),
-        builder: (context, snap) {
-          if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final d = snap.data;
-          if (d == null) return Center(child: Text(tr(ref, 'error')));
-          if (!_leaveInit) {
-            _leaveCtrl.text = d.leaveTill ?? '';
-            _leaveInit = true;
-          }
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Text(
-                d.name,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _Cap(ur: widget.ur, label: tr(ref, 'admin.departments')),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (var i = 0; i < widget.items.length; i++)
+              Container(
+                decoration: BoxDecoration(
+                  color: FdColors.mint,
+                  borderRadius:
+                      BorderRadius.circular(FdDim.pillRadius),
+                ),
+                padding: const EdgeInsets.only(
+                    left: 14, right: 6, top: 8, bottom: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(widget.items[i],
+                        style: FdType.body(widget.ur,
+                            size: 14,
+                            w: FontWeight.w600,
+                            color: FdColors.ink)),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () {
+                        final next =
+                            List<String>.of(widget.items)
+                              ..removeAt(i);
+                        widget.onChanged(next);
+                      },
+                      child: const Icon(Icons.close,
+                          color: FdColors.muted, size: 18),
                     ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              FutureBuilder<Map<String, int>>(
-                future: repo.getWeeklyStats(widget.doctorId),
-                builder: (context, ssnap) {
-                  final stats = ssnap.data ?? const <String, int>{};
-                  final views = stats['views'] ?? 0;
-                  final clicks = stats['whatsapp'] ?? 0;
-                  return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        '$views ${tr(ref, 'profileViews')}, '
-                        '$clicks ${tr(ref, 'whatsappClicks')} '
-                        '${tr(ref, 'thisWeek')}',
-                        style: const TextStyle(fontSize: 15),
-                      ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 50,
+                child: TextField(
+                  controller: _ctrl,
+                  style: FdType.body(widget.ur,
+                      size: 15, color: FdColors.ink),
+                  decoration: InputDecoration(
+                    hintText: tr(ref, 'admin.departmentsHint'),
+                    hintStyle: FdType.body(widget.ur,
+                        size: 15, color: FdColors.muted),
+                    filled: true,
+                    fillColor: FdColors.bg,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide:
+                          const BorderSide(color: FdColors.line),
                     ),
-                  );
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide:
+                          const BorderSide(color: FdColors.line),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              height: 50,
+              child: FdButton(
+                label: tr(ref, 'admin.add'),
+                isUrdu: widget.ur,
+                onTap: () {
+                  final v = _ctrl.text.trim();
+                  if (v.isEmpty ||
+                      widget.items.contains(v)) return;
+                  widget.onChanged([...widget.items, v]);
+                  _ctrl.clear();
                 },
               ),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => RegisterEntityScreen(
-                      kind: EntityKind.doctor,
-                      doctor: d,
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+}
+
+/// Tests & prices editor (lab).
+class _TestsEditor extends ConsumerStatefulWidget {
+  final bool ur;
+  final List<LabTestPrice> tests;
+  final ValueChanged<List<LabTestPrice>> onChanged;
+
+  const _TestsEditor({
+    required this.ur,
+    required this.tests,
+    required this.onChanged,
+  });
+
+  @override
+  ConsumerState<_TestsEditor> createState() => _TestsEditorState();
+}
+
+class _TestsEditorState extends ConsumerState<_TestsEditor> {
+  final _name = TextEditingController();
+  final _price = TextEditingController();
+  String? _category;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _price.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        border: Border.all(color: FdColors.line),
+      ),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 6),
+            child: Text(tr(ref, 'admin.tests'),
+                style: FdType.title(widget.ur, size: 18)),
+          ),
+          for (var i = 0; i < widget.tests.length; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Text(widget.tests[i].test,
+                            style: FdType.body(widget.ur,
+                                size: 15,
+                                w: FontWeight.w600,
+                                color: FdColors.ink)),
+                        Text(
+                            '${widget.tests[i].category} · Rs ${widget.tests[i].price}',
+                            style: FdType.body(widget.ur,
+                                size: 13,
+                                color: FdColors.muted)),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline,
+                        color: FdColors.redInk, size: 22),
+                    onPressed: () {
+                      final next =
+                          List<LabTestPrice>.of(widget.tests)
+                            ..removeAt(i);
+                      widget.onChanged(next);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          const Divider(color: FdColors.line),
+          _Cap(ur: widget.ur, label: tr(ref, 'admin.addTest')),
+          TextField(
+            controller: _name,
+            style: FdType.body(widget.ur,
+                size: 15, color: FdColors.ink),
+            decoration: InputDecoration(
+              hintText: tr(ref, 'admin.testName'),
+              hintStyle: FdType.body(widget.ur,
+                  size: 15, color: FdColors.muted),
+              filled: true,
+              fillColor: FdColors.bg,
+              contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide:
+                    const BorderSide(color: FdColors.line),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide:
+                    const BorderSide(color: FdColors.line),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: StreamBuilder<List<String>>(
+                  stream: ref
+                      .read(repositoryProvider)
+                      .watchTestCategories(),
+                  builder: (context, snap) {
+                    final cats =
+                        snap.data ?? const <String>[];
+                    return DropdownButtonFormField<String>(
+                      value: _category,
+                      hint: Text(tr(ref, 'admin.category'),
+                          style: FdType.body(widget.ur,
+                              size: 15,
+                              color: FdColors.muted)),
+                      items: [
+                        for (final c in cats)
+                          DropdownMenuItem(
+                              value: c, child: Text(c))
+                      ],
+                      onChanged: (v) =>
+                          setState(() => _category = v),
+                      style: FdType.body(widget.ur,
+                          size: 15, color: FdColors.ink),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: FdColors.bg,
+                        contentPadding:
+                            const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14),
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                              color: FdColors.line),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                              color: FdColors.line),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: _price,
+                  keyboardType: TextInputType.number,
+                  style: FdType.body(widget.ur,
+                      size: 15, color: FdColors.ink),
+                  decoration: InputDecoration(
+                    hintText: tr(ref, 'admin.price'),
+                    hintStyle: FdType.body(widget.ur,
+                        size: 15, color: FdColors.muted),
+                    filled: true,
+                    fillColor: FdColors.bg,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide:
+                          const BorderSide(color: FdColors.line),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide:
+                          const BorderSide(color: FdColors.line),
                     ),
                   ),
                 ),
-                icon: const Icon(Icons.edit),
-                label: Text(tr(ref, 'edit')),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _leaveCtrl,
-                decoration: InputDecoration(
-                  labelText: tr(ref, 'leaveTillHint'),
-                ),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: _saveLeave,
-                child: Text(tr(ref, 'save')),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        DoctorDetailScreen(doctorId: widget.doctorId),
-                  ),
-                ),
-                icon: const Icon(Icons.visibility_outlined),
-                // No 'preview' l10n key exists; falls back to the key text.
-                label: Text(tr(ref, 'preview')),
               ),
             ],
-          );
-        },
+          ),
+          const SizedBox(height: 10),
+          FdButton(
+            label: tr(ref, 'admin.addTest'),
+            isUrdu: widget.ur,
+            onTap: () {
+              final t = _name.text.trim();
+              final p = int.tryParse(_price.text.trim()) ?? 0;
+              if (t.isEmpty) return;
+              widget.onChanged([
+                ...widget.tests,
+                LabTestPrice(
+                    test: t, category: _category ?? '', price: p)
+              ]);
+              _name.clear();
+              _price.clear();
+              setState(() => _category = null);
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
       ),
     );
   }

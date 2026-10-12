@@ -18,6 +18,7 @@ import '../models/lab.dart';
 import '../models/model_utils.dart';
 import '../models/review.dart';
 import 'repository.dart';
+import 'seed_loader.dart';
 
 /// Fallback config lists, kept in sync with seeds.dart defaults.
 const List<String> _fallbackCities = [
@@ -99,6 +100,47 @@ class FirestoreRepository implements FauridocRepository {
     json['verified'] = false;
     await col.doc(id).set(json);
     return id;
+  }
+
+  /// One-time import of the bundled research seed data (admin action).
+  /// Writes doctors/labs/hospitals with their researched ids so re-imports
+  /// overwrite rather than duplicate. Returns counts per collection.
+  Future<Map<String, int>> importSeedBundle(SeedBundle bundle) async {
+    var batch = _db.batch();
+    var ops = 0;
+    Future<void> flush() async {
+      if (ops > 0) {
+        await batch.commit();
+        batch = _db.batch();
+        ops = 0;
+      }
+    }
+
+    for (final d in bundle.doctors) {
+      batch.set(_doctors.doc(d.id), d.toJson(), SetOptions(merge: true));
+      if (++ops >= 400) await flush();
+    }
+    for (final l in bundle.labs) {
+      batch.set(_labs.doc(l.id), l.toJson(), SetOptions(merge: true));
+      if (++ops >= 400) await flush();
+    }
+    for (final h in bundle.hospitals) {
+      batch.set(_hospitals.doc(h.id), h.toJson(), SetOptions(merge: true));
+      if (++ops >= 400) await flush();
+    }
+    await flush();
+    if (bundle.cities.isNotEmpty) {
+      await _db.collection('config').doc('lists').set({
+        'cities': bundle.cities,
+        'specialties': bundle.specialties,
+        'testCategories': bundle.testCategories,
+      }, SetOptions(merge: true));
+    }
+    return {
+      'doctors': bundle.doctors.length,
+      'labs': bundle.labs.length,
+      'hospitals': bundle.hospitals.length,
+    };
   }
 
   /// Toggles the current entity doc between approved (verified too) and rejected.
