@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "440522051923",
+    "project_id": "fauridoc-b24a5",
+    "storage_bucket": "fauridoc-b24a5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:440522051923:android:fc8ad73b279e11591951a6",
+        "android_client_info": {
+          "package_name": "com.afzal.fauridoc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9JL0NI7lFajWs3AWbUHryS4vXzIlWfSQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
