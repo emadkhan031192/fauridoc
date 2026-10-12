@@ -26,6 +26,27 @@ android {
         versionName = flutter.versionName
     }
 
+    // Pinned debug keystore (CI): when the FAURIDOC_DEBUG_KEYSTORE_FILE env
+    // var points at a keystore, the debug signing config uses it instead of
+    // the default ~/.android/debug.keystore. This keeps the SHA-1 stable
+    // across CI runs so Google Sign-In keeps working on debug builds.
+    // Local builds without the env var are unaffected.
+    signingConfigs {
+        named("debug") {
+            val ksFile = System.getenv("FAURIDOC_DEBUG_KEYSTORE_FILE")
+            val ksPass = System.getenv("FAURIDOC_DEBUG_KEYSTORE_PASSWORD")
+            val ksAlias = System.getenv("FAURIDOC_DEBUG_KEY_ALIAS")
+            if (!ksFile.isNullOrEmpty() && !ksPass.isNullOrEmpty() &&
+                !ksAlias.isNullOrEmpty() && file(ksFile).exists()
+            ) {
+                storeFile = file(ksFile)
+                storePassword = ksPass
+                keyAlias = ksAlias
+                keyPassword = ksPass
+            }
+        }
+    }
+
     buildTypes {
         debug {
             // Debug builds skip shrinking for speed.

@@ -31,7 +31,22 @@ jobs:
       - name: Test
         run: flutter test
 
+      - name: Prepare pinned debug keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.FAURIDOC_DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > android/app/fauridoc-debug.key.jks
+            echo "pinned debug keystore restored"
+          else
+            echo "no pinned keystore secret; using default debug signing"
+          fi
+
       - name: Build debug APKs (per ABI)
+        env:
+          FAURIDOC_DEBUG_KEYSTORE_FILE: ${{ github.workspace }}/android/app/fauridoc-debug.key.jks
+          FAURIDOC_DEBUG_KEYSTORE_PASSWORD: ${{ secrets.FAURIDOC_DEBUG_KEYSTORE_PASSWORD }}
+          FAURIDOC_DEBUG_KEY_ALIAS: ${{ secrets.FAURIDOC_DEBUG_KEY_ALIAS }}
         run: flutter build apk --debug --split-per-abi
 
       - name: Upload APKs
