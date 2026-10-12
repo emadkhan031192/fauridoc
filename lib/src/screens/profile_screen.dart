@@ -91,7 +91,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   );
                   await ref.read(repositoryProvider).upsertUser(updated);
                   // Keep the auth state + demo prefs in sync.
-                  ref.read(authProvider.notifier).state = updated;
+                  ref.read(authProvider.notifier).updateCurrentUser(updated);
                   if (ref.read(authProvider.notifier).isDemoBackend) {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setString('demo_name', updated.name);
@@ -111,7 +111,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final ur = fdIsUrdu(ref.watch(localeProvider));
     final user = ref.watch(authProvider);
 

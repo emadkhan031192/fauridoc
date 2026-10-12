@@ -198,6 +198,12 @@ const Map<String, String> enD = {
   'admin.category': 'Category',
   'admin.price': 'Price (Rs)',
   'admin.addTest': 'Add test',
+  'admin.importSeedsTitle': 'Seed data',
+  'admin.importSeedsBody':
+      'Copy the researched KP directory (189 doctors, 14 labs, 21 hospitals) into this Firebase project. Safe to re-run — it overwrites by ID, never duplicates.',
+  'admin.importSeeds': 'Import seed data',
+  'admin.importing': 'Importing…',
+  'admin.imported': 'Imported {d} doctors, {l} labs, {h} hospitals.',
   'admin.save': 'Save changes',
   'admin.deleteRecord': 'Delete record',
 };
@@ -387,6 +393,12 @@ const Map<String, String> urD = {
   'admin.category': 'کیٹیگری',
   'admin.price': 'قیمت (روپے)',
   'admin.addTest': 'ٹیسٹ شامل کریں',
+  'admin.importSeedsTitle': 'سیڈ ڈیٹا',
+  'admin.importSeedsBody':
+      'تحقیق شدہ KP ڈائریکٹری (189 ڈاکٹر، 14 لیبز، 21 ہسپتال) اس Firebase پروجیکٹ میں کاپی کریں۔ دوبارہ چلانا محفوظ ہے — ID کے حساب سے اوور رائٹ ہوتا ہے، ڈپلیکیٹ نہیں بنتا۔',
+  'admin.importSeeds': 'سیڈ ڈیٹا امپورٹ کریں',
+  'admin.importing': 'امپورٹ ہو رہا ہے…',
+  'admin.imported': '{d} ڈاکٹر، {l} لیبز، {h} ہسپتال امپورٹ ہو گئے۔',
   'admin.save': 'تبدیلیاں محفوظ کریں',
   'admin.deleteRecord': 'ریکارڈ ڈیلیٹ کریں',
 };

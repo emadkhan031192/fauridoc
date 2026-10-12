@@ -233,7 +233,7 @@ class _OnboardingArt extends StatelessWidget {
                 // Star dots + rating pill.
                 Row(
                   children: [
-                    for (var i = 0; i < 4)
+                    for (var i = 0; i < 4; i++)
                       Container(
                         width: 16,
                         height: 16,

@@ -208,7 +208,7 @@ class _RegisterEntityScreenState
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final ur = fdIsUrdu(ref.watch(localeProvider));
     final user = ref.watch(authProvider);
 
@@ -434,6 +434,7 @@ class _TypeTabs extends StatelessWidget {
                       ),
                     ),
                   ),
+                ),
             ],
           ),
         );

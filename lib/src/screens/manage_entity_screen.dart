@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../l10n/strings.dart';
 import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/lab.dart';
@@ -235,7 +234,7 @@ class _ManageEntityScreenState
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final ur = fdIsUrdu(ref.watch(localeProvider));
     return Scaffold(
       appBar: AppBar(

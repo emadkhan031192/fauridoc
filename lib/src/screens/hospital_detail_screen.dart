@@ -35,7 +35,7 @@ class _HospitalDetailScreenState
   Widget build(BuildContext context) {
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
-    final pos = ref.watch(userLocationProvider).valueOrNull;
+    final pos = ref.watch(userLocationProvider).value;
 
     return Scaffold(
       backgroundColor: FdColors.bg,

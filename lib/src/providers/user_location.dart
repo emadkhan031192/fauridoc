@@ -13,7 +13,7 @@ final userLocationProvider = FutureProvider<Position?>((ref) async {
         perm == LocationPermission.deniedForever) {
       return null;
     }
-    return Geolocator.getCurrentPosition(
+    return await Geolocator.getCurrentPosition(
       timeLimit: const Duration(seconds: 8),
     );
   } catch (_) {

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/strings.dart';
+import '../data/firestore_repository.dart';
+import '../data/seed_loader.dart';
 import '../models/app_user.dart';
 import '../models/doctor.dart';
 import '../models/hospital.dart';
@@ -122,6 +124,10 @@ class AdminPanelScreen extends ConsumerWidget {
             watch: repo.watchTestCategories,
             save: repo.setTestCategories,
           ),
+          if (!repo.isDemo) ...[
+            const SizedBox(height: 26),
+            _SeedImportCard(ur: ur),
+          ],
         ],
       ),
     );
@@ -535,25 +541,23 @@ class _TileIcon extends StatelessWidget {
   final Color bg;
   final IconData icon;
   final Color iconColor;
-  final double size;
 
   const _TileIcon({
     required this.bg,
     required this.icon,
     required this.iconColor,
-    this.size = 58,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size,
-      height: size,
+      width: 58,
+      height: 58,
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(size * 0.3),
+        borderRadius: BorderRadius.circular(58 * 0.3),
       ),
-      child: Icon(icon, color: iconColor, size: size * 0.5),
+      child: Icon(icon, color: iconColor, size: 58 * 0.5),
     );
   }
 }
@@ -613,7 +617,7 @@ class _SearchSectionState<T>
         StreamBuilder<List<T>>(
           stream: widget.stream(),
           builder: (context, snap) {
-            final all = snap.data ?? const <T>[];
+            final all = snap.data ?? <T>[];
             final items = _q.isEmpty
                 ? all
                 : all
@@ -876,5 +880,72 @@ class _ListEditorState extends ConsumerState<_ListEditor> {
         ],
       ),
     );
+  }
+}
+
+/// One-time import of the bundled research seeds into Firestore.
+/// Visible only in Firestore mode (demo mode already ships the seeds).
+class _SeedImportCard extends ConsumerStatefulWidget {
+  final bool ur;
+  const _SeedImportCard({required this.ur});
+
+  @override
+  ConsumerState<_SeedImportCard> createState() => _SeedImportCardState();
+}
+
+class _SeedImportCardState extends ConsumerState<_SeedImportCard> {
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final ur = widget.ur;
+    return Container(
+      decoration: BoxDecoration(
+        color: FdColors.mint,
+        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(tr(ref, 'admin.importSeedsTitle'),
+              style: FdType.title(ur, size: 18)),
+          const SizedBox(height: 8),
+          Text(tr(ref, 'admin.importSeedsBody'),
+              style: FdType.body(ur, size: 14)),
+          const SizedBox(height: 16),
+          FdButton(
+            label: _busy
+                ? tr(ref, 'admin.importing')
+                : tr(ref, 'admin.importSeeds'),
+            isUrdu: ur,
+            onTap: _busy ? null : _run,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _run() async {
+    setState(() => _busy = true);
+    try {
+      final repo = ref.read(repositoryProvider);
+      final bundle = await loadSeedBundle();
+      final counts = await (repo as FirestoreRepository).importSeedBundle(bundle);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(fill(tr(ref, 'admin.imported'), {
+          'd': '${counts['doctors']}',
+          'l': '${counts['labs']}',
+          'h': '${counts['hospitals']}',
+        })),
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 }

@@ -80,11 +80,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               stream: ref.watch(repositoryProvider).watchHospitals(city: city),
               builder: (context, hSnap) {
                 final doctors = _filtered(
-                    dSnap.data ?? const [], _PinType.doctors);
+                    dSnap.data ?? <Doctor>[], _PinType.doctors);
                 final labs =
-                    _filtered(lSnap.data ?? const [], _PinType.labs);
+                    _filtered(lSnap.data ?? <Lab>[], _PinType.labs);
                 final hospitals = _filtered(
-                    hSnap.data ?? const [], _PinType.hospitals);
+                    hSnap.data ?? <Hospital>[], _PinType.hospitals);
                 _ensureSelection(doctors, labs, hospitals);
                 return Stack(
                   children: [
@@ -504,7 +504,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (_selKind == null || _selId == null) {
       return const SizedBox.shrink();
     }
-    final pos = ref.watch(userLocationProvider).valueOrNull;
+    final pos = ref.watch(userLocationProvider).value;
     late final String name;
     late final String sub;
     late final String ratingLine;

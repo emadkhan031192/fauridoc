@@ -42,7 +42,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final ur = fdIsUrdu(ref.watch(localeProvider));
     final repo = ref.watch(repositoryProvider);
 

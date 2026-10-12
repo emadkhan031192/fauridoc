@@ -265,4 +265,9 @@ class AuthController extends Notifier<AppUser?> {
       _backend!.verifyPhoneCode(verificationId, smsCode, name: name);
 
   Future<void> signOut() => _backend!.signOut();
+
+  /// Replace the signed-in user object (e.g. after a profile edit).
+  void updateCurrentUser(AppUser user) {
+    if (state?.uid == user.uid) state = user;
+  }
 }
