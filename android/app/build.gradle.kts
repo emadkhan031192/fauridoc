@@ -34,6 +34,10 @@ android {
             // when publishing to the Play Store.
             signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
+            // The Flutter Gradle plugin enables resource shrinking on release
+            // by default; it requires code shrinking, which we skip, so turn
+            // it off explicitly.
+            isShrinkResources = false
         }
     }
 
