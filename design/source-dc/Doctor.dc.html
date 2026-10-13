@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Doctor profile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F5F7F6}
+button{font-family:inherit}
+a{text-decoration:none;color:inherit}
+.noscroll{scrollbar-width:none}
+.noscroll::-webkit-scrollbar{display:none}
+.press{transition:transform .08s ease-out;-webkit-tap-highlight-color:transparent}
+.press:active{transform:scale(.97)}
+.press:focus-visible{outline:2px solid #0B6B5C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F5F7F6;color:#0F2A2E;font-family:'Albert Sans',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden">
+
+  <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto">
+    <div style="position:relative;height:196px;background:#FFE6D2;display:flex;align-items:center;justify-content:center">
+      <span style="font-size:84px;font-weight:800;letter-spacing:-.03em;color:#8A3F00;opacity:.28">SY</span>
+      <a href="Main.dc.html" class="press" aria-label="Back" style="position:absolute;left:14px;top:48px;width:44px;height:44px;border-radius:22px;background:#fff;color:#0F2A2E;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(15,42,46,.18)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+      </a>
+      <button class="press" aria-label="Save this doctor" style="position:absolute;right:14px;top:48px;width:44px;height:44px;border:0;border-radius:22px;background:#fff;color:#0F2A2E;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(15,42,46,.18);padding:0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v17l-6-4-6 4z"></path></svg>
+      </button>
+    </div>
+
+    <div style="padding:16px 20px 24px">
+      <div style="display:flex;align-items:center;gap:7px">
+        <h1 style="margin:0;font-size:25px;line-height:1.15;font-weight:800;letter-spacing:-.02em">Dr. Sana Yousafzai</h1>
+        <svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Verified by Fauridoc" style="flex:none"><circle cx="12" cy="12" r="11" fill="#0B6B5C"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <div style="margin-top:4px;font-size:15px;font-weight:600;color:#0B6B5C">Gynecologist</div>
+      <div style="margin-top:2px;font-size:14px;font-weight:500;color:#566B68">MBBS, FCPS (Gynecology and Obstetrics)</div>
+
+      <a href="Reviews.dc.html" class="press" style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;height:36px;padding:0 12px 0 10px;border-radius:18px;background:#fff;border:1px solid #E1E7E4;font-size:14px;font-weight:700">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>
+        4.9<span style="font-weight:500;color:#566B68">·  186 reviews</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#566B68" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+      </a>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;border-radius:16px;background:#E4F3EF">
+        <span style="flex:none;width:12px;height:12px;border-radius:50%;background:#1FA463;box-shadow:0 0 0 4px rgba(31,164,99,.2)"></span>
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+          <span style="font-size:15px;font-weight:800;color:#0B5446">Currently: Open</span>
+          <span style="font-size:13px;font-weight:500;color:#2F6A5E">Sees patients until 8 PM today</span>
+        </span>
+        <span style="flex:none;font-size:12px;font-weight:700;color:#0B5446">Updated by doctor</span>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <div style="flex:1;padding:12px 14px;border-radius:16px;background:#fff;border:1px solid #E1E7E4;display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:12px;font-weight:600;color:#566B68">Consultation fee</span>
+          <span style="font-size:18px;font-weight:800">Rs 1,500</span>
+        </div>
+        <div style="flex:1;padding:12px 14px;border-radius:16px;background:#fff;border:1px solid #E1E7E4;display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:12px;font-weight:600;color:#566B68">Parking</span>
+          <span style="font-size:18px;font-weight:800">Available</span>
+        </div>
+      </div>
+
+      <h2 style="margin:22px 0 10px;font-size:17px;font-weight:800">Clinic photos</h2>
+      <div style="display:flex;gap:8px">
+        <span style="flex:1;height:84px;border-radius:12px;background:#DDF0EA;display:flex;align-items:flex-end;padding:8px;font-size:11px;font-weight:700;color:#0B5446">Reception</span>
+        <span style="flex:1;height:84px;border-radius:12px;background:#E3E9FF;display:flex;align-items:flex-end;padding:8px;font-size:11px;font-weight:700;color:#2B3F9E">Waiting area</span>
+        <span style="flex:1;height:84px;border-radius:12px;background:#F8E1EC;display:flex;align-items:flex-end;padding:8px;font-size:11px;font-weight:700;color:#8E2A57">Consulting room</span>
+      </div>
+
+      <h2 style="margin:22px 0 6px;font-size:17px;font-weight:800">Clinic</h2>
+      <div style="display:flex;flex-direction:column;background:#fff;border:1px solid #E1E7E4;border-radius:16px;padding:0 14px">
+        <sc-for list="{{info}}" as="r" hint-placeholder-count="5">
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #EEF1F0">
+            <span style="flex:none;width:92px;font-size:13px;font-weight:600;color:#566B68">{{r.k}}</span>
+            <span style="flex:1;min-width:0;font-size:14px;font-weight:600;line-height:1.35">{{r.v}}</span>
+          </div>
+        </sc-for>
+        <div style="display:flex;gap:12px;padding:12px 0">
+          <span style="flex:none;width:92px;font-size:13px;font-weight:600;color:#566B68">Languages</span>
+          <span style="flex:1;display:flex;flex-wrap:wrap;gap:6px">
+            <span style="padding:3px 10px;border-radius:11px;background:#EEF1F0;font-size:13px;font-weight:600">Pashto</span>
+            <span style="padding:3px 10px;border-radius:11px;background:#EEF1F0;font-size:13px;font-weight:600">Urdu</span>
+            <span style="padding:3px 10px;border-radius:11px;background:#EEF1F0;font-size:13px;font-weight:600">English</span>
+          </span>
+        </div>
+      </div>
+
+      <h2 style="margin:22px 0 6px;font-size:17px;font-weight:800">Working hours</h2>
+      <div style="display:flex;flex-direction:column;background:#fff;border:1px solid #E1E7E4;border-radius:16px;padding:4px 14px">
+        <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+          <div style="display:flex;align-items:center;justify-content:space-between;height:40px;border-bottom:1px solid {{d.line}}">
+            <span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:{{d.weight}};color:{{d.color}}">{{d.day}}<sc-if value="{{d.today}}" hint-placeholder-val="{{ false }}"><span style="padding:1px 8px;border-radius:9px;background:#0B6B5C;color:#fff;font-size:11px;font-weight:700">Today</span></sc-if></span>
+            <span style="font-size:14px;font-weight:{{d.weight}};color:{{d.color}}">{{d.hours}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px">
+        <h2 style="margin:0;font-size:17px;font-weight:800">What patients say</h2>
+        <a href="Reviews.dc.html" style="font-size:14px;font-weight:700;color:#0B6B5C;display:flex;align-items:center;height:44px">See all 186</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="padding:12px 14px;border-radius:16px;background:#fff;border:1px solid #E1E7E4;display:flex;flex-direction:column;gap:4px">
+          <span style="display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:700">Rabia K.<span style="display:flex;gap:1px"><svg width="13" height="13" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg><span style="font-size:13px;font-weight:700;margin-left:3px">5.0</span></span></span>
+          <span style="font-size:14px;font-weight:500;line-height:1.45;color:#2E4744">Listened properly and explained everything in Pashto. Waiting time was short.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:none;box-sizing:border-box;padding:10px 16px 26px;background:#fff;border-top:1px solid #E1E7E4;display:flex;gap:10px">
+    <a href="Profile.dc.html" class="press" style="flex:1.3;display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:16px;background:#0B6B5C;color:#fff;font-size:15px;font-weight:700">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>
+      Call
+    </a>
+    <a href="Profile.dc.html" class="press" style="flex:1.6;display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:16px;border:1.5px solid #0B6B5C;background:#fff;color:#0B6B5C;font-size:15px;font-weight:700">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.6z"></path></svg>
+      WhatsApp
+    </a>
+    <a href="Map.dc.html" class="press" aria-label="View on map" style="flex:none;display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:16px;border:1.5px solid #E1E7E4;background:#fff;color:#0F2A2E">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hours = [['Monday', '5 PM – 8 PM'], ['Tuesday', '5 PM – 8 PM'], ['Wednesday', '5 PM – 8 PM'], ['Thursday', '5 PM – 8 PM'], ['Friday', 'Closed'], ['Saturday', '10 AM – 2 PM'], ['Sunday', 'Closed']];
+    return {
+      info: [
+        { k: 'Clinic', v: 'Sana Women’s Clinic' },
+        { k: 'Address', v: 'Hospital Road, near the main chowk, Mardan' },
+        { k: 'Phone', v: '0937 XXX XXX' },
+        { k: 'WhatsApp', v: '03XX XXXXXXX' }
+      ],
+      days: hours.map((h, i) => ({
+        day: h[0], hours: h[1], today: i === 0,
+        weight: i === 0 ? 800 : 500,
+        color: h[1] === 'Closed' ? '#8A9A96' : '#0F2A2E',
+        line: i === 6 ? 'transparent' : '#EEF1F0'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

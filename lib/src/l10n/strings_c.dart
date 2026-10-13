@@ -30,6 +30,8 @@ const Map<String, String> enC = {
   'doc.saved': 'Saved to your list',
   'doc.unsaved': 'Removed from saved',
   'doc.backOn': 'Back {date}',
+  'doc.whatPatientsSay': 'What patients say',
+  'doc.seeAllReviews': 'See all {n}',
   // ---- lab detail ----
   'lab.clinicalLab': 'Clinical laboratory',
   'lab.away': '{d} away',
@@ -41,6 +43,9 @@ const Map<String, String> enC = {
   'lab.all': 'All',
   'lab.viewOnMap': 'View on Map',
   'lab.noTests': 'No tests found.',
+  'lab.showAllTests': 'Show all {n} tests',
+  'lab.priceDisclaimer':
+      'Prices are entered by the lab and may change. Call to confirm before you go.',
   // ---- hospital detail ----
   'hosp.hospital': 'Hospital',
   'hosp.away': '{d} away',
@@ -51,6 +56,8 @@ const Map<String, String> enC = {
   'hosp.emergency': 'Emergency',
   'hosp.callEmergency': 'Call emergency',
   'hosp.directions': 'Directions',
+  'hosp.opd': 'OPD',
+  'hosp.location': 'Location',
   // ---- map ----
   'map.all': 'All',
   'map.doctors': 'Doctors',
@@ -84,6 +91,9 @@ const Map<String, String> enC = {
   'rev.delete': 'Delete',
   'rev.cancel': 'Cancel',
   'rev.deleted': 'Review deleted.',
+  'rev.youReviewed': 'You reviewed {name}',
+  'rev.reviewedNote':
+      'Thank you. The average rating has been updated. You can edit or delete your review, but not add a second one.',
   // ---- community ----
   'com.title': 'Community',
   'com.ask': 'Ask',
@@ -111,6 +121,7 @@ const Map<String, String> enC = {
   'com.cancel': 'Cancel',
   'com.deleted': 'Deleted.',
   'com.fillTitle': 'Please write a question title.',
+  'com.more': 'More',
 };
 
 const Map<String, String> urC = {
@@ -141,6 +152,8 @@ const Map<String, String> urC = {
   'doc.saved': 'آپ کی فہرست میں محفوظ ہو گیا',
   'doc.unsaved': 'محفوظ فہرست سے ہٹا دیا گیا',
   'doc.backOn': 'واپسی {date}',
+  'doc.whatPatientsSay': 'مریض کیا کہتے ہیں',
+  'doc.seeAllReviews': 'تمام {n} جائزے دیکھیں',
   // ---- lab detail ----
   'lab.clinicalLab': 'کلینیکل لیبارٹری',
   'lab.away': '{d} کی دوری پر',
@@ -152,6 +165,9 @@ const Map<String, String> urC = {
   'lab.all': 'سب',
   'lab.viewOnMap': 'نقشے پر دیکھیں',
   'lab.noTests': 'کوئی ٹیسٹ نہیں ملا۔',
+  'lab.showAllTests': 'تمام {n} ٹیسٹ دکھائیں',
+  'lab.priceDisclaimer':
+      'قیمتیں لیب کی طرف سے درج کی جاتی ہیں اور تبدیل ہو سکتی ہیں۔ جانے سے پہلے کال کر کے تصدیق کریں۔',
   // ---- hospital detail ----
   'hosp.hospital': 'ہسپتال',
   'hosp.away': '{d} کی دوری پر',
@@ -162,6 +178,8 @@ const Map<String, String> urC = {
   'hosp.emergency': 'ایمرجنسی',
   'hosp.callEmergency': 'ایمرجنسی کال کریں',
   'hosp.directions': 'راستہ دیکھیں',
+  'hosp.opd': 'او پی ڈی',
+  'hosp.location': 'مقام',
   // ---- map ----
   'map.all': 'سب',
   'map.doctors': 'ڈاکٹرز',
@@ -195,6 +213,9 @@ const Map<String, String> urC = {
   'rev.delete': 'حذف کریں',
   'rev.cancel': 'منسوخ کریں',
   'rev.deleted': 'ریویو حذف ہو گیا۔',
+  'rev.youReviewed': 'آپ نے {name} کا جائزہ دیا',
+  'rev.reviewedNote':
+      'شکریہ۔ اوسط ریٹنگ اپ ڈیٹ ہو گئی ہے۔ آپ اپنا جائزہ تبدیل یا حذف کر سکتے ہیں، لیکن دوسرا جائزہ نہیں دے سکتے۔',
   // ---- community ----
   'com.title': 'کمیونٹی',
   'com.ask': 'پوچھیں',
@@ -222,4 +243,5 @@ const Map<String, String> urC = {
   'com.cancel': 'منسوخ کریں',
   'com.deleted': 'حذف ہو گیا۔',
   'com.fillTitle': 'براہ کرم سوال کا عنوان لکھیں۔',
+  'com.more': 'مزید',
 };

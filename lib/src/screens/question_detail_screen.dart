@@ -251,51 +251,53 @@ class _QuestionDetailScreenState
     required int myVote,
     required Future<void> Function(int delta) onVote,
   }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        InkWell(
-          onTap: () => onVote(1),
-          borderRadius: BorderRadius.circular(999),
-          child: Padding(
-            padding: const EdgeInsets.all(2),
-            child: Icon(
-              Icons.keyboard_arrow_up,
-              size: 30,
-              color:
-                  myVote == 1 ? FdColors.primary : FdColors.muted,
+    // Spec: 44px column, 44x36 chevron buttons (22px), 15/800 score.
+    return SizedBox(
+      width: 44,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _FdPress(
+            onTap: () => onVote(1),
+            child: SizedBox(
+              width: 44,
+              height: 36,
+              child: Icon(
+                Icons.keyboard_arrow_up,
+                size: 22,
+                color: myVote == 1
+                    ? FdColors.primary
+                    : const Color(0xFF7B8E8A),
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
-          child: Text(
+          Text(
             '$score',
             style: TextStyle(
               fontFamily: FdType.latin,
-              fontSize: 19,
+              fontSize: 15,
               fontWeight: FontWeight.w800,
               color: myVote != 0
                   ? FdColors.primary
                   : FdColors.ink,
             ),
           ),
-        ),
-        InkWell(
-          onTap: () => onVote(-1),
-          borderRadius: BorderRadius.circular(999),
-          child: Padding(
-            padding: const EdgeInsets.all(2),
-            child: Icon(
-              Icons.keyboard_arrow_down,
-              size: 30,
-              color: myVote == -1
-                  ? FdColors.primary
-                  : FdColors.muted,
+          _FdPress(
+            onTap: () => onVote(-1),
+            child: SizedBox(
+              width: 44,
+              height: 36,
+              child: Icon(
+                Icons.keyboard_arrow_down,
+                size: 22,
+                color: myVote == -1
+                    ? FdColors.primary
+                    : const Color(0xFF7B8E8A),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -306,13 +308,13 @@ class _QuestionDetailScreenState
     final locale = ref.watch(localeProvider);
     final myVote = user == null ? 0 : (q.votes[user.uid] ?? 0);
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.fromLTRB(6, 12, 12, 12),
       decoration: BoxDecoration(
-        color: q.pinned ? FdColors.amberCard : Colors.white,
-        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        color: q.pinned ? const Color(0xFFFFF8EC) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: q.pinned
-              ? FdColors.amberStrong.withValues(alpha: 0.35)
+              ? const Color(0xFFF4D9B2)
               : FdColors.line,
         ),
       ),
@@ -324,7 +326,7 @@ class _QuestionDetailScreenState
             myVote: myVote,
             onVote: _voteQuestion,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,36 +335,37 @@ class _QuestionDetailScreenState
                   Row(
                     children: [
                       const Icon(Icons.push_pin,
-                          size: 16, color: FdColors.amberInk),
-                      const SizedBox(width: 6),
+                          size: 13, color: Color(0xFF8A4B00)),
+                      const SizedBox(width: 5),
                       Expanded(
                         child: Text(
                           tr(ref, 'com.pinnedBy'),
                           style: FdType.body(ur,
-                              size: 14,
+                              size: 12,
                               w: FontWeight.w700,
-                              color: FdColors.amberInk),
+                              color: const Color(0xFF8A4B00)),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                 ],
                 Text(q.title,
                     style: FdType.body(ur,
-                        size: 20,
-                        w: FontWeight.w700,
-                        color: FdColors.ink)),
+                            size: 16,
+                            w: FontWeight.w700,
+                            color: FdColors.ink)
+                        .copyWith(height: FdType.height(ur, 1.3))),
                 if (q.body.trim().isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(q.body,
                       style: FdType.body(ur,
-                          size: 16, color: FdColors.inkSoft)),
+                          size: 14, color: FdColors.inkSoft)),
                 ],
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: 6,
+                  runSpacing: 6,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     if (q.city.trim().isNotEmpty) _tag(q.city),
@@ -371,11 +374,13 @@ class _QuestionDetailScreenState
                     if (q.isDoctor) _doctorPill(ref),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   '${q.userName} · ${_ago(ref, q.createdAt)}',
-                  style:
-                      FdType.body(ur, size: 14, color: FdColors.muted),
+                  style: FdType.body(ur,
+                      size: 12,
+                      w: FontWeight.w500,
+                      color: FdColors.muted),
                 ),
                 if (isAdmin) ...[
                   const SizedBox(height: 8),
@@ -411,18 +416,18 @@ class _QuestionDetailScreenState
   Widget _tag(String label) {
     return Container(
       padding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
       decoration: BoxDecoration(
-        color: FdColors.bg,
-        borderRadius: BorderRadius.circular(FdDim.pillRadius),
+        color: const Color(0xFFEEF1F0),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         label,
         style: const TextStyle(
           fontFamily: FdType.latin,
-          fontSize: 13.5,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: FdColors.inkSoft,
+          color: Color(0xFF2E4744),
         ),
       ),
     );
@@ -431,16 +436,16 @@ class _QuestionDetailScreenState
   Widget _doctorPill(WidgetRef ref) {
     return Container(
       padding:
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
       decoration: BoxDecoration(
         color: FdColors.primary,
-        borderRadius: BorderRadius.circular(FdDim.pillRadius),
+        borderRadius: BorderRadius.circular(9),
       ),
       child: Text(
         tr(ref, 'com.doctor'),
         style: const TextStyle(
           fontFamily: FdType.latin,
-          fontSize: 12.5,
+          fontSize: 11,
           fontWeight: FontWeight.w700,
           color: Colors.white,
         ),
@@ -466,10 +471,10 @@ class _QuestionDetailScreenState
         ? '•'
         : r.userName.trim()[0].toUpperCase();
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(FdDim.bannerRadius),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: FdColors.line),
       ),
       child: Column(
@@ -478,14 +483,14 @@ class _QuestionDetailScreenState
           Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                     color: tint.$1, shape: BoxShape.circle),
                 alignment: Alignment.center,
                 child: Text(initial,
                     style: FdType.body(false,
-                        size: 18, w: FontWeight.w700, color: tint.$2)),
+                        size: 16, w: FontWeight.w700, color: tint.$2)),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -497,19 +502,19 @@ class _QuestionDetailScreenState
                         Flexible(
                           child: Text(r.userName,
                               style: FdType.body(ur,
-                                  size: 15,
+                                  size: 14,
                                   w: FontWeight.w700,
                                   color: FdColors.ink)),
                         ),
                         if (r.isDoctor) ...[
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           _doctorPill(ref),
                         ],
                       ],
                     ),
                     Text(_ago(ref, r.createdAt),
                         style: FdType.body(ur,
-                            size: 13, color: FdColors.muted)),
+                            size: 12, color: FdColors.muted)),
                   ],
                 ),
               ),
@@ -526,10 +531,10 @@ class _QuestionDetailScreenState
                 ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(r.body,
               style:
-                  FdType.body(ur, size: 15.5, color: FdColors.inkSoft)),
+                  FdType.body(ur, size: 14, color: FdColors.inkSoft)),
         ],
       ),
     );
@@ -598,6 +603,41 @@ class _QuestionDetailScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Spec `.press`: scale to 0.97 in 80 ms on press.
+class _FdPress extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _FdPress({required this.child, this.onTap});
+
+  @override
+  State<_FdPress> createState() => _FdPressState();
+}
+
+class _FdPressState extends State<_FdPress> {
+  double _scale = 1;
+
+  void _set(double s) {
+    if (_scale != s) setState(() => _scale = s);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _set(0.97),
+      onTapUp: (_) => _set(1),
+      onTapCancel: () => _set(1),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 80),
+        child: widget.child,
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../design/tokens.dart';
 import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/lab.dart';
@@ -237,163 +238,299 @@ class _ManageEntityScreenState
   Widget build(BuildContext context) {
     final ur = fdIsUrdu(ref.watch(localeProvider));
     return Scaffold(
-      appBar: AppBar(
-          title: Text(_kindTitle, style: FdType.title(ur, size: 22))),
-      body: ListView(
-        padding:
-            const EdgeInsets.fromLTRB(FdDim.page, 8, FdDim.page, 28),
+      body: Column(
         children: [
-          _Card(
-            ur: ur,
-            children: [
-              _Field(
+          _Header(ur: ur, title: _kindTitle),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                  FdDim.page, 4, FdDim.page, 24),
+              children: [
+                _Card(
                   ur: ur,
-                  label: tr(ref, 'admin.name'),
-                  controller: _name,
-                  hint: tr(ref, 'admin.name')),
-              if (widget.doctor != null) ...[
-                _SpecialtyDrop(
-                  ur: ur,
-                  value: _specialtyDrop,
-                  fallback: _specialty.text,
-                  onChanged: (v) => setState(() => _specialtyDrop = v),
+                  children: [
+                    _Field(
+                      ur: ur,
+                      label: tr(ref, 'admin.name'),
+                      controller: _name,
+                      hint: tr(ref, 'admin.name')),
+                    if (widget.doctor != null) ...[
+                      _SpecialtyDrop(
+                        ur: ur,
+                        value: _specialtyDrop,
+                        fallback: _specialty.text,
+                        onChanged: (v) => setState(() => _specialtyDrop = v),
+                      ),
+                      _Field(
+                        ur: ur,
+                        label: tr(ref, 'admin.qualification'),
+                        controller: _qualification,
+                        hint: tr(ref, 'admin.qualification')),
+                      _Field(
+                        ur: ur,
+                        label: tr(ref, 'admin.clinicName'),
+                        controller: _clinicName,
+                        hint: tr(ref, 'admin.clinicName')),
+                    ],
+                    _CityDrop(
+                      ur: ur,
+                      value: _cityDrop,
+                      fallback: _city.text,
+                      onChanged: (v) => setState(() => _cityDrop = v),
+                    ),
+                    _Field(
+                      ur: ur,
+                      label: tr(ref, 'admin.address'),
+                      controller: _address,
+                      hint: tr(ref, 'admin.address'),
+                      maxLines: 2),
+                    _Field(
+                      ur: ur,
+                      label: tr(ref, 'admin.phone'),
+                      controller: _phone,
+                      hint: tr(ref, 'admin.phone'),
+                      keyboardType: TextInputType.phone),
+                    if (widget.doctor != null) ...[
+                      _Field(
+                        ur: ur,
+                        label: tr(ref, 'admin.whatsapp'),
+                        controller: _whatsapp,
+                        hint: tr(ref, 'admin.whatsapp'),
+                        keyboardType: TextInputType.phone),
+                      _Field(
+                        ur: ur,
+                        label: tr(ref, 'admin.fee'),
+                        controller: _fee,
+                        hint: tr(ref, 'admin.fee'),
+                        keyboardType: TextInputType.number),
+                      _Field(
+                        ur: ur,
+                        label: tr(ref, 'admin.hoursText'),
+                        controller: _hoursText,
+                        hint: tr(ref, 'admin.hoursText')),
+                    ],
+                    if (widget.lab != null)
+                    _Field(
+                      ur: ur,
+                      label: tr(ref, 'admin.hoursText'),
+                      controller: _hoursText,
+                      hint: tr(ref, 'admin.hoursText')),
+                    if (widget.hospital != null) ...[
+                      _Field(
+                        ur: ur,
+                        label: tr(ref, 'admin.emergencyPhone'),
+                        controller: _emergencyPhone,
+                        hint: tr(ref, 'admin.emergencyPhone'),
+                        keyboardType: TextInputType.phone),
+                      _Field(
+                        ur: ur,
+                        label: tr(ref, 'admin.visitingHours'),
+                        controller: _visitingHours,
+                        hint: tr(ref, 'admin.visitingHours')),
+                      _SwitchRow(
+                        ur: ur,
+                        label: tr(ref, 'admin.emergency247'),
+                        value: _emergency247,
+                        onChanged: (v) =>
+                        setState(() => _emergency247 = v),
+                      ),
+                      _DepartmentsEditor(
+                        ur: ur,
+                        items: _departments,
+                        onChanged: (v) =>
+                        setState(() => _departments = v),
+                      ),
+                    ],
+                  ],
                 ),
-                _Field(
+                if (widget.lab != null) ...[
+                  const SizedBox(height: 16),
+                  _TestsEditor(
                     ur: ur,
-                    label: tr(ref, 'admin.qualification'),
-                    controller: _qualification,
-                    hint: tr(ref, 'admin.qualification')),
-                _Field(
-                    ur: ur,
-                    label: tr(ref, 'admin.clinicName'),
-                    controller: _clinicName,
-                    hint: tr(ref, 'admin.clinicName')),
-              ],
-              _CityDrop(
-                ur: ur,
-                value: _cityDrop,
-                fallback: _city.text,
-                onChanged: (v) => setState(() => _cityDrop = v),
-              ),
-              _Field(
+                    tests: _tests,
+                    onChanged: (v) => setState(() => _tests = v),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                _Card(
                   ur: ur,
-                  label: tr(ref, 'admin.address'),
-                  controller: _address,
-                  hint: tr(ref, 'admin.address'),
-                  maxLines: 2),
-              _Field(
-                  ur: ur,
-                  label: tr(ref, 'admin.phone'),
-                  controller: _phone,
-                  hint: tr(ref, 'admin.phone'),
-                  keyboardType: TextInputType.phone),
-              if (widget.doctor != null) ...[
-                _Field(
-                    ur: ur,
-                    label: tr(ref, 'admin.whatsapp'),
-                    controller: _whatsapp,
-                    hint: tr(ref, 'admin.whatsapp'),
-                    keyboardType: TextInputType.phone),
-                _Field(
-                    ur: ur,
-                    label: tr(ref, 'admin.fee'),
-                    controller: _fee,
-                    hint: tr(ref, 'admin.fee'),
-                    keyboardType: TextInputType.number),
-                _Field(
-                    ur: ur,
-                    label: tr(ref, 'admin.hoursText'),
-                    controller: _hoursText,
-                    hint: tr(ref, 'admin.hoursText')),
-              ],
-              if (widget.lab != null)
-                _Field(
-                    ur: ur,
-                    label: tr(ref, 'admin.hoursText'),
-                    controller: _hoursText,
-                    hint: tr(ref, 'admin.hoursText')),
-              if (widget.hospital != null) ...[
-                _Field(
-                    ur: ur,
-                    label: tr(ref, 'admin.emergencyPhone'),
-                    controller: _emergencyPhone,
-                    hint: tr(ref, 'admin.emergencyPhone'),
-                    keyboardType: TextInputType.phone),
-                _Field(
-                    ur: ur,
-                    label: tr(ref, 'admin.visitingHours'),
-                    controller: _visitingHours,
-                    hint: tr(ref, 'admin.visitingHours')),
-                _SwitchRow(
-                  ur: ur,
-                  label: tr(ref, 'admin.emergency247'),
-                  value: _emergency247,
-                  onChanged: (v) =>
-                      setState(() => _emergency247 = v),
+                  children: [
+                    _SwitchRow(
+                      ur: ur,
+                      label: tr(ref, 'admin.parking'),
+                      value: _hasParking,
+                      onChanged: (v) =>
+                      setState(() => _hasParking = v),
+                    ),
+                    _SwitchRow(
+                      ur: ur,
+                      label: tr(ref, 'admin.verified'),
+                      value: _verified,
+                      onChanged: (v) =>
+                      setState(() => _verified = v),
+                    ),
+                    _SwitchRow(
+                      ur: ur,
+                      label: tr(ref, 'admin.approved'),
+                      value: _approved,
+                      onChanged: (v) =>
+                      setState(() => _approved = v),
+                    ),
+                  ],
                 ),
-                _DepartmentsEditor(
-                  ur: ur,
-                  items: _departments,
-                  onChanged: (v) =>
-                      setState(() => _departments = v),
+                const SizedBox(height: 20),
+                FdButton(
+                  label: tr(ref, 'admin.save'),
+                  isUrdu: ur,
+                  onTap: _busy ? null : _save,
+                ),
+                const SizedBox(height: 12),
+                FdButton(
+                  label: tr(ref, 'admin.deleteRecord'),
+                  style: FdButtonStyle.danger,
+                  icon: Icons.delete_outline,
+                  isUrdu: ur,
+                  onTap: _busy ? null : _delete,
                 ),
               ],
-            ],
-          ),
-          if (widget.lab != null) ...[
-            const SizedBox(height: 16),
-            _TestsEditor(
-              ur: ur,
-              tests: _tests,
-              onChanged: (v) => setState(() => _tests = v),
             ),
-          ],
-          const SizedBox(height: 16),
-          _Card(
-            ur: ur,
-            children: [
-              _SwitchRow(
-                ur: ur,
-                label: tr(ref, 'admin.parking'),
-                value: _hasParking,
-                onChanged: (v) =>
-                    setState(() => _hasParking = v),
-              ),
-              _SwitchRow(
-                ur: ur,
-                label: tr(ref, 'admin.verified'),
-                value: _verified,
-                onChanged: (v) =>
-                    setState(() => _verified = v),
-              ),
-              _SwitchRow(
-                ur: ur,
-                label: tr(ref, 'admin.approved'),
-                value: _approved,
-                onChanged: (v) =>
-                    setState(() => _approved = v),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          FdButton(
-            label: tr(ref, 'admin.save'),
-            isUrdu: ur,
-            onTap: _busy ? null : _save,
-          ),
-          const SizedBox(height: 12),
-          FdButton(
-            label: tr(ref, 'admin.deleteRecord'),
-            style: FdButtonStyle.danger,
-            icon: Icons.delete_outline,
-            isUrdu: ur,
-            onTap: _busy ? null : _delete,
           ),
         ],
       ),
     );
   }
 }
+
+/// Spec back bar: 44px back chevron + 20/800 title, 48px top padding.
+class _Header extends StatelessWidget {
+  final bool ur;
+  final String title;
+
+  const _Header({required this.ur, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final rtl =
+        Directionality.of(context) == TextDirection.rtl;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 48, 10, 8),
+      child: Row(
+        children: [
+          _PressScale(
+            onTap: () => Navigator.of(context).maybePop(),
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Icon(
+                rtl ? Icons.chevron_right : Icons.chevron_left,
+                color: FdColors.ink,
+                size: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontFamily: FdType.family(ur),
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                letterSpacing: ur ? 0 : -0.2,
+                color: FdColors.ink,
+                height: FdType.height(ur, 1.25),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Press feedback: scale to 0.97 in 80 ms (spec `.press` class).
+class _PressScale extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _PressScale({required this.child, this.onTap});
+
+  @override
+  State<_PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<_PressScale> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown:
+          widget.onTap == null ? null : (_) => setState(() => _down = true),
+      onTapUp:
+          widget.onTap == null ? null : (_) => setState(() => _down = false),
+      onTapCancel:
+          widget.onTap == null ? null : () => setState(() => _down = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? FdSpec.pressScale : 1.0,
+        duration: FdSpec.pressDuration,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// Spec switch: 52x32 track, 26px knob, teal when on.
+class _FdSwitch extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _FdSwitch({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return _PressScale(
+      onTap: () => onChanged(!value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        width: 52,
+        height: 32,
+        decoration: BoxDecoration(
+          color: value ? FdColors.primary : _switchOff,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Stack(
+          children: [
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOut,
+              top: 3,
+              left: value ? 23 : 3,
+              child: Container(
+                width: 26,
+                height: 26,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x40000000),
+                      blurRadius: 2,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+const _switchOff = Color(0xFFB7C4C0);
 
 /// White rounded card grouping form fields.
 class _Card extends StatelessWidget {
@@ -406,11 +543,11 @@ class _Card extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        borderRadius: BorderRadius.circular(FdSpec.cardRadius),
         border: Border.all(color: FdColors.line),
       ),
       padding:
-          const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+          const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: children,
@@ -427,9 +564,16 @@ class _Cap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 6),
+      padding: const EdgeInsets.only(top: 14),
       child: Text(label.toUpperCase(),
-          style: FdType.label(ur, size: 12.5, w: FontWeight.w700)),
+          style: TextStyle(
+            fontFamily: FdType.family(ur),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: ur ? 0 : 0.72,
+            color: FdColors.muted,
+            height: FdType.height(ur, 1.3),
+          )),
     );
   }
 }
@@ -453,39 +597,41 @@ class _Field extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final multi = maxLines > 1;
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: FdSpec.inputBorder),
+    );
+    final field = TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      style: FdType.body(ur,
+          size: 15, w: FontWeight.w600, color: FdColors.ink),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: FdType.body(ur,
+            size: 15, w: FontWeight.w600, color: FdSpec.placeholder),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: multi
+            ? const EdgeInsets.fromLTRB(14, 12, 14, 12)
+            : const EdgeInsets.symmetric(horizontal: 14),
+        border: border,
+        enabledBorder: border,
+        focusedBorder: border.copyWith(
+          borderSide:
+              const BorderSide(color: FdColors.primary, width: 1.6),
+        ),
+      ),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _Cap(ur: ur, label: label),
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          maxLines: maxLines,
-          style: FdType.body(ur, size: 15.5, color: FdColors.ink),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle:
-                FdType.body(ur, size: 15.5, color: FdColors.muted),
-            filled: true,
-            fillColor: FdColors.bg,
-            contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16, vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: FdColors.line),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: FdColors.line),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide:
-                  const BorderSide(color: FdColors.primary, width: 1.6),
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
+        multi ? field : SizedBox(height: 50, child: field),
+        const SizedBox(height: 14),
       ],
     );
   }
@@ -507,22 +653,21 @@ class _SwitchRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(label,
-                style: FdType.body(ur,
-                    size: 15.5,
-                    w: FontWeight.w600,
-                    color: FdColors.ink)),
-          ),
-          Switch(
-            value: value,
-            activeThumbColor: FdColors.primary,
-            onChanged: onChanged,
-          ),
-        ],
+      padding: const EdgeInsets.only(top: 14),
+      child: SizedBox(
+        height: 48,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(label,
+                  style: FdType.body(ur,
+                      size: 15,
+                      w: FontWeight.w600,
+                      color: FdColors.ink)),
+            ),
+            _FdSwitch(value: value, onChanged: onChanged),
+          ],
+        ),
       ),
     );
   }
@@ -550,45 +695,54 @@ class _SpecialtyDrop extends ConsumerWidget {
         final items = snap.data ?? const <String>[];
         final effective =
             (value != null && items.contains(value)) ? value : null;
+        final border = OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: FdSpec.inputBorder),
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _Cap(ur: ur, label: tr(ref, 'admin.specialization')),
-            DropdownButtonFormField<String>(
-              initialValue: effective,
-              hint: Text(
-                  fallback.isEmpty
-                      ? tr(ref, 'admin.specialization')
-                      : fallback,
-                  style: FdType.body(ur,
-                      size: 15.5, color: FdColors.muted)),
-              items: [
-                for (final it in items)
-                  DropdownMenuItem(value: it, child: Text(it))
-              ],
-              onChanged: onChanged,
-              style:
-                  FdType.body(ur, size: 15.5, color: FdColors.ink),
-              icon: const Icon(Icons.keyboard_arrow_down,
-                  color: FdColors.ink),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: FdColors.bg,
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide:
-                      const BorderSide(color: FdColors.line),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide:
-                      const BorderSide(color: FdColors.line),
+            const SizedBox(height: 6),
+            SizedBox(
+              height: 50,
+              child: DropdownButtonFormField<String>(
+                initialValue: effective,
+                hint: Text(
+                    fallback.isEmpty
+                        ? tr(ref, 'admin.specialization')
+                        : fallback,
+                    style: FdType.body(ur,
+                        size: 15,
+                        w: FontWeight.w600,
+                        color: FdSpec.placeholder)),
+                items: [
+                  for (final it in items)
+                    DropdownMenuItem(value: it, child: Text(it))
+                ],
+                onChanged: onChanged,
+                style: FdType.body(ur,
+                    size: 15,
+                    w: FontWeight.w600,
+                    color: FdColors.ink),
+                icon: const Icon(Icons.keyboard_arrow_down,
+                    color: FdColors.ink, size: 16),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  isDense: true,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 14),
+                  border: border,
+                  enabledBorder: border,
+                  focusedBorder: border.copyWith(
+                    borderSide: const BorderSide(
+                        color: FdColors.primary, width: 1.6),
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 14),
           ],
         );
       },
@@ -618,45 +772,54 @@ class _CityDrop extends ConsumerWidget {
         final items = snap.data ?? const <String>[];
         final effective =
             (value != null && items.contains(value)) ? value : null;
+        final border = OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: FdSpec.inputBorder),
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _Cap(ur: ur, label: tr(ref, 'admin.city')),
-            DropdownButtonFormField<String>(
-              initialValue: effective,
-              hint: Text(
-                  fallback.isEmpty
-                      ? tr(ref, 'admin.city')
-                      : fallback,
-                  style: FdType.body(ur,
-                      size: 15.5, color: FdColors.muted)),
-              items: [
-                for (final it in items)
-                  DropdownMenuItem(value: it, child: Text(it))
-              ],
-              onChanged: onChanged,
-              style:
-                  FdType.body(ur, size: 15.5, color: FdColors.ink),
-              icon: const Icon(Icons.keyboard_arrow_down,
-                  color: FdColors.ink),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: FdColors.bg,
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide:
-                      const BorderSide(color: FdColors.line),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide:
-                      const BorderSide(color: FdColors.line),
+            const SizedBox(height: 6),
+            SizedBox(
+              height: 50,
+              child: DropdownButtonFormField<String>(
+                initialValue: effective,
+                hint: Text(
+                    fallback.isEmpty
+                        ? tr(ref, 'admin.city')
+                        : fallback,
+                    style: FdType.body(ur,
+                        size: 15,
+                        w: FontWeight.w600,
+                        color: FdSpec.placeholder)),
+                items: [
+                  for (final it in items)
+                    DropdownMenuItem(value: it, child: Text(it))
+                ],
+                onChanged: onChanged,
+                style: FdType.body(ur,
+                    size: 15,
+                    w: FontWeight.w600,
+                    color: FdColors.ink),
+                icon: const Icon(Icons.keyboard_arrow_down,
+                    color: FdColors.ink, size: 16),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  isDense: true,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 14),
+                  border: border,
+                  enabledBorder: border,
+                  focusedBorder: border.copyWith(
+                    borderSide: const BorderSide(
+                        color: FdColors.primary, width: 1.6),
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 14),
           ],
         );
       },
@@ -697,6 +860,7 @@ class _DepartmentsEditorState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _Cap(ur: widget.ur, label: tr(ref, 'admin.departments')),
+        const SizedBox(height: 6),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -749,18 +913,18 @@ class _DepartmentsEditorState
                     hintStyle: FdType.body(widget.ur,
                         size: 15, color: FdColors.muted),
                     filled: true,
-                    fillColor: FdColors.bg,
+                    fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                       borderSide:
-                          const BorderSide(color: FdColors.line),
+                          const BorderSide(color: FdSpec.inputBorder),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                       borderSide:
-                          const BorderSide(color: FdColors.line),
+                          const BorderSide(color: FdSpec.inputBorder),
                     ),
                   ),
                 ),
@@ -823,11 +987,11 @@ class _TestsEditorState extends ConsumerState<_TestsEditor> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        borderRadius: BorderRadius.circular(FdSpec.cardRadius),
         border: Border.all(color: FdColors.line),
       ),
       padding:
-          const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+          const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -874,6 +1038,7 @@ class _TestsEditorState extends ConsumerState<_TestsEditor> {
             ),
           const Divider(color: FdColors.line),
           _Cap(ur: widget.ur, label: tr(ref, 'admin.addTest')),
+          const SizedBox(height: 6),
           TextField(
             controller: _name,
             style: FdType.body(widget.ur,
@@ -883,18 +1048,18 @@ class _TestsEditorState extends ConsumerState<_TestsEditor> {
               hintStyle: FdType.body(widget.ur,
                   size: 15, color: FdColors.muted),
               filled: true,
-              fillColor: FdColors.bg,
+              fillColor: Colors.white,
               contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16, vertical: 14),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 borderSide:
-                    const BorderSide(color: FdColors.line),
+                    const BorderSide(color: FdSpec.inputBorder),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 borderSide:
-                    const BorderSide(color: FdColors.line),
+                    const BorderSide(color: FdSpec.inputBorder),
               ),
             ),
           ),
@@ -927,21 +1092,21 @@ class _TestsEditorState extends ConsumerState<_TestsEditor> {
                           size: 15, color: FdColors.ink),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: FdColors.bg,
+                        fillColor: Colors.white,
                         contentPadding:
                             const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 14),
                         border: OutlineInputBorder(
                           borderRadius:
-                              BorderRadius.circular(16),
+                              BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                              color: FdColors.line),
+                              color: FdSpec.inputBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius:
-                              BorderRadius.circular(16),
+                              BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                              color: FdColors.line),
+                              color: FdSpec.inputBorder),
                         ),
                       ),
                     );
@@ -960,18 +1125,18 @@ class _TestsEditorState extends ConsumerState<_TestsEditor> {
                     hintStyle: FdType.body(widget.ur,
                         size: 15, color: FdColors.muted),
                     filled: true,
-                    fillColor: FdColors.bg,
+                    fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 14),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                       borderSide:
-                          const BorderSide(color: FdColors.line),
+                          const BorderSide(color: FdSpec.inputBorder),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                       borderSide:
-                          const BorderSide(color: FdColors.line),
+                          const BorderSide(color: FdSpec.inputBorder),
                     ),
                   ),
                 ),

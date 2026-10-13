@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Reviews</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F5F7F6}
+button{font-family:inherit}
+textarea{font-family:inherit}
+a{text-decoration:none;color:inherit}
+.noscroll{scrollbar-width:none}
+.noscroll::-webkit-scrollbar{display:none}
+.press{transition:transform .08s ease-out;-webkit-tap-highlight-color:transparent}
+.press:active{transform:scale(.96)}
+.press:focus-visible{outline:2px solid #0B6B5C;outline-offset:2px}
+textarea::placeholder{color:#6B7F7B}
+textarea:focus-visible{outline:2px solid #0B6B5C;outline-offset:0}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F5F7F6;color:#0F2A2E;font-family:'Albert Sans',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden">
+
+  <div style="flex:none;display:flex;align-items:center;gap:4px;padding:48px 10px 8px 10px">
+    <a href="Doctor.dc.html" class="press" aria-label="Back to the doctor" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#0F2A2E">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <span style="display:flex;flex-direction:column">
+      <span style="font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.15">Reviews</span>
+      <span style="font-size:13px;font-weight:500;color:#566B68">Dr. Sana Yousafzai</span>
+    </span>
+  </div>
+
+  <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto;padding:6px 20px 24px">
+
+    <div style="display:flex;align-items:center;gap:18px;padding:16px;border-radius:18px;background:#fff;border:1px solid #E1E7E4">
+      <div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:2px">
+        <span style="font-size:46px;line-height:1;font-weight:800;letter-spacing:-.03em">4.9</span>
+        <span style="display:flex;gap:1px" role="img" aria-label="4.9 out of 5 stars">
+          <sc-for list="{{five}}" as="s" hint-placeholder-count="5"><svg width="15" height="15" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg></sc-for>
+        </span>
+        <span style="font-size:12px;font-weight:600;color:#566B68">186 reviews</span>
+      </div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+        <sc-for list="{{bars}}" as="b" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#566B68">
+            <span style="flex:none;width:8px">{{b.n}}</span>
+            <span style="flex:1;height:6px;border-radius:3px;background:#EEF1F0;overflow:hidden"><span style="display:block;height:6px;width:{{b.w}}%;border-radius:3px;background:#F5B400"></span></span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <sc-if value="{{notReviewed}}" hint-placeholder-val="{{ true }}">
+      <div style="margin-top:14px;padding:16px;border-radius:18px;background:#fff;border:1px solid #E1E7E4">
+        <span style="font-size:16px;font-weight:800">Rate your visit</span>
+        <div style="display:flex;gap:2px;margin:8px 0 0 -6px" role="group" aria-label="Your rating">
+          <sc-for list="{{starBtns}}" as="s" hint-placeholder-count="5">
+            <button class="press" aria-label="{{s.label}}" aria-pressed="{{s.on}}" onClick="{{s.pick}}" style="width:48px;height:48px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="{{s.fill}}" stroke="{{s.stroke}}" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>
+            </button>
+          </sc-for>
+        </div>
+        <textarea aria-label="Write your review" placeholder="What was your visit like? Wait time, behavior, fee..." rows="3" style="display:block;box-sizing:border-box;width:100%;margin-top:6px;padding:12px;border-radius:12px;border:1px solid #D5DEDA;background:#F5F7F6;font-size:15px;font-weight:500;line-height:1.4;color:#0F2A2E;resize:none"></textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px">
+          <span style="font-size:12px;font-weight:500;line-height:1.35;color:#566B68">One review per person for each doctor.</span>
+          <button class="press" onClick="{{submit}}" style="flex:none;height:46px;padding:0 24px;border:0;border-radius:23px;background:#0B6B5C;color:#fff;font-size:15px;font-weight:700;cursor:pointer">Post review</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{reviewed}}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:14px;padding:16px;border-radius:18px;background:#E4F3EF;border:1px solid #BFE0D6;display:flex;flex-direction:column;gap:8px">
+        <span style="display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;color:#0B5446">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#0B6B5C"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          You reviewed Dr. Sana
+        </span>
+        <span style="font-size:13px;font-weight:500;line-height:1.4;color:#2F6A5E">Thank you. The average rating has been updated. You can edit or delete your review, but not add a second one.</span>
+        <div style="display:flex;gap:8px">
+          <button class="press" onClick="{{reset}}" style="height:44px;padding:0 18px;border-radius:22px;border:1.5px solid #0B6B5C;background:#fff;color:#0B6B5C;font-size:14px;font-weight:700;cursor:pointer">Edit</button>
+          <button class="press" onClick="{{reset}}" style="height:44px;padding:0 18px;border-radius:22px;border:1.5px solid #E1E7E4;background:#fff;color:#A11F1F;font-size:14px;font-weight:700;cursor:pointer">Delete</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 4px">
+      <span style="font-size:17px;font-weight:800">All reviews</span>
+      <span style="font-size:13px;font-weight:700;color:#0B6B5C;display:flex;align-items:center;gap:4px">Newest<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></span>
+    </div>
+
+    <div style="display:flex;flex-direction:column">
+      <sc-for list="{{reviews}}" as="r" hint-placeholder-count="4">
+        <div style="padding:14px 0;border-bottom:1px solid #E1E7E4;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="flex:none;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:18px;background:{{r.tint}};color:{{r.ink}};font-size:14px;font-weight:800">{{r.init}}</span>
+            <span style="flex:1;display:flex;flex-direction:column"><span style="font-size:14px;font-weight:700">{{r.name}}</span><span style="font-size:12px;font-weight:500;color:#566B68">{{r.when}}</span></span>
+            <span style="display:flex;align-items:center;gap:3px;font-size:13px;font-weight:800"><svg width="14" height="14" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>{{r.stars}}</span>
+          </div>
+          <span style="font-size:14px;font-weight:500;line-height:1.5;color:#2E4744">{{r.text}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { rating: 4, done: false };
+  }
+  renderVals() {
+    const { rating, done } = this.state;
+    const labels = ['Poor', 'Fair', 'Good', 'Very good', 'Excellent'];
+    const reviews = [
+      { name: 'Rabia K.', when: '2 days ago', stars: '5.0', text: 'Listened properly and explained everything in Pashto. Waiting time was short.', tint: '#F8E1EC', ink: '#8E2A57' },
+      { name: 'Shabana A.', when: '1 week ago', stars: '5.0', text: 'Clean clinic and the staff are polite. The fee was exactly what the app said.', tint: '#DDF0EA', ink: '#0B5446' },
+      { name: 'Nargis B.', when: '3 weeks ago', stars: '4.0', text: 'Very good doctor. It took about an hour to get my turn on a busy day, so come early.', tint: '#E3E9FF', ink: '#2B3F9E' },
+      { name: 'Hina M.', when: '2 months ago', stars: '5.0', text: 'My family has been going here for two years. Highly recommended.', tint: '#FFE6D2', ink: '#8A3F00' }
+    ];
+    return {
+      five: [1, 2, 3, 4, 5],
+      bars: [['5', 84], ['4', 11], ['3', 3], ['2', 1], ['1', 1]].map((b) => ({ n: b[0], w: b[1] })),
+      notReviewed: !done,
+      reviewed: done,
+      starBtns: [1, 2, 3, 4, 5].map((n) => ({
+        label: n + ' star' + (n > 1 ? 's' : '') + ', ' + labels[n - 1],
+        on: n === rating,
+        fill: n <= rating ? '#F5B400' : 'none',
+        stroke: n <= rating ? '#F5B400' : '#B7C4C0',
+        pick: () => this.setState({ rating: n })
+      })),
+      submit: () => this.setState({ done: true }),
+      reset: () => this.setState({ done: false }),
+      reviews: reviews.map((r) => ({ ...r, init: r.name[0] }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -45,6 +45,12 @@ const Map<String, String> enD = {
   'prof.typeLab': 'Lab',
   'prof.typeHospital': 'Hospital',
   'prof.pendingSub': 'Submitted {ago}',
+  'prof.browsingAsGuest': 'You are browsing as a guest',
+  'prof.guestSub':
+      'Everything is open to you. Log in only to write a review, add a listing or post in Community.',
+  'prof.mobileNumber': 'Mobile number',
+  'prof.footer': 'Fauridoc 1.0 · No ads, no data selling',
+  'prof.adminBadge': 'Admin',
 
   // ---------- auth ----------
   'auth.signInTitle': 'Sign in',
@@ -241,6 +247,12 @@ const Map<String, String> urD = {
   'prof.typeLab': 'لیب',
   'prof.typeHospital': 'ہسپتال',
   'prof.pendingSub': '{ago} جمع کرایا',
+  'prof.browsingAsGuest': 'آپ بطور مہمان براؤز کر رہے ہیں',
+  'prof.guestSub':
+      'آپ کے لیے سب کچھ کھلا ہے۔ صرف جائزہ لکھنے، لسٹنگ شامل کرنے یا کمیونٹی میں پوسٹ کرنے کے لیے لاگ اِن کریں۔',
+  'prof.mobileNumber': 'موبائل نمبر',
+  'prof.footer': 'فوری ڈاک 1.0 · کوئی اشتہار نہیں، کوئی ڈیٹا فروخت نہیں',
+  'prof.adminBadge': 'ایڈمن',
 
   // ---------- auth ----------
   'auth.signInTitle': 'سائن ان',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../design/tokens.dart';
 import '../l10n/strings.dart';
 import '../data/firestore_repository.dart';
 import '../data/seed_loader.dart';
@@ -41,93 +42,92 @@ class AdminPanelScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(tr(ref, 'admin.title'),
-                style: FdType.title(ur, size: 22)),
-            Text(tr(ref, 'admin.liveCounts'),
-                style: FdType.body(ur, size: 13)),
-          ],
-        ),
-      ),
-      body: ListView(
-        padding:
-            const EdgeInsets.fromLTRB(FdDim.page, 8, FdDim.page, 32),
+      body: Column(
         children: [
-          _CountsGrid(ur: ur),
-          const SizedBox(height: 26),
-          _PendingSection(ur: ur),
-          const SizedBox(height: 26),
-          _SearchSection<Doctor>(
-            ur: ur,
-            title: tr(ref, 'admin.allDoctors'),
-            stream: repo.watchDoctors,
-            nameOf: (d) => d.name,
-            subOf: (d) =>
-                '${specialtyLabel(ref.watch(localeProvider), d.specialty)} · ${d.city}',
-            tileOf: (d) => FdAvatarTile(
-                name: d.name, size: 54, bg: FdColors.peach),
-            onEdit: (d) => _goManage(context, doctor: d),
-            onDelete: (d) => repo.deleteDoctor(d.id),
-          ),
-          const SizedBox(height: 26),
-          _SearchSection<Lab>(
-            ur: ur,
-            title: tr(ref, 'admin.allLabs'),
-            stream: repo.watchLabs,
-            nameOf: (l) => l.name,
-            subOf: (l) => l.city,
-            tileOf: (_) => const _TileIcon(
+          _Header(
+              ur: ur,
+              title: tr(ref, 'admin.title'),
+              subtitle: tr(ref, 'admin.liveCounts')),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                  FdDim.page, 6, FdDim.page, 24),
+              children: [
+                _CountsGrid(ur: ur),
+                const SizedBox(height: 22),
+                _PendingSection(ur: ur),
+                const SizedBox(height: 24),
+                _SearchSection<Doctor>(
+                  ur: ur,
+                  title: tr(ref, 'admin.allDoctors'),
+                  stream: repo.watchDoctors,
+                  nameOf: (d) => d.name,
+                  subOf: (d) =>
+                      '${specialtyLabel(ref.watch(localeProvider), d.specialty)} · ${d.city}',
+                  tileOf: (d) => FdAvatarTile(
+                      name: d.name, size: 54, bg: FdColors.peach),
+                  onEdit: (d) => _goManage(context, doctor: d),
+                  onDelete: (d) => repo.deleteDoctor(d.id),
+                ),
+                const SizedBox(height: 26),
+                _SearchSection<Lab>(
+                  ur: ur,
+                  title: tr(ref, 'admin.allLabs'),
+                  stream: repo.watchLabs,
+                  nameOf: (l) => l.name,
+                  subOf: (l) => l.city,
+                  tileOf: (_) => const _TileIcon(
                 bg: FdColors.lavender,
                 icon: Icons.science_outlined,
                 iconColor: FdColors.lavenderInk),
-            onEdit: (l) => _goManage(context, lab: l),
-            onDelete: (l) => repo.deleteLab(l.id),
-          ),
-          const SizedBox(height: 26),
-          _SearchSection<Hospital>(
-            ur: ur,
-            title: tr(ref, 'admin.allHospitals'),
-            stream: repo.watchHospitals,
-            nameOf: (h) => h.name,
-            subOf: (h) => h.city,
-            tileOf: (_) => const _TileIcon(
+                  onEdit: (l) => _goManage(context, lab: l),
+                  onDelete: (l) => repo.deleteLab(l.id),
+                ),
+                const SizedBox(height: 26),
+                _SearchSection<Hospital>(
+                  ur: ur,
+                  title: tr(ref, 'admin.allHospitals'),
+                  stream: repo.watchHospitals,
+                  nameOf: (h) => h.name,
+                  subOf: (h) => h.city,
+                  tileOf: (_) => const _TileIcon(
                 bg: FdColors.redSoft,
                 icon: Icons.add,
                 iconColor: FdColors.redInk),
-            onEdit: (h) => _goManage(context, hospital: h),
-            onDelete: (h) => repo.deleteHospital(h.id),
+                  onEdit: (h) => _goManage(context, hospital: h),
+                  onDelete: (h) => repo.deleteHospital(h.id),
+                ),
+                const SizedBox(height: 24),
+                Text(tr(ref, 'admin.manageLists'),
+              style: _sectionTitle(ur)),
+                const SizedBox(height: 12),
+                _ListEditor(
+                  ur: ur,
+                  title: tr(ref, 'admin.cities'),
+                  watch: repo.watchCities,
+                  save: repo.setCities,
+                ),
+                const SizedBox(height: 12),
+                _ListEditor(
+                  ur: ur,
+                  title: tr(ref, 'admin.specialties'),
+                  watch: repo.watchSpecialties,
+                  save: repo.setSpecialties,
+                ),
+                const SizedBox(height: 12),
+                _ListEditor(
+                  ur: ur,
+                  title: tr(ref, 'admin.testCategories'),
+                  watch: repo.watchTestCategories,
+                  save: repo.setTestCategories,
+                ),
+                if (!repo.isDemo) ...[
+                  const SizedBox(height: 26),
+                  _SeedImportCard(ur: ur),
+                ],
+              ],
+            ),
           ),
-          const SizedBox(height: 26),
-          Text(tr(ref, 'admin.manageLists'),
-              style: FdType.title(ur, size: 21)),
-          const SizedBox(height: 12),
-          _ListEditor(
-            ur: ur,
-            title: tr(ref, 'admin.cities'),
-            watch: repo.watchCities,
-            save: repo.setCities,
-          ),
-          const SizedBox(height: 12),
-          _ListEditor(
-            ur: ur,
-            title: tr(ref, 'admin.specialties'),
-            watch: repo.watchSpecialties,
-            save: repo.setSpecialties,
-          ),
-          const SizedBox(height: 12),
-          _ListEditor(
-            ur: ur,
-            title: tr(ref, 'admin.testCategories'),
-            watch: repo.watchTestCategories,
-            save: repo.setTestCategories,
-          ),
-          if (!repo.isDemo) ...[
-            const SizedBox(height: 26),
-            _SeedImportCard(ur: ur),
-          ],
         ],
       ),
     );
@@ -158,7 +158,16 @@ String _ago(WidgetRef ref, DateTime dt) {
   return fill(tr(ref, 'admin.daysAgo'), {'n': '$days'});
 }
 
-/// 3x2 live-count tiles.
+/// Spec section titles: 17/800 ink.
+TextStyle _sectionTitle(bool ur) => TextStyle(
+      fontFamily: FdType.family(ur),
+      fontSize: 17,
+      fontWeight: FontWeight.w800,
+      color: FdColors.ink,
+      height: FdType.height(ur, 1.3),
+    );
+
+/// 3x2 live-count tiles (spec: 22/800 values, 12/600 labels, gap 8).
 class _CountsGrid extends ConsumerWidget {
   final bool ur;
   const _CountsGrid({required this.ur});
@@ -196,14 +205,20 @@ class _CountsGrid extends ConsumerWidget {
               label: tr(ref, 'admin.reviews'),
               ur: ur),
         ];
-        return GridView.count(
-          crossAxisCount: 3,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.04,
-          children: tiles,
+        Widget row(int from) => Row(
+              children: [
+                for (var i = from; i < from + 3; i++) ...[
+                  if (i > from) const SizedBox(width: 8),
+                  Expanded(child: tiles[i]),
+                ],
+              ],
+            );
+        return Column(
+          children: [
+            row(0),
+            const SizedBox(height: 8),
+            row(3),
+          ],
         );
       },
     );
@@ -227,34 +242,141 @@ class _CountTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: highlight ? FdColors.amberSoft : Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: highlight ? _pendingBg : Colors.white,
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-            color: highlight ? FdColors.amberSoft : FdColors.line),
+            color: highlight ? _pendingBorder : FdColors.line),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(value,
               style: TextStyle(
                 fontFamily: FdType.latin,
-                fontSize: 27,
+                fontSize: 22,
                 fontWeight: FontWeight.w800,
+                letterSpacing: -0.44,
                 color:
-                    highlight ? FdColors.amberInk : FdColors.ink,
+                    highlight ? _amberInk : FdColors.ink,
+                height: 1.15,
               ),
               overflow: TextOverflow.ellipsis),
           const SizedBox(height: 2),
           Text(label,
               style: FdType.body(
                 ur,
-                size: 13.5,
-                color: highlight ? FdColors.amberInk : FdColors.muted,
+                size: 12,
+                w: FontWeight.w600,
+                color:
+                    highlight ? _amberInk : FdColors.muted,
               ),
               overflow: TextOverflow.ellipsis),
         ],
+      ),
+    );
+  }
+}
+
+// Spec-only colours (not in FdSpec): pending tile + amber ink,
+// reject button border/red.
+const _pendingBg = Color(0xFFFFF0DC);
+const _pendingBorder = Color(0xFFF4D9B2);
+const _amberInk = Color(0xFF8A4B00);
+const _rejectBorder = Color(0xFFE3B6B2);
+const _rejectRed = Color(0xFFA11F1F);
+
+/// Spec back bar: 44px back chevron + 20/800 title + 13/500 subtitle.
+class _Header extends StatelessWidget {
+  final bool ur;
+  final String title;
+  final String? subtitle;
+
+  const _Header(
+      {required this.ur, required this.title, this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    final rtl =
+        Directionality.of(context) == TextDirection.rtl;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 48, 10, 8),
+      child: Row(
+        children: [
+          _PressScale(
+            onTap: () => Navigator.of(context).maybePop(),
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Icon(
+                rtl ? Icons.chevron_right : Icons.chevron_left,
+                color: FdColors.ink,
+                size: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: FdType.family(ur),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: ur ? 0 : -0.2,
+                    color: FdColors.ink,
+                    height: 1.15,
+                  ),
+                ),
+                if (subtitle != null)
+                  Text(
+                    subtitle!,
+                    style: FdType.body(ur,
+                        size: 13,
+                        w: FontWeight.w500,
+                        color: FdColors.muted),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Press feedback: scale to 0.97 in 80 ms (spec `.press` class).
+class _PressScale extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _PressScale({required this.child, this.onTap});
+
+  @override
+  State<_PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<_PressScale> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown:
+          widget.onTap == null ? null : (_) => setState(() => _down = true),
+      onTapUp:
+          widget.onTap == null ? null : (_) => setState(() => _down = false),
+      onTapCancel:
+          widget.onTap == null ? null : () => setState(() => _down = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? FdSpec.pressScale : 1.0,
+        duration: FdSpec.pressDuration,
+        child: widget.child,
       ),
     );
   }
@@ -328,22 +450,30 @@ class _PendingSection extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
                     Expanded(
                       child: Text(tr(ref, 'admin.pendingApproval'),
-                          style: FdType.title(ur, size: 21)),
+                          style: TextStyle(
+                            fontFamily: FdType.family(ur),
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: FdColors.ink,
+                            height: FdType.height(ur, 1.3),
+                          )),
                     ),
                     Text(
                       fill(tr(ref, 'admin.waiting'),
                           {'n': '${items.length}'}),
                       style: FdType.body(ur,
-                          size: 15,
+                          size: 13,
                           w: FontWeight.w700,
-                          color: FdColors.amberInk),
+                          color: _amberInk),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 for (final it in items)
                   _PendingCard(ur: ur, item: it),
               ],
@@ -368,15 +498,25 @@ class _PendingCard extends ConsumerWidget {
       _PendingKind.lab => tr(ref, 'prof.typeLab'),
       _PendingKind.hospital => tr(ref, 'prof.typeHospital'),
     };
+    // Spec shows the specialty for doctors ("ENT · Mardan · …"),
+    // the entity type for labs/hospitals.
+    final typeToken =
+        item.kind == _PendingKind.doctor && item.sub.isNotEmpty
+            ? specialtyLabel(ref.watch(localeProvider), item.sub)
+            : typeLabel;
     final tile = switch (item.kind) {
-      _PendingKind.doctor =>
-        FdAvatarTile(name: item.name, size: 58, bg: FdColors.peach),
-      _PendingKind.lab => const _TileIcon(
+      _PendingKind.doctor => const _SpecTile(
+          bg: Color(0xFFDDF0EA),
+          icon: Icons.person_outline,
+          iconColor: FdSpec.darkGreen),
+      _PendingKind.lab => const _SpecTile(
           bg: FdColors.lavender,
           icon: Icons.science_outlined,
           iconColor: FdColors.lavenderInk),
-      _PendingKind.hospital => const _TileIcon(
-          bg: FdColors.redSoft, icon: Icons.add, iconColor: FdColors.redInk),
+      _PendingKind.hospital => const _SpecTile(
+          bg: Color(0xFFF8DDDB),
+          icon: Icons.add,
+          iconColor: FdColors.red),
     };
 
     Future<void> approve() async {
@@ -451,34 +591,43 @@ class _PendingCard extends ConsumerWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: FdColors.line),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Column(
         children: [
           Row(
             children: [
               tile,
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(item.name,
-                        style: FdType.title(ur, size: 18),
+                        style: TextStyle(
+                          fontFamily: FdType.family(ur),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: FdColors.ink,
+                          height: FdType.height(ur, 1.3),
+                        ),
                         overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 1),
                     Text(
                       fill(tr(ref, 'admin.submitted'), {
-                        'type': typeLabel,
+                        'type': typeToken,
                         'city': item.city,
                         'ago': _ago(ref, item.createdAt),
-                      }),
-                      style: FdType.body(ur, size: 13.5),
+                      }).replaceAll(' - ', ' \u00B7 '),
+                      style: FdType.body(ur,
+                          size: 12.5,
+                          w: FontWeight.w500,
+                          color: FdColors.muted),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
                     ),
@@ -487,51 +636,110 @@ class _PendingCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                flex: 2,
-                child: SizedBox(
-                  height: 52,
-                  child: FdButton(
-                    label: tr(ref, 'admin.approve'),
-                    isUrdu: ur,
-                    onTap: approve,
-                  ),
+                flex: 12,
+                child: _PressScale(
+                  onTap: approve,
+                  child: _ActionButton(
+                      ur: ur,
+                      label: tr(ref, 'admin.approve'),
+                      primary: true),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
-                flex: 2,
-                child: SizedBox(
-                  height: 52,
-                  child: FdButton(
-                    label: tr(ref, 'admin.reject'),
-                    style: FdButtonStyle.dangerOutline,
-                    isUrdu: ur,
-                    onTap: reject,
-                  ),
+                flex: 10,
+                child: _PressScale(
+                  onTap: reject,
+                  child: _ActionButton(
+                      ur: ur,
+                      label: tr(ref, 'admin.reject'),
+                      primary: false),
                 ),
               ),
-              const SizedBox(width: 10),
-              GestureDetector(
+              const SizedBox(width: 8),
+              _PressScale(
                 onTap: openDetail,
                 child: Container(
-                  width: 52,
-                  height: 52,
+                  width: 46,
+                  height: 46,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: FdColors.line),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                        color: FdColors.line, width: 1.5),
                   ),
                   child: const Icon(Icons.chevron_right,
-                      color: FdColors.ink, size: 26),
+                      color: FdColors.ink, size: 20),
                 ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 44px rounded-square entity icon tile (spec).
+class _SpecTile extends StatelessWidget {
+  final Color bg;
+  final IconData icon;
+  final Color iconColor;
+
+  const _SpecTile({
+    required this.bg,
+    required this.icon,
+    required this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, color: iconColor, size: 22),
+    );
+  }
+}
+
+/// 46px Approve (teal) / Reject (red-outline) button (spec).
+class _ActionButton extends StatelessWidget {
+  final bool ur;
+  final String label;
+  final bool primary;
+
+  const _ActionButton(
+      {required this.ur, required this.label, required this.primary});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 46,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: primary ? FdColors.primary : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: primary
+            ? null
+            : Border.all(color: _rejectBorder, width: 1.5),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontFamily: FdType.family(ur),
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: primary ? Colors.white : _rejectRed,
+          height: FdType.height(ur, 1.3),
+        ),
       ),
     );
   }
@@ -605,7 +813,7 @@ class _SearchSectionState<T>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(widget.title, style: FdType.title(widget.ur, size: 21)),
+        Text(widget.title, style: _sectionTitle(widget.ur)),
         const SizedBox(height: 10),
         FdSearchField(
           hint: tr(ref, 'admin.searchHint'),
@@ -762,7 +970,7 @@ class _ListEditorState extends ConsumerState<_ListEditor> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.title, style: FdType.title(widget.ur, size: 17)),
+          Text(widget.title, style: _sectionTitle(widget.ur)),
           const SizedBox(height: 10),
           StreamBuilder<List<String>>(
             stream: widget.watch(),

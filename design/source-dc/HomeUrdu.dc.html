@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Home in Urdu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&amp;family=Noto+Nastaliq+Urdu:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F5F7F6}
+button{font-family:inherit}
+a{text-decoration:none;color:inherit}
+.noscroll{scrollbar-width:none}
+.noscroll::-webkit-scrollbar{display:none}
+.press{transition:transform .08s ease-out;-webkit-tap-highlight-color:transparent}
+.press:active{transform:scale(.97)}
+.press:focus-visible{outline:2px solid #0B6B5C;outline-offset:2px}
+</style>
+</helmet>
+<div dir="rtl" lang="ur" style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F5F7F6;color:#0F2A2E;font-family:'Noto Nastaliq Urdu',serif;line-height:1.9;display:flex;flex-direction:column;overflow:hidden">
+
+  <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto;padding:48px 20px 16px">
+
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <button class="press" aria-label="شہر تبدیل کریں، مردان" style="display:flex;align-items:center;gap:6px;height:44px;padding:0 10px 0 14px;border-radius:22px;border:1px solid #E1E7E4;background:#fff;color:#0F2A2E;font-family:inherit;font-size:14px;font-weight:600;line-height:1.4">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B6B5C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+        مردان
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+      </button>
+      <a href="Main.dc.html" class="press" aria-label="Switch to English" lang="en" dir="ltr" style="display:flex;align-items:center;justify-content:center;height:44px;padding:0 14px;border-radius:22px;border:1px solid #E1E7E4;background:#fff;color:#0F2A2E;font-family:'Albert Sans',sans-serif;font-size:13px;font-weight:700;line-height:1">English</a>
+    </div>
+
+    <h1 style="margin:10px 0 0;font-size:25px;line-height:1.75;font-weight:700">اپنے بھروسے کا ڈاکٹر ڈھونڈیں</h1>
+
+    <a href="Emergency.dc.html" class="press" style="display:flex;align-items:center;gap:12px;margin-top:10px;padding:10px 14px;border-radius:16px;background:#C62828;color:#fff">
+      <span style="flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.18)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      </span>
+      <span style="flex:1;min-width:0;display:flex;flex-direction:column">
+        <span style="font-size:16px;font-weight:700;line-height:1.8">قریبی ہسپتال ایمرجنسی</span>
+        <span style="font-size:11.5px;font-weight:400;line-height:1.8;opacity:.95">نور جنرل ہسپتال  ·  2.1 کلومیٹر  ·  24 گھنٹے کھلا</span>
+      </span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+
+    <a href="Search.dc.html" class="press" style="display:flex;align-items:center;gap:10px;margin-top:12px;height:50px;padding:0 14px;border-radius:14px;border:1px solid #E1E7E4;background:#fff;color:#566B68;font-size:14px;font-weight:400">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4"></path></svg>
+      ڈاکٹر، ٹیسٹ، ہسپتال تلاش کریں
+    </a>
+
+    <div class="noscroll" style="display:flex;gap:8px;margin:12px -20px 0;padding:0 20px;overflow-x:auto">
+      <sc-for list="{{chips}}" as="c" hint-placeholder-count="6">
+        <span style="flex:none;display:flex;align-items:center;height:42px;padding:0 16px;border-radius:21px;border:1px solid {{c.border}};background:{{c.bg}};color:{{c.fg}};font-size:13px;font-weight:500;line-height:1">{{c.name}}</span>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:14px;padding:16px;border-radius:26px;background:#D2F55A;color:#0F2A2E">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#33430A">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>
+          آپ کے قریب سب سے اچھے
+        </span>
+        <span style="padding:2px 12px;border-radius:15px;background:#fff;font-family:'Albert Sans',sans-serif;font-size:13px;font-weight:800;line-height:1.8">4.9  <span style="font-weight:600;color:#566B68">(186)</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+        <span style="flex:none;display:flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:20px;background:#fff;color:#0B5446;font-size:26px;font-weight:700;line-height:1">ث</span>
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column">
+          <span style="display:flex;align-items:center;gap:6px"><span style="font-size:18px;font-weight:700;line-height:1.8">ڈاکٹر ثناء یوسفزئی</span><svg width="18" height="18" viewBox="0 0 24 24" aria-label="تصدیق شدہ" role="img" style="flex:none"><circle cx="12" cy="12" r="11" fill="#0B6B5C"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span style="font-size:13px;font-weight:500;line-height:1.8;color:#33430A">گائناکالوجسٹ  ·  1.2 کلومیٹر</span>
+          <span style="display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;line-height:1.8"><span style="width:9px;height:9px;border-radius:50%;background:#1FA463;box-shadow:0 0 0 2px #fff"></span>ابھی کھلا ہے  ·  رات 8 بجے تک</span>
+          <span style="display:flex;align-items:flex-start;gap:5px;margin-top:0px;font-size:12.5px;font-weight:600;line-height:1.7;color:#33430A"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.800 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg><span>ثناء کلینک، بینک روڈ، مردان</span></span>
+        </span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px">
+        <sc-for list="{{slots}}" as="t" hint-placeholder-count="4"><span style="display:flex;align-items:center;justify-content:center;height:42px;border-radius:21px;background:rgba(255,255,255,.62);font-size:12.5px;font-weight:500;line-height:1">{{t}}</span></sc-for>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <a href="Doctor.dc.html" class="press" style="flex:1;display:flex;align-items:center;justify-content:center;height:50px;border-radius:25px;background:#fff;color:#0F2A2E;font-size:14px;font-weight:600;line-height:1">پروفائل دیکھیں</a>
+        <button class="press" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border:0;border-radius:25px;background:#0F2A2E;color:#fff;font-family:inherit;font-size:14px;font-weight:600;line-height:1;cursor:pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>
+          کال کریں
+        </button>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+      <span style="font-size:17px;font-weight:700">مزید ڈاکٹر</span>
+      <span style="font-size:12.5px;font-weight:500;color:#0B6B5C">سب سے اچھے</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+      <sc-for list="{{doctors}}" as="d" hint-placeholder-count="2">
+        <div style="padding:12px;border-radius:22px;background:{{d.card}}">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="flex:none;display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:#fff;color:#0F2A2E;font-size:22px;font-weight:700;line-height:1">{{d.initial}}</span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column">
+              <span style="display:flex;align-items:center;gap:5px"><span style="font-size:15px;font-weight:700;line-height:1.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{d.name}}</span><svg width="16" height="16" viewBox="0 0 24 24" aria-label="تصدیق شدہ" role="img" style="flex:none"><circle cx="12" cy="12" r="11" fill="#0B6B5C"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+              <span style="font-size:12.5px;font-weight:500;line-height:1.8;color:#3E5754">{{d.spec}}</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:14px;background:#fff;font-family:'Albert Sans',sans-serif;font-size:13px;font-weight:800;line-height:1.5"><svg width="13" height="13" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>{{d.rating}}</span>
+          </div>
+          <div style="display:flex;margin-top:8px;padding:6px 0;border-radius:16px;background:#fff;line-height:1.7">
+            <span style="flex:1;display:flex;flex-direction:column;align-items:center"><span style="font-size:11px;font-weight:400;color:#566B68">فیس</span><span style="font-size:13px;font-weight:700">{{d.fee}} روپے</span></span>
+            <span style="width:1px;background:#E1E7E4"></span>
+            <span style="flex:1;display:flex;flex-direction:column;align-items:center"><span style="font-size:11px;font-weight:400;color:#566B68">فاصلہ</span><span style="font-size:13px;font-weight:700">{{d.dist}}</span></span>
+            <span style="width:1px;background:#E1E7E4"></span>
+            <span style="flex:1;display:flex;flex-direction:column;align-items:center"><span style="font-size:11px;font-weight:400;color:#566B68">ریویوز</span><span style="font-size:13px;font-weight:700;font-family:'Albert Sans',sans-serif">{{d.reviews}}</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;margin-top:6px;font-size:12px;font-weight:600;line-height:1.9"><span style="width:9px;height:9px;border-radius:50%;background:{{d.dot}};box-shadow:0 0 0 2px #fff"></span>{{d.status}}</div>
+          <div style="display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:12.5px;font-weight:600;line-height:1.7;color:#3E5754"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.800 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg><span>{{d.addr}}</span></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <a href="Doctor.dc.html" class="press" style="flex:1;display:flex;align-items:center;justify-content:center;height:46px;border-radius:23px;background:#fff;color:#0F2A2E;font-size:13px;font-weight:600;line-height:1">پروفائل دیکھیں</a>
+            <button class="press" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;height:46px;border:0;border-radius:23px;background:#0F2A2E;color:#fff;font-family:inherit;font-size:13px;font-weight:600;line-height:1;cursor:pointer">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>
+              ابھی کال کریں
+            </button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="flex:none;height:84px;box-sizing:border-box;background:#fff;border-top:1px solid #E1E7E4;display:flex;justify-content:space-around;align-items:flex-start;padding:8px 8px 0;line-height:1.5">
+    <a href="Main.dc.html" class="press" style="width:68px;color:#0B6B5C;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:12px;font-weight:600">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px;border-radius:15px;background:#DDF0EA"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4zM10 20v-6h4v6"></path></svg></span>ہوم
+    </a>
+    <a href="Search.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:12px;font-weight:500">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4"></path></svg></span>تلاش
+    </a>
+    <a href="Map.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:12px;font-weight:500">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg></span>نقشہ
+    </a>
+    <a href="Community.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:12px;font-weight:500">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v9H9l-4 3v-3H4zM16 9h4v8h-1v3l-3-3h-5v-2"></path></svg></span>کمیونٹی
+    </a>
+    <a href="Profile.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:12px;font-weight:500">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 4-6 8-6s8 2 8 6"></path></svg></span>پروفائل
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const names = ['سب', 'جنرل فزیشن', 'دل کا ڈاکٹر', 'جلد کا ڈاکٹر', 'گائناکالوجسٹ', 'بچوں کا ڈاکٹر', 'ناک کان گلا', 'ہڈی جوڑ', 'آنکھوں کا ڈاکٹر', 'دانتوں کا ڈاکٹر', 'ذہنی صحت'];
+    const ok = ['#E4F3EF', '#0B5446'];
+    const closed = ['#EEF1F0', '#566B68'];
+    const leave = ['#FFF0DC', '#8A4B00'];
+    const tints = [['#DDF0EA', '#0B5446'], ['#FFE6D2', '#8A3F00'], ['#E3E9FF', '#2B3F9E']];
+    const docs = [
+      { name: 'ڈاکٹر عمران خٹک', initial: 'ع', spec: 'دل کا ڈاکٹر', dist: '2.8 کلومیٹر', rating: '4.8', reviews: '143', fee: '2,000', status: 'بند ہے  ·  شام 5 بجے کھلے گا', dot: '#8A9A96', card: '#E3EBFF', addr: 'ہارٹ کیئر سینٹر، شیخ ملتون ٹاؤن' },
+      { name: 'ڈاکٹر فواد علی', initial: 'ف', spec: 'جنرل فزیشن', dist: '0.9 کلومیٹر', rating: '4.6', reviews: '311', fee: '800', status: 'چھٹی پر  ·  20 اکتوبر تک', dot: '#FF7A1A', card: '#FFE9DA', addr: 'سٹی میڈیکل سینٹر، شمسی روڈ' }
+    ];
+    return {
+      chips: names.map((n, i) => ({
+        name: n,
+        bg: i === 0 ? '#0B6B5C' : '#fff',
+        border: i === 0 ? '#0B6B5C' : '#E1E7E4',
+        fg: i === 0 ? '#fff' : '#0F2A2E'
+      })),
+      slots: ['پیر  شام 5–8', 'منگل  شام 5–8', 'بدھ  شام 5–8', 'ہفتہ  صبح 10–2'],
+      doctors: docs
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F5F7F6}
+button{font-family:inherit}
+a{text-decoration:none;color:inherit}
+.noscroll{scrollbar-width:none}
+.noscroll::-webkit-scrollbar{display:none}
+.press{transition:transform .08s ease-out;-webkit-tap-highlight-color:transparent}
+.press:active{transform:scale(.97)}
+.press:focus-visible{outline:2px solid #0B6B5C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F5F7F6;color:#0F2A2E;font-family:'Albert Sans',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden">
+
+  <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto;padding:52px 20px 16px">
+
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <button class="press" aria-label="Change city, Mardan" style="display:flex;align-items:center;gap:6px;height:44px;padding:0 14px 0 10px;border-radius:22px;border:1px solid #E1E7E4;background:#fff;color:#0F2A2E;font-size:14px;font-weight:700">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B6B5C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+        Mardan
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+      </button>
+      <a href="HomeUrdu.dc.html" class="press" aria-label="Switch to Urdu" style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:22px;border:1px solid #E1E7E4;background:#fff;color:#0F2A2E;font-size:13px;font-weight:700">اردو</a>
+    </div>
+
+    <h1 style="margin:18px 0 0;font-size:28px;line-height:1.12;font-weight:800;letter-spacing:-.02em">Find a doctor<br>you can trust.</h1>
+
+    <a href="Emergency.dc.html" class="press" style="display:flex;align-items:center;gap:12px;margin-top:18px;padding:12px 14px;border-radius:16px;background:#C62828;color:#fff">
+      <span style="flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.18)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      </span>
+      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+        <span style="font-size:16px;font-weight:800">Nearest hospital emergency</span>
+        <span style="font-size:12px;font-weight:500;opacity:.92">Noor General Hospital  ·  2.1 km  ·  Open 24/7</span>
+      </span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+    </a>
+
+    <a href="Search.dc.html" class="press" style="display:flex;align-items:center;gap:10px;margin-top:12px;height:48px;padding:0 14px;border-radius:14px;border:1px solid #E1E7E4;background:#fff;color:#566B68;font-size:15px;font-weight:500">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4"></path></svg>
+      Search doctors, lab tests, hospitals
+    </a>
+
+    <div class="noscroll" style="display:flex;gap:8px;margin:14px -20px 0;padding:0 20px;overflow-x:auto">
+      <sc-for list="{{chips}}" as="c" hint-placeholder-count="6">
+        <button class="press" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="flex:none;height:40px;padding:0 16px;border-radius:20px;border:1px solid {{c.border}};background:{{c.bg}};color:{{c.fg}};font-size:14px;font-weight:600;cursor:pointer">{{c.name}}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{hasFeatured}}" hint-placeholder-val="{{ true }}">
+      <div style="margin-top:18px;padding:16px;border-radius:26px;background:#D2F55A;color:#0F2A2E">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#33430A">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>
+            Top rated near you
+          </span>
+          <span style="padding:5px 12px;border-radius:15px;background:#fff;font-size:13px;font-weight:800">{{f.rating}}  <span style="font-weight:600;color:#566B68">({{f.reviews}})</span></span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+          <span style="flex:none;display:flex;align-items:center;justify-content:center;width:68px;height:68px;border-radius:20px;background:#fff;color:#0B5446;font-size:24px;font-weight:800">{{f.initials}}</span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <span style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:20px;font-weight:800;letter-spacing:-.015em;line-height:1.15">{{f.name}}</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-label="Verified" role="img" style="flex:none"><circle cx="12" cy="12" r="11" fill="#0B6B5C"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </span>
+            <span style="font-size:14px;font-weight:600;color:#33430A">{{f.spec}}  ·  {{f.dist}} km</span>
+            <span style="display:flex;align-items:flex-start;gap:5px;margin-top:0px;font-size:12.5px;font-weight:600;line-height:1.35;color:#3E5754"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.800 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg><span>{{f.addr}}</span></span>
+            <span style="display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700"><span style="width:9px;height:9px;border-radius:50%;background:{{f.dot}};box-shadow:0 0 0 2px #fff"></span>{{f.status}}</span>
+          </span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px">
+          <sc-for list="{{f.slots}}" as="s" hint-placeholder-count="4">
+            <span style="display:flex;align-items:center;justify-content:center;height:40px;border-radius:20px;background:rgba(255,255,255,.62);font-size:13px;font-weight:700">{{s}}</span>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <a href="Doctor.dc.html" class="press" style="flex:1;display:flex;align-items:center;justify-content:center;height:50px;border-radius:25px;background:#fff;color:#0F2A2E;font-size:15px;font-weight:700">View profile</a>
+          <button class="press" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:50px;border:0;border-radius:25px;background:#0F2A2E;color:#fff;font-size:15px;font-weight:700;cursor:pointer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>
+            Call
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:22px">
+      <span style="font-size:18px;font-weight:800;letter-spacing:-.01em">{{heading}}</span>
+      <span style="font-size:13px;font-weight:600;color:#0B6B5C">Top rated</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
+      <sc-for list="{{doctors}}" as="d" hint-placeholder-count="3">
+        <div style="padding:12px;border-radius:22px;background:{{d.card}}">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="flex:none;display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:#fff;color:#0F2A2E;font-size:19px;font-weight:800">{{d.initials}}</span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+              <span style="display:flex;align-items:center;gap:5px"><span style="font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{d.name}}</span><svg width="16" height="16" viewBox="0 0 24 24" aria-label="Verified" role="img" style="flex:none"><circle cx="12" cy="12" r="11" fill="#0B6B5C"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+              <span style="font-size:13px;font-weight:600;color:#3E5754">{{d.spec}}</span>
+            </span>
+            <span style="flex:none;display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:14px;background:#fff;font-size:13px;font-weight:800"><svg width="13" height="13" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>{{d.rating}}</span>
+          </div>
+          <div style="display:flex;margin-top:10px;padding:10px 0;border-radius:16px;background:#fff">
+            <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:11px;font-weight:600;color:#566B68">Fee</span><span style="font-size:14px;font-weight:800">Rs {{d.fee}}</span></span>
+            <span style="width:1px;background:#E1E7E4"></span>
+            <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:11px;font-weight:600;color:#566B68">Distance</span><span style="font-size:14px;font-weight:800">{{d.dist}} km</span></span>
+            <span style="width:1px;background:#E1E7E4"></span>
+            <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:11px;font-weight:600;color:#566B68">Reviews</span><span style="font-size:14px;font-weight:800">{{d.reviews}}</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;margin-top:10px;font-size:13px;font-weight:700"><span style="width:9px;height:9px;border-radius:50%;background:{{d.dot}};box-shadow:0 0 0 2px #fff"></span>{{d.status}}</div>
+          <div style="display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:12.5px;font-weight:600;line-height:1.35;color:#3E5754"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.800 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg><span>{{d.addr}}</span></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <a href="Doctor.dc.html" class="press" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;height:46px;border-radius:23px;background:#fff;color:#0F2A2E;font-size:14px;font-weight:700">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              View profile
+            </a>
+            <button class="press" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;height:46px;border:0;border-radius:23px;background:#0F2A2E;color:#fff;font-size:14px;font-weight:700;cursor:pointer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>
+              Call now
+            </button>
+          </div>
+        </div>
+      </sc-for>
+
+      <sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:28px 20px;border-radius:16px;border:1px dashed #C9D3CF;text-align:center">
+          <span style="font-size:16px;font-weight:700">No doctors listed here yet</span>
+          <span style="font-size:13px;font-weight:500;color:#566B68;line-height:1.45">Know a good one in Mardan? Add their profile and help others find them.</span>
+          <a href="Register.dc.html" class="press" style="margin-top:8px;display:flex;align-items:center;height:44px;padding:0 20px;border-radius:22px;background:#0B6B5C;color:#fff;font-size:14px;font-weight:700">Add a doctor</a>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="flex:none;height:84px;box-sizing:border-box;background:#fff;border-top:1px solid #E1E7E4;display:flex;justify-content:space-around;align-items:flex-start;padding:8px 8px 0">
+    <a href="Main.dc.html" class="press" style="width:68px;color:#0B6B5C;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px;border-radius:15px;background:#DDF0EA"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4zM10 20v-6h4v6"></path></svg></span>Home
+    </a>
+    <a href="Search.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4"></path></svg></span>Search
+    </a>
+    <a href="Map.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg></span>Map
+    </a>
+    <a href="Community.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v9H9l-4 3v-3H4zM16 9h4v8h-1v3l-3-3h-5v-2"></path></svg></span>Community
+    </a>
+    <a href="Profile.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 4-6 8-6s8 2 8 6"></path></svg></span>Profile
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { spec: 'All' };
+  }
+  renderVals() {
+    const ADDR = {"Dr. Sana Yousafzai": "Sana Clinic, Bank Road, Mardan", "Dr. Imran Khattak": "Heart Care Centre, Sheikh Maltoon Town", "Dr. Naeem Shah": "Child Care Clinic, Takht Bhai Road", "Dr. Zarmina Gul": "Skin & Beauty Clinic, Hoti Mardan", "Dr. Fawad Ali": "City Medical Centre, Shamsi Road", "Dr. Aisha Rehman": "Rehman Clinic, Par Hoti", "Dr. Bilal Afridi": "ENT Clinic, Mardan Medical Complex"};
+    const spec = this.state.spec;
+    const specs = ['All', 'General Physician', 'Cardiologist', 'Dermatologist', 'Gynecologist', 'Pediatrician', 'ENT', 'Orthopedic', 'Eye Specialist', 'Dentist', 'Psychiatrist'];
+    const cards = ['#E1F3EC', '#E3EBFF', '#FFE9DA', '#F8E3EE', '#F1EFD8'];
+    const dots = { open: '#1FA463', closed: '#8A9A96', leave: '#FF7A1A' };
+    const all = [
+      { name: 'Dr. Sana Yousafzai', spec: 'Gynecologist', dist: '1.2', rating: '4.9', reviews: '186', fee: '1,500', st: 'open', status: 'Open now  ·  until 8 PM', slots: ['Mon  5–8 PM', 'Tue  5–8 PM', 'Wed  5–8 PM', 'Sat  10 AM–2 PM'] },
+      { name: 'Dr. Imran Khattak', spec: 'Cardiologist', dist: '2.8', rating: '4.8', reviews: '143', fee: '2,000', st: 'closed', status: 'Closed  ·  opens 5 PM', slots: ['Mon  5–9 PM', 'Wed  5–9 PM', 'Thu  5–9 PM', 'Sat  4–8 PM'] },
+      { name: 'Dr. Naeem Shah', spec: 'Pediatrician', dist: '4.1', rating: '4.8', reviews: '207', fee: '1,000', st: 'open', status: 'Open now  ·  until 9 PM', slots: ['Mon  4–9 PM', 'Tue  4–9 PM', 'Fri  4–9 PM', 'Sun  4–9 PM'] },
+      { name: 'Dr. Zarmina Gul', spec: 'Dermatologist', dist: '3.4', rating: '4.7', reviews: '98', fee: '1,200', st: 'open', status: 'Open now  ·  until 6 PM', slots: ['Mon  10 AM–6 PM', 'Tue  10 AM–6 PM', 'Thu  10 AM–6 PM', 'Fri  10 AM–1 PM'] },
+      { name: 'Dr. Fawad Ali', spec: 'General Physician', dist: '0.9', rating: '4.6', reviews: '311', fee: '800', st: 'leave', status: 'On leave till 20 Oct', slots: ['Mon  9 AM–2 PM', 'Tue  9 AM–2 PM', 'Wed  9 AM–2 PM', 'Thu  9 AM–2 PM'] },
+      { name: 'Dr. Aisha Rehman', spec: 'General Physician', dist: '1.7', rating: '4.5', reviews: '76', fee: '700', st: 'closed', status: 'Closed  ·  opens 4 PM', slots: ['Tue  4–7 PM', 'Wed  4–7 PM', 'Thu  4–7 PM', 'Sat  4–7 PM'] }
+    ];
+    const list = all.filter((d) => spec === 'All' || d.spec === spec);
+    const initials = (n) => n.replace('Dr. ', '').split(' ').map((w) => w[0]).join('');
+    const feat = list[0];
+    const rest = list.slice(1);
+    const shape = (d, i) => ({
+      addr: ADDR[d.name], name: d.name, spec: d.spec, dist: d.dist, rating: d.rating, reviews: d.reviews, fee: d.fee,
+      initials: initials(d.name), status: d.status, dot: dots[d.st], card: cards[i % cards.length]
+    });
+    return {
+      chips: specs.map((s) => ({
+        name: s, on: s === spec,
+        bg: s === spec ? '#0B6B5C' : '#fff',
+        border: s === spec ? '#0B6B5C' : '#E1E7E4',
+        fg: s === spec ? '#fff' : '#0F2A2E',
+        pick: () => this.setState({ spec: s })
+      })),
+      hasFeatured: !!feat,
+      f: feat ? { ...shape(feat, 0), slots: feat.slots } : { name: '', initials: '', spec: '', dist: '', rating: '', reviews: '', status: '', dot: '#8A9A96', slots: [], addr: '' },
+      heading: !feat ? (spec === 'All' ? 'Doctors in Mardan' : spec + 's in Mardan') : (spec === 'All' ? 'More doctors in Mardan' : 'More ' + spec + 's'),
+      empty: list.length === 0,
+      doctors: rest.map((d, i) => shape(d, i))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,50 +1,56 @@
 import 'package:flutter/material.dart';
 
 /// Fauridoc design system — sampled from the 16-screen design PDF
-/// (design_ref/page-*.png). Poppins for Latin, Noto Nastaliq Urdu for Urdu.
+/// (design/fauridoc-screens.html). Albert Sans for Latin, Noto Nastaliq Urdu for Urdu.
 class FdColors {
-  static const primary = Color(0xFF0B6B5D); // teal: splash, buttons, chips
-  static const primaryDark = Color(0xFF095A4D);
-  static const ink = Color(0xFF0F2B2B); // headings + dark "Call" buttons
-  static const inkSoft = Color(0xFF3D4F4E); // body grey-green
-  static const muted = Color(0xFF7A8B8A); // secondary text
-  static const line = Color(0xFFE3E8E7); // hairlines, chip borders
+  static const primary = Color(0xFF0B6B5C); // teal: splash, buttons, chips
+  static const primaryDark = Color(0xFF0B5446);
+  static const ink = Color(0xFF0F2A2E); // headings + dark "Call" buttons
+  static const inkSoft = Color(0xFF3E5754); // body grey-green
+  static const muted = Color(0xFF566B68); // secondary text
+  static const line = Color(0xFFE1E7E4); // hairlines, chip borders
 
-  static const lime = Color(0xFFD2F456); // "Top rated near you" card
+  static const lime = Color(0xFFD2F55A); // "Top rated near you" card
   static const limeLight = Color(0xFFEFFAC2); // time pills on lime
-  static const red = Color(0xFFC62827); // emergency
-  static const redSoft = Color(0xFFF9DDDA); // pink chips / headers
+  static const red = Color(0xFFC62828); // emergency
+  static const redSoft = Color(0xFFF8DDDB); // pink chips / headers
   static const redInk = Color(0xFFB3261E);
-  static const mint = Color(0xFFE2F3ED); // search cards, status cards
+  static const mint = Color(0xFFDDF0EA); // search cards, status cards
   static const mintDeep = Color(0xFFDDF0EA); // avatars, nav pill
-  static const mintInk = Color(0xFF0B6B5D);
-  static const lavender = Color(0xFFE3EBFD); // alt cards, lab header
-  static const lavenderInk = Color(0xFF3B4A9E);
+  static const mintInk = Color(0xFF0B6B5C);
+  static const lavender = Color(0xFFE3E9FF); // alt cards, lab header
+  static const lavenderInk = Color(0xFF2B3F9E);
   static const peach = Color(0xFFFFE6D2); // doctor header
-  static const peachInk = Color(0xFF9A5B1E);
+  static const peachInk = Color(0xFF8A3F00);
   static const amberCard = Color(0xFFFFF9ED); // pinned community card
-  static const amberStrong = Color(0xFFF7B204); // rating bars, 1122 badge
+  static const amberStrong = Color(0xFFF5B400); // rating bars, 1122 badge
   static const amberInk = Color(0xFF8A5A00);
   static const amberSoft = Color(0xFFFFF0DB); // pending pills
 
-  static const bg = Color(0xFFF7F9F8);
+  static const bg = Color(0xFFF5F7F6);
   static const card = Colors.white;
-  static const starGold = Color(0xFFF7B204);
+  static const starGold = Color(0xFFF5B400);
 
   /// Alternating pastel card backgrounds for search/list rows.
-  static const cardTints = [mint, lavender, redSoft, peach, amberSoft];
+  static const cardTints = [
+    Color(0xFFE1F3EC),
+    Color(0xFFE3EBFF),
+    Color(0xFFFFE9DA),
+    Color(0xFFF8E3EE),
+    Color(0xFFF1EFD8),
+  ];
 
   /// Header banner tints per entity type.
   static const doctorHeader = peach;
   static const labHeader = lavender;
-  static const hospitalHeader = Color(0xFFFBE3E3);
+  static const hospitalHeader = Color(0xFFF8DDDB);
 
   static Color tintForIndex(int i) => cardTints[i % cardTints.length];
 }
 
 /// Central type scale. [isUrdu] swaps the family to Nastaliq.
 class FdType {
-  static const latin = 'Poppins';
+  static const latin = 'AlbertSans';
   static const urdu = 'NotoNastaliqUrdu';
 
   static String family(bool isUrdu) => isUrdu ? urdu : latin;
@@ -615,7 +621,7 @@ class FdInfoRow {
 }
 
 /// Bottom navigation bar from the design: 5 items, mint pill on active.
-class FdBottomNav extends StatelessWidget {
+class FdBottomNav extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final bool isUrdu;
@@ -629,6 +635,13 @@ class FdBottomNav extends StatelessWidget {
     this.isUrdu = false,
   });
 
+  @override
+  State<FdBottomNav> createState() => _FdBottomNavState();
+}
+
+class _FdBottomNavState extends State<FdBottomNav> {
+  int _pressed = -1;
+
   static const _icons = [
     Icons.home_outlined,
     Icons.search,
@@ -636,66 +649,74 @@ class FdBottomNav extends StatelessWidget {
     Icons.forum_outlined,
     Icons.person_outlined,
   ];
-  static const _iconsActive = [
-    Icons.home,
-    Icons.search,
-    Icons.location_on,
-    Icons.forum,
-    Icons.person,
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final bottomPad = MediaQuery.of(context).padding.bottom;
     return Container(
+      height: 84 + bottomPad,
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: FdColors.line)),
       ),
-      padding: EdgeInsets.only(
-        top: 10,
-        bottom: MediaQuery.of(context).padding.bottom + 10,
-      ),
+      padding: EdgeInsets.only(top: 8, bottom: bottomPad),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (var i = 0; i < 5; i++)
-            Expanded(
-              child: GestureDetector(
-                onTap: () => onTap(i),
-                behavior: HitTestBehavior.opaque,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: i == currentIndex
-                            ? FdColors.mintDeep
-                            : Colors.transparent,
-                        borderRadius:
-                            BorderRadius.circular(FdDim.pillRadius),
+            GestureDetector(
+              onTapDown: (_) => setState(() => _pressed = i),
+              onTapUp: (_) {
+                setState(() => _pressed = -1);
+                widget.onTap(i);
+              },
+              onTapCancel: () => setState(() => _pressed = -1),
+              behavior: HitTestBehavior.opaque,
+              child: AnimatedScale(
+                scale: _pressed == i ? 0.97 : 1.0,
+                duration: const Duration(milliseconds: 80),
+                child: SizedBox(
+                  width: 68,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 30,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: i == widget.currentIndex
+                              ? FdColors.mint
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Icon(
+                          _icons[i],
+                          color: i == widget.currentIndex
+                              ? FdColors.primary
+                              : FdColors.muted,
+                          size: 22,
+                        ),
                       ),
-                      child: Icon(
-                        i == currentIndex ? _iconsActive[i] : _icons[i],
-                        color: i == currentIndex
-                            ? FdColors.primary
-                            : FdColors.muted,
-                        size: 26,
+                      const SizedBox(height: 3),
+                      Text(
+                        widget.labels[i],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: FdType.body(
+                          widget.isUrdu,
+                          size: 11,
+                          w: i == widget.currentIndex
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                          color: i == widget.currentIndex
+                              ? FdColors.primary
+                              : FdColors.muted,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      labels[i],
-                      style: FdType.body(
-                        isUrdu,
-                        size: 12.5,
-                        w: FontWeight.w600,
-                        color: i == currentIndex
-                            ? FdColors.primary
-                            : FdColors.muted,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin panel</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F5F7F6}
+button{font-family:inherit}
+a{text-decoration:none;color:inherit}
+.noscroll{scrollbar-width:none}
+.noscroll::-webkit-scrollbar{display:none}
+.press{transition:transform .08s ease-out;-webkit-tap-highlight-color:transparent}
+.press:active{transform:scale(.97)}
+.press:focus-visible{outline:2px solid #0B6B5C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F5F7F6;color:#0F2A2E;font-family:'Albert Sans',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden">
+
+  <div style="flex:none;display:flex;align-items:center;gap:4px;padding:48px 10px 8px 10px">
+    <a href="Profile.dc.html" class="press" aria-label="Back to profile" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#0F2A2E">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <span style="display:flex;flex-direction:column">
+      <span style="font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.15">Admin panel</span>
+      <span style="font-size:13px;font-weight:500;color:#566B68">Live counts</span>
+    </span>
+  </div>
+
+  <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto;padding:6px 20px 24px">
+
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      <sc-for list="{{counts}}" as="c" hint-placeholder-count="6">
+        <div style="padding:12px;border-radius:14px;background:{{c.bg}};border:1px solid {{c.border}};display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:22px;font-weight:800;letter-spacing:-.02em;color:{{c.fg}}">{{c.n}}</span>
+          <span style="font-size:12px;font-weight:600;color:{{c.label}}">{{c.name}}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px">
+      <span style="font-size:17px;font-weight:800">Pending approval</span>
+      <span style="font-size:13px;font-weight:700;color:#8A4B00">{{pendingText}}</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{pending}}" as="p" hint-placeholder-count="4">
+        <div style="padding:14px;border-radius:16px;background:{{p.bg}};border:1px solid {{p.border}}">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:{{p.tint}};color:{{p.ink}}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{p.d}}"></path></svg>
+            </span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+              <span style="font-size:15px;font-weight:700">{{p.name}}</span>
+              <span style="font-size:12.5px;font-weight:500;color:#566B68">{{p.meta}}</span>
+            </span>
+            <sc-if value="{{p.done}}" hint-placeholder-val="{{ false }}"><span style="padding:3px 10px;border-radius:11px;background:{{p.badgeBg}};color:{{p.badgeFg}};font-size:12px;font-weight:700">{{p.result}}</span></sc-if>
+          </div>
+          <sc-if value="{{p.open}}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:8px;margin-top:12px">
+              <button class="press" onClick="{{p.approve}}" style="flex:1.2;height:46px;border:0;border-radius:14px;background:#0B6B5C;color:#fff;font-size:14px;font-weight:700;cursor:pointer">Approve</button>
+              <button class="press" onClick="{{p.reject}}" style="flex:1;height:46px;border-radius:14px;border:1.5px solid #E3B6B2;background:#fff;color:#A11F1F;font-size:14px;font-weight:700;cursor:pointer">Reject</button>
+              <button class="press" aria-label="Open the full submission" style="flex:none;width:46px;height:46px;border-radius:14px;border:1.5px solid #E1E7E4;background:#fff;color:#0F2A2E;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+              </button>
+            </div>
+          </sc-if>
+          <sc-if value="{{p.done}}" hint-placeholder-val="{{ false }}">
+            <button class="press" onClick="{{p.undo}}" style="margin-top:8px;height:40px;padding:0;border:0;background:transparent;color:#0B6B5C;font-size:13px;font-weight:700;cursor:pointer">Undo</button>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:24px 0 4px">
+      <span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#566B68">Needs a look</span>
+      <span style="flex:1;height:1px;background:#E1E7E4"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+      <div style="padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #E1E7E4;display:flex;align-items:center;gap:12px">
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:13px;font-weight:700;color:#A11F1F">Flagged review  ·  2 reports</span>
+          <span style="font-size:14px;font-weight:500;line-height:1.35;color:#2E4744">“Visit my page for cheaper medicine...”</span>
+        </span>
+        <button class="press" style="flex:none;height:44px;padding:0 16px;border-radius:12px;border:1.5px solid #E3B6B2;background:#fff;color:#A11F1F;font-size:13px;font-weight:700;cursor:pointer">Delete</button>
+      </div>
+      <div style="padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #E1E7E4;display:flex;align-items:center;gap:12px">
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:13px;font-weight:700;color:#8A4B00">Community post  ·  useful, many votes</span>
+          <span style="font-size:14px;font-weight:500;line-height:1.35;color:#2E4744">Where can I find a good skin specialist in Mardan?</span>
+        </span>
+        <button class="press" style="flex:none;height:44px;padding:0 16px;border-radius:12px;border:1.5px solid #0B6B5C;background:#fff;color:#0B6B5C;font-size:13px;font-weight:700;cursor:pointer">Pin</button>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:24px 0 4px">
+      <span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#566B68">Manage</span>
+      <span style="flex:1;height:1px;background:#E1E7E4"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;margin-top:6px;background:#fff;border:1px solid #E1E7E4;border-radius:16px;padding:0 14px">
+      <sc-for list="{{manage}}" as="m" hint-placeholder-count="5">
+        <div style="display:flex;align-items:center;gap:12px;min-height:54px;border-bottom:1px solid {{m.line}}">
+          <span style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:15px;font-weight:600">{{m.name}}</span><span style="font-size:12px;font-weight:500;color:#566B68">{{m.hint}}</span></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA9A5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { done: {} };
+  }
+  renderVals() {
+    const done = this.state.done;
+    const P = {
+      doctor: { tint: '#DDF0EA', ink: '#0B5446', d: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 4-6 8-6s8 2 8 6' },
+      lab: { tint: '#E3E9FF', ink: '#2B3F9E', d: 'M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3M8 15h8' },
+      hospital: { tint: '#F8DDDB', ink: '#C62828', d: 'M12 5v14M5 12h14' }
+    };
+    const rows = [
+      { id: 'a', t: 'lab', name: 'Sehat Clinical Lab', meta: 'Lab  ·  Mardan  ·  submitted yesterday' },
+      { id: 'b', t: 'doctor', name: 'Dr. Bilal Afridi', meta: 'ENT  ·  Mardan  ·  submitted 2 days ago' },
+      { id: 'c', t: 'hospital', name: 'Mardan Women & Child Care', meta: 'Hospital  ·  Mardan  ·  admin created' },
+      { id: 'd', t: 'doctor', name: 'Dr. Hira Naz', meta: 'Pediatrician  ·  Nowshera  ·  3 days ago' }
+    ];
+    const set = (id, v) => this.setState({ done: { ...this.state.done, [id]: v } });
+    const base = { doctor: 128, lab: 34, hospital: 12 };
+    let pendingN = 0;
+    rows.forEach((r) => {
+      if (!done[r.id]) pendingN++;
+      if (done[r.id] === 'approved') base[r.t]++;
+    });
+    const card = (name, n, bg, border, fg, label) => ({ name: name, n: n, bg: bg, border: border, fg: fg, label: label });
+    return {
+      counts: [
+        card('Doctors', String(base.doctor), '#fff', '#E1E7E4', '#0F2A2E', '#566B68'),
+        card('Labs', String(base.lab), '#fff', '#E1E7E4', '#0F2A2E', '#566B68'),
+        card('Hospitals', String(base.hospital), '#fff', '#E1E7E4', '#0F2A2E', '#566B68'),
+        card('Pending', String(pendingN), '#FFF0DC', '#F4D9B2', '#8A4B00', '#8A4B00'),
+        card('Users', '2,406', '#fff', '#E1E7E4', '#0F2A2E', '#566B68'),
+        card('Reviews', '1,873', '#fff', '#E1E7E4', '#0F2A2E', '#566B68')
+      ],
+      pendingText: pendingN === 0 ? 'All caught up' : pendingN + ' waiting',
+      pending: rows.map((r) => {
+        const st = done[r.id];
+        return {
+          name: r.name, meta: r.meta, tint: P[r.t].tint, ink: P[r.t].ink, d: P[r.t].d,
+          open: !st, done: !!st,
+          result: st === 'approved' ? 'Approved' : 'Rejected',
+          badgeBg: st === 'approved' ? '#E4F3EF' : '#F8DDDB', badgeFg: st === 'approved' ? '#0B5446' : '#A11F1F',
+          bg: st ? '#FAFBFA' : '#fff', border: '#E1E7E4',
+          approve: () => set(r.id, 'approved'), reject: () => set(r.id, 'rejected'), undo: () => set(r.id, null)
+        };
+      }),
+      manage: [
+        { name: 'Doctors, labs and hospitals', hint: 'Edit or delete any profile, add one for someone offline' },
+        { name: 'Cities', hint: 'Mardan, Peshawar, Abbottabad, Swabi and more' },
+        { name: 'Specializations and test categories', hint: 'Change the lists without an app update' },
+        { name: 'Reviews and community posts', hint: 'Remove abuse and spam, pin important posts' }
+      ].map((m, i, a) => ({ ...m, line: i === a.length - 1 ? 'transparent' : '#EEF1F0' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

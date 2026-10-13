@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../../design/tokens.dart';
 import '../l10n/strings.dart';
 import '../l10n/strings_b.dart';
 import '../models/doctor.dart';
@@ -19,6 +20,12 @@ import 'lab_detail_screen.dart';
 /// Search tab (design page 05): title, live search field, Doctors / Lab Tests
 /// / Hospitals segmented control, filter chips, and result cards.
 /// Body-only — the bottom nav lives in HomeShell.
+///
+/// Pixel pass: all sizes / radii / colors below are taken literally from
+/// design/fauridoc-screens.html (1 CSS px = 1 logical px). Private `_`-prefixed
+/// widgets are used wherever the shared theme widgets don't match the spec.
+/// The HTML artboard only shows the Doctors tab; lab/hospital cards reuse the
+/// same pastel-card language for consistency (no invented tags).
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
@@ -286,35 +293,40 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     return Scaffold(
       backgroundColor: FdColors.bg,
+      // Spec artboard is edge-to-edge: header padding already includes the
+      // 52/48px status-bar area, so the top safe-area inset is disabled.
       body: SafeArea(
+        top: false,
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Fixed header: padding 52 20 0 (EN) / 48 20 0 (UR).
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  FdDim.page, 14, FdDim.page, 0),
-              child: Text(trB(ref, 'search.title'),
-                  style: FdType.display(ur, size: 34)),
-            ),
-            const SizedBox(height: 14),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: FdDim.page),
-              child: FdSearchField(
-                hint: trB(ref, 'search.hint'),
-                isUrdu: ur,
-                onChanged: (v) => setState(() => _query = v.trim()),
+              padding: EdgeInsets.fromLTRB(20, ur ? 48 : 52, 20, 0),
+              child: Text(
+                trB(ref, 'search.title'),
+                style: TextStyle(
+                  fontFamily: FdType.family(ur),
+                  // EN: 28/800 ls -0.02em. UR mirrors HomeUrdu scale.
+                  fontSize: ur ? 25 : 28,
+                  fontWeight:
+                      ur ? FontWeight.w700 : FontWeight.w800,
+                  color: FdSpec.ink,
+                  height: ur ? 1.75 : null,
+                  letterSpacing: ur ? 0 : -0.56,
+                ),
               ),
             ),
-            const SizedBox(height: 14),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: FdDim.page),
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+              child: _searchBox(ur),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               child: _segmented(ur),
             ),
-            const SizedBox(height: 14),
             _filterChips(city, locale, ur),
-            const SizedBox(height: 6),
             Expanded(child: _results(city, locale, ur)),
           ],
         ),
@@ -322,8 +334,56 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
+  // -- search box --------------------------------------------------------------
+
+  /// Spec: height 50, radius 14, 1px border, 20px icon, input 15/500 ink,
+  /// hint inherits muted.
+  Widget _searchBox(bool ur) {
+    return Container(
+      height: 50,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: FdSpec.border),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.search, color: FdSpec.muted, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextField(
+              onChanged: (v) => setState(() => _query = v.trim()),
+              style: TextStyle(
+                fontFamily: FdType.family(ur),
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: FdSpec.ink,
+              ),
+              decoration: InputDecoration(
+                hintText: trB(ref, 'search.hint'),
+                hintStyle: TextStyle(
+                  fontFamily: FdType.family(ur),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: FdSpec.muted,
+                ),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // -- segmented control -------------------------------------------------------
 
+  /// Spec: margin-top 12, padding 4, radius 14, bg #E8EEEC, gap 4;
+  /// segments h40 radius 11, 14px — selected: white bg, primary, 800,
+  /// 0 1px 3px shadow; unselected: transparent, muted, 600.
   Widget _segmented(bool ur) {
     final tabs = [
       trB(ref, 'search.doctors'),
@@ -331,47 +391,54 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       trB(ref, 'search.hospitals'),
     ];
     return Container(
-      height: 62,
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: FdColors.mint,
-        borderRadius: BorderRadius.circular(FdDim.pillRadius),
+        color: const Color(0xFFE8EEEC),
+        borderRadius: BorderRadius.circular(14),
       ),
-      padding: const EdgeInsets.all(6),
       child: Row(
         children: [
-          for (var i = 0; i < 3; i++)
+          for (var i = 0; i < 3; i++) ...[
+            if (i > 0) const SizedBox(width: 4),
             Expanded(
-              child: GestureDetector(
+              child: _FdPress(
                 onTap: () => setState(() => _tab = i),
                 child: Container(
-                  alignment: Alignment.center,
+                  height: 40,
                   decoration: BoxDecoration(
-                    color: _tab == i ? Colors.white : Colors.transparent,
-                    borderRadius:
-                        BorderRadius.circular(FdDim.pillRadius),
+                    color:
+                        _tab == i ? Colors.white : Colors.transparent,
+                    borderRadius: BorderRadius.circular(11),
                     boxShadow: _tab == i
-                        ? [
+                        ? const [
                             BoxShadow(
-                              color:
-                                  Colors.black.withValues(alpha: 0.06),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                              // rgba(15, 42, 46, 0.14) 0 1px 3px.
+                              color: Color(0x240F2A2E),
+                              blurRadius: 3,
+                              offset: Offset(0, 1),
                             ),
                           ]
                         : null,
                   ),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     tabs[i],
-                    style: FdType.body(
-                      ur,
-                      size: 15,
-                      w: FontWeight.w700,
-                      color: _tab == i ? FdColors.primary : FdColors.muted,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: FdType.family(ur),
+                      fontSize: 14,
+                      fontWeight: _tab == i
+                          ? FontWeight.w800
+                          : FontWeight.w600,
+                      color: _tab == i ? FdSpec.primary : FdSpec.muted,
                     ),
                   ),
                 ),
               ),
             ),
+          ],
         ],
       ),
     );
@@ -379,125 +446,96 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   // -- filter chips ------------------------------------------------------------
 
+  /// Spec: full-bleed row (margin 12/-20/0, padding 0 20, gap 8); chips
+  /// h38, padding 0 12, radius 19, 1px border, 13/600 ink, gap 6.
   Widget _filterChips(String city, String locale, bool ur) {
     final specsAsync = ref.watch(_searchSpecialtiesProvider);
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: FdDim.page),
-      child: Row(
-        children: [
-          _dropdownChip(
-            label: city,
-            onTap: _showCitySheet,
-            ur: ur,
-          ),
-          if (_tab == 0) ...[
-            const SizedBox(width: 10),
-            specsAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-              data: (specs) => _dropdownChip(
-                label: _specialty == null
-                    ? trB(ref, 'search.allSpecialties')
-                    : specialtyLabel(locale, _specialty!),
-                onTap: () => _showSpecialtySheet(specs),
-                ur: ur,
+    return Container(
+      margin: const EdgeInsets.only(top: 12, left: -20, right: -20),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          children: [
+            _filterChip(
+              label: city,
+              chevron: true,
+              ur: ur,
+              onTap: _showCitySheet,
+            ),
+            if (_tab == 0) ...[
+              const SizedBox(width: 8),
+              specsAsync.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (specs) => _filterChip(
+                  label: _specialty == null
+                      ? trB(ref, 'search.allSpecialties')
+                      : specialtyLabel(locale, _specialty!),
+                  chevron: true,
+                  ur: ur,
+                  onTap: () => _showSpecialtySheet(specs),
+                ),
               ),
+            ],
+            const SizedBox(width: 8),
+            _filterChip(
+              label: trB(ref, 'search.within5km'),
+              icon: Icons.location_on_outlined,
+              selected: _within5km,
+              ur: ur,
+              onTap: () async {
+                if (!_within5km) await _ensurePosition();
+                setState(() => _within5km = !_within5km);
+              },
             ),
           ],
-          const SizedBox(width: 10),
-          _toggleChip(
-            label: trB(ref, 'search.within5km'),
-            icon: Icons.location_on_outlined,
-            selected: _within5km,
-            ur: ur,
-            onTap: () async {
-              if (!_within5km) await _ensurePosition();
-              setState(() => _within5km = !_within5km);
-            },
-          ),
-          const SizedBox(width: FdDim.page),
-        ],
-      ),
-    );
-  }
-
-  Widget _dropdownChip({
-    required String label,
-    required VoidCallback onTap,
-    required bool ur,
-  }) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(FdDim.pillRadius),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(FdDim.pillRadius),
-        onTap: onTap,
-        child: Container(
-          height: FdDim.chipHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(FdDim.pillRadius),
-            border: Border.all(color: FdColors.line, width: 1.4),
-          ),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: FdType.body(ur,
-                    size: 15, w: FontWeight.w600, color: FdColors.ink),
-              ),
-              const SizedBox(width: 6),
-              const Icon(Icons.keyboard_arrow_down,
-                  color: FdColors.muted, size: 20),
-            ],
-          ),
         ),
       ),
     );
   }
 
-  Widget _toggleChip({
+  Widget _filterChip({
     required String label,
-    required IconData icon,
-    required bool selected,
     required bool ur,
     required VoidCallback onTap,
+    IconData? icon,
+    bool chevron = false,
+    bool selected = false,
   }) {
-    return Material(
-      color: selected ? FdColors.primary : Colors.white,
-      borderRadius: BorderRadius.circular(FdDim.pillRadius),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(FdDim.pillRadius),
-        onTap: onTap,
-        child: Container(
-          height: FdDim.chipHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(FdDim.pillRadius),
-            border: selected
-                ? null
-                : Border.all(color: FdColors.line, width: 1.4),
-          ),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon,
-                  size: 20,
-                  color: selected ? Colors.white : FdColors.muted),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: FdType.body(ur,
-                    size: 15,
-                    w: FontWeight.w600,
-                    color: selected ? Colors.white : FdColors.ink),
-              ),
+    final fg = selected ? Colors.white : FdSpec.ink;
+    return _FdPress(
+      onTap: onTap,
+      child: Container(
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: selected ? FdSpec.primary : Colors.white,
+          borderRadius: BorderRadius.circular(19),
+          border: Border.all(
+              color: selected ? FdSpec.primary : FdSpec.border),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 15, color: fg),
+              const SizedBox(width: 6),
             ],
-          ),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: FdType.family(ur),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: fg,
+              ),
+            ),
+            if (chevron) ...[
+              const SizedBox(width: 6),
+              Icon(Icons.expand_more, size: 13, color: fg),
+            ],
+          ],
         ),
       ),
     );
@@ -522,10 +560,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ur: ur,
             empty: doctors.isEmpty,
             children: [
-              for (var i = 0; i < doctors.length; i++) ...[
+              for (var i = 0; i < doctors.length; i++)
                 _doctorCard(doctors[i], i, locale, ur),
-                const SizedBox(height: 14),
-              ],
             ],
           );
         },
@@ -546,10 +582,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ur: ur,
             empty: labs.isEmpty,
             children: [
-              for (var i = 0; i < labs.length; i++) ...[
+              for (var i = 0; i < labs.length; i++)
                 _labCard(labs[i], i, ur),
-                const SizedBox(height: 14),
-              ],
             ],
           );
         },
@@ -570,16 +604,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ur: ur,
           empty: hospitals.isEmpty,
           children: [
-            for (var i = 0; i < hospitals.length; i++) ...[
+            for (var i = 0; i < hospitals.length; i++)
               _hospitalCard(hospitals[i], i, ur),
-              const SizedBox(height: 14),
-            ],
           ],
         );
       },
     );
   }
 
+  /// Spec: scroll padding 14 20 16; count 13/600 muted; cards gap 10,
+  /// margin-top 10.
   Widget _listShell({
     required String countText,
     required bool ur,
@@ -587,24 +621,39 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     required List<Widget> children,
   }) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
-          FdDim.page, 8, FdDim.page, 28),
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(countText,
-              style: FdType.body(ur, size: 15, color: FdColors.inkSoft)),
-          const SizedBox(height: 12),
-          if (empty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32),
-              child: Text(
-                trB(ref, 'search.noResults'),
-                style: FdType.body(ur, color: FdColors.muted),
-              ),
-            )
-          else
-            ...children,
+          Text(
+            countText,
+            style: TextStyle(
+              fontFamily: FdType.family(ur),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: FdSpec.muted,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: empty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Text(
+                      trB(ref, 'search.noResults'),
+                      style: FdType.body(ur, color: FdColors.muted),
+                    ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < children.length; i++) ...[
+                        if (i > 0) const SizedBox(height: 10),
+                        children[i],
+                      ],
+                    ],
+                  ),
+          ),
         ],
       ),
     );
@@ -612,159 +661,604 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   // -- cards ---------------------------------------------------------------------
 
+  /// Same pastel-card language as the Home list cards (spec page 05):
+  /// padding 12, radius 22; 56x56 avatar r16; name 16/800 + 16px tick;
+  /// specialty 13/600; rating pill; white stat strip; 13/700 status;
+  /// 12.5/600 address; h46 buttons 14/700.
   Widget _doctorCard(Doctor d, int index, String locale, bool ur) {
     final dist = _distanceKm(d.lat, d.lng);
     final open = _isOpen(d);
+    final addressLine = [
+      if (d.clinicName.isNotEmpty) d.clinicName,
+      if (d.address.isNotEmpty) d.address,
+      d.city,
+    ].where((s) => s.isNotEmpty).join(', ');
     return Container(
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: FdColors.tintForIndex(index),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(22),
       ),
-      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FdAvatarTile(name: d.name, size: 76, bg: Colors.white),
-              const SizedBox(width: 14),
+              _avatar(
+                d.name,
+                ur,
+                size: 56,
+                radius: 16,
+                fontSize: ur ? 22 : 19,
+                weight: ur ? FontWeight.w700 : FontWeight.w800,
+                color: FdSpec.ink,
+                textHeight: ur ? 1 : null,
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Expanded(
-                          child:
-                              Text(d.name, style: FdType.title(ur, size: 18)),
+                        Flexible(
+                          child: Text(
+                            d.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: FdType.family(ur),
+                              fontSize: ur ? 15 : 16,
+                              fontWeight: ur
+                                  ? FontWeight.w700
+                                  : FontWeight.w800,
+                              color: FdSpec.ink,
+                              height: ur ? 1.8 : null,
+                            ),
+                          ),
                         ),
-                        if (d.verified) ...[
-                          const SizedBox(width: 6),
-                          const FdVerifiedBadge(size: 20),
-                        ],
+                        const SizedBox(width: 5),
+                        if (d.verified) const FdVerifiedBadge(size: 16),
                       ],
                     ),
-                    const SizedBox(height: 2),
                     Text(
                       specialtyLabel(locale, d.specialty),
-                      style:
-                          FdType.body(ur, size: 15, color: FdColors.inkSoft),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: FdType.family(ur),
+                        fontSize: ur ? 12.5 : 13,
+                        fontWeight:
+                            ur ? FontWeight.w500 : FontWeight.w600,
+                        color: FdSpec.secondary,
+                        height: ur ? 1.8 : null,
+                      ),
                     ),
                   ],
                 ),
               ),
               if (d.reviewCount > 0)
-                FdRatingPill(rating: d.rating, isUrdu: ur)
+                _ratingPill(d.rating, ur)
               else
                 FdNewPill(label: trB(ref, 'home.new'), isUrdu: ur),
             ],
           ),
-          const SizedBox(height: 14),
           Container(
+            margin: EdgeInsets.only(top: ur ? 8 : 10),
+            padding: EdgeInsets.symmetric(vertical: ur ? 6 : 10),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(FdDim.bannerRadius),
+              borderRadius: BorderRadius.circular(16),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 13),
             child: Row(
               children: [
-                if (d.fee != null) _stat(trB(ref, 'home.fee'), 'Rs ${d.fee}', ur),
+                if (d.fee != null)
+                  _stat(trB(ref, 'home.fee'), 'Rs ${d.fee}', ur),
                 if (d.fee != null && dist != null) _statDivider(),
                 if (dist != null)
-                  _stat(trB(ref, 'home.distance'), formatDistance(dist), ur),
+                  _stat(
+                      trB(ref, 'home.distance'), formatDistance(dist), ur),
                 if (dist != null) _statDivider(),
                 _stat(
                   trB(ref, 'home.reviews'),
                   d.reviewCount > 0 ? '${d.reviewCount}' : '–',
                   ur,
+                  latinDigits: true,
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                width: 13,
-                height: 13,
-                decoration: BoxDecoration(
-                  color: open ? FdColors.primary : FdColors.muted,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2.5),
-                ),
-              ),
-              const SizedBox(width: 7),
-              Expanded(
-                child: Text(
-                  _openText(d, ref),
-                  style: FdType.body(ur,
-                      size: 15, w: FontWeight.w700, color: FdColors.ink),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              const Icon(Icons.location_on_outlined,
-                  size: 16, color: FdColors.inkSoft),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  [
-                    if (d.clinicName.isNotEmpty) d.clinicName,
-                    if (d.address.isNotEmpty) d.address,
-                    d.city,
-                  ].where((s) => s.isNotEmpty).join(', '),
-                  style: FdType.body(ur, size: 14, color: FdColors.inkSoft),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: FdButton(
-                  label: trB(ref, 'home.viewProfile'),
-                  style: FdButtonStyle.white,
-                  icon: Icons.visibility_outlined,
-                  isUrdu: ur,
-                  onTap: () => _openDoctor(d.id),
-                ),
-              ),
-              if (d.phone.trim().isNotEmpty) ...[
-                const SizedBox(width: 12),
+          Padding(
+            padding: EdgeInsets.only(top: ur ? 6 : 10),
+            child: Row(
+              children: [
+                _statusDot(
+                    color: open ? FdSpec.openGreen : FdSpec.closedGrey),
+                const SizedBox(width: 7),
                 Expanded(
-                  child: FdButton(
-                    label: trB(ref, 'search.callNow'),
-                    style: FdButtonStyle.dark,
-                    icon: Icons.phone_outlined,
-                    isUrdu: ur,
-                    onTap: () => callNumber(context, d.phone),
+                  child: Text(
+                    _openText(d, ref),
+                    style: TextStyle(
+                      fontFamily: FdType.family(ur),
+                      fontSize: ur ? 12 : 13,
+                      fontWeight:
+                          ur ? FontWeight.w600 : FontWeight.w700,
+                      color: FdSpec.ink,
+                      height: ur ? 1.9 : null,
+                    ),
                   ),
                 ),
               ],
-            ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.location_on_outlined,
+                    size: 14, color: FdSpec.secondary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    addressLine,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: FdType.family(ur),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: FdSpec.secondary,
+                      height: ur ? 1.7 : 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: ur ? 8 : 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _pillButton(
+                    label: trB(ref, 'home.viewProfile'),
+                    icon: ur ? null : Icons.visibility_outlined,
+                    onTap: () => _openDoctor(d.id),
+                    bg: Colors.white,
+                    fg: FdSpec.ink,
+                    height: 46,
+                    fontSize: ur ? 13 : 14,
+                    weight:
+                        ur ? FontWeight.w600 : FontWeight.w700,
+                    textHeight: ur ? 1 : null,
+                    ur: ur,
+                  ),
+                ),
+                if (d.phone.trim().isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _pillButton(
+                      label: trB(ref, 'search.callNow'),
+                      icon: Icons.phone_outlined,
+                      iconSize: ur ? 17 : 18,
+                      onTap: () => callNumber(context, d.phone),
+                      bg: FdSpec.ink,
+                      fg: Colors.white,
+                      height: 46,
+                      fontSize: ur ? 13 : 14,
+                      weight:
+                          ur ? FontWeight.w600 : FontWeight.w700,
+                      textHeight: ur ? 1 : null,
+                      ur: ur,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _stat(String label, String value, bool ur) {
+  /// Lab card in the same pastel-card language (spec artboard shows only
+  /// doctors; data/logic unchanged).
+  Widget _labCard(Lab l, int index, bool ur) {
+    final dist = _distanceKm(l.lat, l.lng);
+    final minPrice = l.tests.isEmpty
+        ? null
+        : l.tests.map((t) => t.price).reduce((a, b) => a < b ? a : b);
+    return _FdPress(
+      onTap: () => _openLab(l.id),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: FdColors.tintForIndex(index),
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: FdColors.lavender,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.science_outlined,
+                  color: FdColors.lavenderInk, size: 28),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          l.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: FdType.family(ur),
+                            fontSize: ur ? 15 : 16,
+                            fontWeight:
+                                ur ? FontWeight.w700 : FontWeight.w800,
+                            color: FdSpec.ink,
+                            height: ur ? 1.8 : null,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      if (l.verified) const FdVerifiedBadge(size: 16),
+                    ],
+                  ),
+                  Text(
+                    [
+                      l.city,
+                      if (dist != null) formatDistance(dist),
+                    ].join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: FdType.family(ur),
+                      fontSize: ur ? 12.5 : 13,
+                      fontWeight:
+                          ur ? FontWeight.w500 : FontWeight.w600,
+                      color: FdSpec.secondary,
+                      height: ur ? 1.8 : null,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      if (l.reviewCount > 0)
+                        _ratingPill(l.rating, ur)
+                      else
+                        FdNewPill(
+                            label: trB(ref, 'home.new'), isUrdu: ur),
+                      const Spacer(),
+                      if (minPrice != null)
+                        Flexible(
+                          child: Text(
+                            fill(trB(ref, 'search.testsFrom'), {
+                              'count': '${l.tests.length}',
+                              'price': '$minPrice'
+                            }),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: FdType.family(ur),
+                              fontSize: ur ? 12.5 : 13,
+                              fontWeight: FontWeight.w700,
+                              color: FdSpec.primary,
+                              height: ur ? 1.8 : null,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Hospital card in the same pastel-card language (data/logic unchanged).
+  Widget _hospitalCard(Hospital h, int index, bool ur) {
+    final dist = _distanceKm(h.lat, h.lng);
+    return _FdPress(
+      onTap: () => _openHospital(h.id),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: FdColors.tintForIndex(index),
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: FdColors.redSoft,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.add,
+                  color: FdColors.redInk, size: 28),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          h.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: FdType.family(ur),
+                            fontSize: ur ? 15 : 16,
+                            fontWeight:
+                                ur ? FontWeight.w700 : FontWeight.w800,
+                            color: FdSpec.ink,
+                            height: ur ? 1.8 : null,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      if (h.verified) const FdVerifiedBadge(size: 16),
+                    ],
+                  ),
+                  Text(
+                    [
+                      h.city,
+                      if (dist != null) formatDistance(dist),
+                    ].join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: FdType.family(ur),
+                      fontSize: ur ? 12.5 : 13,
+                      fontWeight:
+                          ur ? FontWeight.w500 : FontWeight.w600,
+                      color: FdSpec.secondary,
+                      height: ur ? 1.8 : null,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      if (h.reviewCount > 0)
+                        _ratingPill(h.rating, ur)
+                      else
+                        FdNewPill(
+                            label: trB(ref, 'home.new'), isUrdu: ur),
+                      if (h.emergency247) ...[
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: FdColors.redSoft,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              trB(ref, 'search.emergency247'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: FdType.family(ur),
+                                fontSize: ur ? 12 : 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: FdColors.redInk,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (h.departments.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      h.departments.take(3).join(' · '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: FdType.family(ur),
+                        fontSize: ur ? 12 : 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: FdSpec.muted,
+                        height: ur ? 1.7 : null,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // -- spec-exact private widgets ---------------------------------------------
+
+  /// White initials avatar tile.
+  Widget _avatar(
+    String name,
+    bool ur, {
+    required double size,
+    required double radius,
+    required double fontSize,
+    required FontWeight weight,
+    required Color color,
+    double? textHeight,
+  }) {
+    final initials = name
+        .replaceFirst(RegExp(r'^Dr\.\s*'), '')
+        .split(' ')
+        .where((w) => w.isNotEmpty)
+        .take(2)
+        .map((w) => w[0])
+        .join()
+        .toUpperCase();
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initials.isEmpty ? '•' : initials,
+        style: TextStyle(
+          fontFamily: FdType.family(ur),
+          fontSize: fontSize,
+          fontWeight: weight,
+          color: color,
+          height: textHeight,
+        ),
+      ),
+    );
+  }
+
+  /// List-card rating pill: white, radius 14, padding 5 10 (EN) / 3 10
+  /// (UR), 13px gold star + 13/800 rating.
+  Widget _ratingPill(double rating, bool ur) {
+    return Container(
+      padding:
+          EdgeInsets.symmetric(horizontal: 10, vertical: ur ? 3 : 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.star, color: FdSpec.star, size: 13),
+          const SizedBox(width: 4),
+          Text(
+            rating.toStringAsFixed(1),
+            style: TextStyle(
+              fontFamily: FdSpec.latinFont,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: FdSpec.ink,
+              height: ur ? 1.5 : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 9px status dot with 2px white ring.
+  Widget _statusDot({required Color color}) {
+    return Container(
+      width: 9,
+      height: 9,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        boxShadow: const [
+          BoxShadow(color: Colors.white, spreadRadius: 2),
+        ],
+      ),
+    );
+  }
+
+  /// Full-width spec button: height 50/46, radius = height/2.
+  Widget _pillButton({
+    required String label,
+    required VoidCallback? onTap,
+    required Color bg,
+    required Color fg,
+    required double height,
+    required double fontSize,
+    required FontWeight weight,
+    required bool ur,
+    double? textHeight,
+    IconData? icon,
+    double iconSize = 18,
+  }) {
+    return _FdPress(
+      onTap: onTap,
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(height / 2),
+        ),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: fg, size: iconSize),
+              const SizedBox(width: 7),
+            ],
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: FdType.family(ur),
+                  fontSize: fontSize,
+                  fontWeight: weight,
+                  color: fg,
+                  height: textHeight,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _stat(String label, String value, bool ur,
+      {bool latinDigits = false}) {
     return Expanded(
       child: Column(
         children: [
-          Text(label, style: FdType.body(ur, size: 13, color: FdColors.muted)),
-          const SizedBox(height: 3),
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: FdType.family(ur),
+              fontSize: 11,
+              fontWeight: ur ? FontWeight.w400 : FontWeight.w600,
+              color: FdSpec.muted,
+            ),
+          ),
+          const SizedBox(height: 1),
           Text(
             value,
-            style: FdType.body(ur,
-                size: 17, w: FontWeight.w800, color: FdColors.ink),
+            style: TextStyle(
+              // UR review counts stay in Albert Sans per spec.
+              fontFamily:
+                  latinDigits ? FdSpec.latinFont : FdType.family(ur),
+              fontSize: ur ? 13 : 14,
+              fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
+              color: FdSpec.ink,
+              height: ur ? 1.7 : null,
+            ),
           ),
         ],
       ),
@@ -772,187 +1266,40 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _statDivider() {
-    return Container(width: 1.2, height: 34, color: FdColors.line);
+    return Container(width: 1, height: 34, color: FdSpec.border);
+  }
+}
+
+/// Press feedback per the spec `.press` class: scale to 0.97 in 80 ms.
+class _FdPress extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _FdPress({required this.child, this.onTap});
+
+  @override
+  State<_FdPress> createState() => _FdPressState();
+}
+
+class _FdPressState extends State<_FdPress> {
+  bool _down = false;
+
+  void _set(bool v) {
+    if (_down != v) setState(() => _down = v);
   }
 
-  Widget _labCard(Lab l, int index, bool ur) {
-    final dist = _distanceKm(l.lat, l.lng);
-    final minPrice = l.tests.isEmpty
-        ? null
-        : l.tests.map((t) => t.price).reduce((a, b) => a < b ? a : b);
-    return Material(
-      color: FdColors.tintForIndex(index),
-      borderRadius: BorderRadius.circular(28),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(28),
-        onTap: () => _openLab(l.id),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 76,
-                height: 76,
-                decoration: BoxDecoration(
-                  color: FdColors.lavender,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: const Icon(Icons.science_outlined,
-                    color: FdColors.lavenderInk, size: 36),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(l.name,
-                              style: FdType.title(ur, size: 18)),
-                        ),
-                        if (l.verified) ...[
-                          const SizedBox(width: 6),
-                          const FdVerifiedBadge(size: 20),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      [
-                        l.city,
-                        if (dist != null) formatDistance(dist),
-                      ].join(' · '),
-                      style:
-                          FdType.body(ur, size: 14, color: FdColors.inkSoft),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        if (l.reviewCount > 0)
-                          FdRatingPill(rating: l.rating, isUrdu: ur)
-                        else
-                          FdNewPill(
-                              label: trB(ref, 'home.new'), isUrdu: ur),
-                        const Spacer(),
-                        if (minPrice != null)
-                          Text(
-                            fill(trB(ref, 'search.testsFrom'), {
-                              'count': '${l.tests.length}',
-                              'price': '$minPrice'
-                            }),
-                            style: FdType.body(ur,
-                                size: 14,
-                                w: FontWeight.w700,
-                                color: FdColors.primary),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _hospitalCard(Hospital h, int index, bool ur) {
-    final dist = _distanceKm(h.lat, h.lng);
-    return Material(
-      color: FdColors.tintForIndex(index),
-      borderRadius: BorderRadius.circular(28),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(28),
-        onTap: () => _openHospital(h.id),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 76,
-                height: 76,
-                decoration: BoxDecoration(
-                  color: FdColors.redSoft,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: const Icon(Icons.add,
-                    color: FdColors.redInk, size: 38),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(h.name,
-                              style: FdType.title(ur, size: 18)),
-                        ),
-                        if (h.verified) ...[
-                          const SizedBox(width: 6),
-                          const FdVerifiedBadge(size: 20),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      [
-                        h.city,
-                        if (dist != null) formatDistance(dist),
-                      ].join(' · '),
-                      style:
-                          FdType.body(ur, size: 14, color: FdColors.inkSoft),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        if (h.reviewCount > 0)
-                          FdRatingPill(rating: h.rating, isUrdu: ur)
-                        else
-                          FdNewPill(
-                              label: trB(ref, 'home.new'), isUrdu: ur),
-                        if (h.emergency247) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 7),
-                            decoration: BoxDecoration(
-                              color: FdColors.redSoft,
-                              borderRadius:
-                                  BorderRadius.circular(FdDim.pillRadius),
-                            ),
-                            child: Text(
-                              trB(ref, 'search.emergency247'),
-                              style: FdType.body(ur,
-                                  size: 13,
-                                  w: FontWeight.w700,
-                                  color: FdColors.redInk),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    if (h.departments.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        h.departments.take(3).join(' · '),
-                        style: FdType.body(ur,
-                            size: 13, color: FdColors.muted),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.onTap,
+      onTapDown: (_) => _set(true),
+      onTapUp: (_) => _set(false),
+      onTapCancel: () => _set(false),
+      child: AnimatedScale(
+        scale: _down ? FdSpec.pressScale : 1,
+        duration: FdSpec.pressDuration,
+        child: widget.child,
       ),
     );
   }

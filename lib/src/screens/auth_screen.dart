@@ -11,7 +11,11 @@ import 'register_entity_screen.dart';
 /// Firebase backend uses real two-step SMS OTP. Doctors continue to
 /// "Add a listing" after signing in.
 class AuthScreen extends ConsumerStatefulWidget {
-  const AuthScreen({super.key});
+  /// When set, the phone step opens expanded with this number pre-filled
+  /// (used by the Profile guest card's inline "Send code" button).
+  final String? initialPhone;
+
+  const AuthScreen({super.key, this.initialPhone});
 
   @override
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
@@ -25,6 +29,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _codeCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final p = widget.initialPhone;
+    if (p != null && p.isNotEmpty) {
+      _phoneCtrl.text = p;
+      _showPhone = true;
+    }
+  }
 
   @override
   void dispose() {

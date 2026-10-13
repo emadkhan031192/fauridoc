@@ -83,7 +83,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               children: [
                 Expanded(
                   child: Text(tr(ref, 'com.title'),
-                      style: FdType.display(ur, size: 32)),
+                      style: FdType.display(ur,
+                          size: 28, w: FontWeight.w800)),
                 ),
                 _askPill(ref, ur),
               ],
@@ -116,14 +117,14 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   );
                 }
                 return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
                   itemCount: pinned.length + rest.length,
                   itemBuilder: (context, i) {
                     final q = i < pinned.length
                         ? pinned[i]
                         : rest[i - pinned.length];
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.only(bottom: 10),
                       child: q.pinned
                           ? _pinnedCard(ref, ur, q)
                           : _questionCard(ref, ur, repo, q),
@@ -141,27 +142,30 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   // ---------- header widgets ----------
 
   Widget _askPill(WidgetRef ref, bool ur) {
-    return Material(
-      color: FdColors.primary,
-      borderRadius: BorderRadius.circular(FdDim.pillRadius),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(FdDim.pillRadius),
-        onTap: _onAsk,
-        child: Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 22),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.add, color: Colors.white, size: 22),
-              const SizedBox(width: 6),
-              Text(
-                tr(ref, 'com.ask'),
-                style: FdType.button(ur, size: 17),
-              ),
-            ],
-          ),
+    // Spec: 44px pill, padding 0 18 0 14, 18px icon, 14/700 label.
+    return _FdPress(
+      onTap: _onAsk,
+      child: Container(
+        height: 44,
+        padding: const EdgeInsets.fromLTRB(14, 0, 18, 0),
+        decoration: BoxDecoration(
+          color: FdColors.primary,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.add, color: Colors.white, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              tr(ref, 'com.ask'),
+              style: FdType.body(ur,
+                  size: 14,
+                  w: FontWeight.w700,
+                  color: Colors.white),
+            ),
+          ],
         ),
       ),
     );
@@ -187,13 +191,13 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             ),
         ];
         return SizedBox(
-          height: FdDim.chipHeight,
+          height: 36,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding:
                 const EdgeInsets.symmetric(horizontal: FdDim.page),
             itemCount: items.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 10),
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (_, i) => items[i],
           ),
         );
@@ -201,36 +205,33 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     );
   }
 
-  /// Filter chip — dark ink when the "All" chip is selected, teal otherwise.
+  /// Filter chip — spec: 36px, padding 0 14, 13/600, 1px border.
+  /// Selected "All" is ink with an ink border; selected others are teal.
   Widget _filterChip(WidgetRef ref, String label, bool selected,
       VoidCallback onTap, {bool dark = false}) {
     final bg = selected
         ? (dark ? FdColors.ink : FdColors.primary)
         : Colors.white;
-    return Material(
-      color: bg,
-      borderRadius: BorderRadius.circular(FdDim.pillRadius),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(FdDim.pillRadius),
-        onTap: onTap,
-        child: Container(
-          height: FdDim.chipHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 22),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(FdDim.pillRadius),
-            border: selected
-                ? null
-                : Border.all(color: FdColors.line, width: 1.4),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: FdType.latin,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: selected ? Colors.white : FdColors.ink,
-            ),
+    return _FdPress(
+      onTap: onTap,
+      child: Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(18),
+          border: selected
+              ? (dark ? Border.all(color: FdColors.ink) : null)
+              : Border.all(color: FdColors.line),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: FdType.latin,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : FdColors.ink,
           ),
         ),
       ),
@@ -240,19 +241,19 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   // ---------- cards ----------
 
   Widget _pinnedCard(WidgetRef ref, bool ur, CommunityQuestion q) {
+    // Spec: #FFF8EC bg, #F4D9B2 border, padding 12 12 12 6, radius 16.
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.fromLTRB(6, 12, 12, 12),
       decoration: BoxDecoration(
-        color: FdColors.amberCard,
-        borderRadius: BorderRadius.circular(FdDim.cardRadius),
-        border: Border.all(
-            color: FdColors.amberStrong.withValues(alpha: 0.35)),
+        color: const Color(0xFFFFF8EC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF4D9B2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _voteColumn(ref, q),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,41 +261,45 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 Row(
                   children: [
                     const Icon(Icons.push_pin,
-                        size: 16, color: FdColors.amberInk),
-                    const SizedBox(width: 6),
+                        size: 13, color: Color(0xFF8A4B00)),
+                    const SizedBox(width: 5),
                     Expanded(
                       child: Text(
                         tr(ref, 'com.pinnedBy'),
                         style: FdType.body(ur,
-                            size: 14,
+                            size: 12,
                             w: FontWeight.w700,
-                            color: FdColors.amberInk),
+                            color: const Color(0xFF8A4B00)),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 GestureDetector(
                   onTap: () => _openQuestion(q.id),
                   child: Text(q.title,
                       style: FdType.body(ur,
-                          size: 19,
-                          w: FontWeight.w700,
-                          color: FdColors.ink)),
+                              size: 16,
+                              w: FontWeight.w700,
+                              color: FdColors.ink)
+                          .copyWith(height: FdType.height(ur, 1.3))),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 Wrap(
-                  spacing: 8,
+                  spacing: 6,
+                  runSpacing: 6,
                   children: [
                     _tag(tr(ref, 'com.allCities')),
                     _tag(tr(ref, 'com.announcement')),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   '${q.userName} · ${_ago(ref, q.createdAt)}',
-                  style:
-                      FdType.body(ur, size: 14, color: FdColors.muted),
+                  style: FdType.body(ur,
+                      size: 12,
+                      w: FontWeight.w500,
+                      color: FdColors.muted),
                 ),
               ],
             ),
@@ -310,17 +315,17 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final isAdmin = (user?.isAdmin ?? false) ||
         (repo.isDemo && ref.watch(demoAdminPreviewProvider));
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.fromLTRB(6, 12, 12, 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: FdColors.line),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _voteColumn(ref, q),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,19 +338,21 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                       Expanded(
                         child: Text(q.title,
                             style: FdType.body(ur,
-                                size: 19,
-                                w: FontWeight.w700,
-                                color: FdColors.ink)),
+                                    size: 16,
+                                    w: FontWeight.w700,
+                                    color: FdColors.ink)
+                                .copyWith(
+                                    height: FdType.height(ur, 1.3))),
                       ),
                       if (isAdmin)
                         _adminMenu(ref, repo, q),
                     ],
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: 6,
+                  runSpacing: 6,
                   children: [
                     if (q.city.trim().isNotEmpty) _tag(q.city),
                     if (q.specialty.trim().isNotEmpty)
@@ -369,16 +376,18 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (doctorReply != null) ...[
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 6),
                           _doctorAnswer(ref, ur, doctorReply),
                         ],
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 6),
                         GestureDetector(
                           onTap: () => _openQuestion(q.id),
                           child: Text(
                             '${q.userName} · ${_ago(ref, q.createdAt)} · ${fill(tr(ref, 'com.replies'), {'n': '${replies.length}'})}',
                             style: FdType.body(ur,
-                                size: 14, color: FdColors.muted),
+                                size: 12,
+                                w: FontWeight.w500,
+                                color: FdColors.muted),
                           ),
                         ),
                       ],
@@ -394,12 +403,14 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   Widget _doctorAnswer(WidgetRef ref, bool ur, CommunityReply r) {
+    // Spec: #E4F3EF box, padding 10 12, radius 12, gap 3.
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: FdColors.mint,
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFFE4F3EF),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,52 +420,57 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               Expanded(
                 child: Text(r.userName,
                     style: FdType.body(ur,
-                        size: 16,
+                        size: 13,
                         w: FontWeight.w700,
-                        color: FdColors.ink)),
+                        color: const Color(0xFF0B5446))),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 5),
+                    horizontal: 8, vertical: 1),
                 decoration: BoxDecoration(
                   color: FdColors.primary,
-                  borderRadius:
-                      BorderRadius.circular(FdDim.pillRadius),
+                  borderRadius: BorderRadius.circular(9),
                 ),
                 child: Text(
                   tr(ref, 'com.doctor'),
-                  style: FdType.body(false,
-                      size: 12.5,
-                      w: FontWeight.w700,
-                      color: Colors.white),
+                  style: const TextStyle(
+                    fontFamily: FdType.latin,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 3),
           Text(r.body,
               style: FdType.body(ur,
-                  size: 15.5, color: FdColors.inkSoft)),
+                      size: 13,
+                      w: FontWeight.w500,
+                      color: const Color(0xFF1F4A41))
+                  .copyWith(height: FdType.height(ur, 1.45))),
         ],
       ),
     );
   }
 
   Widget _tag(String label) {
+    // Spec: padding 2 9, radius 10, #EEF1F0, 12/600 #2E4744.
     return Container(
       padding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
       decoration: BoxDecoration(
-        color: FdColors.bg,
-        borderRadius: BorderRadius.circular(FdDim.pillRadius),
+        color: const Color(0xFFEEF1F0),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         label,
         style: const TextStyle(
           fontFamily: FdType.latin,
-          fontSize: 13.5,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: FdColors.inkSoft,
+          color: Color(0xFF2E4744),
         ),
       ),
     );
@@ -463,48 +479,51 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   // ---------- voting ----------
 
   Widget _voteColumn(WidgetRef ref, CommunityQuestion q) {
+    // Spec: 44px column, 44x36 chevron buttons (22px), 15/800 score.
     final user = ref.read(authProvider);
     final myVote = user == null ? 0 : (q.votes[user.uid] ?? 0);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _voteBtn(
-          Icons.keyboard_arrow_up,
-          myVote == 1,
-          () => _vote(q, 1),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
-          child: Text(
+    return SizedBox(
+      width: 44,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _voteBtn(
+            Icons.keyboard_arrow_up,
+            myVote == 1,
+            () => _vote(q, 1),
+          ),
+          Text(
             '${q.score}',
             style: TextStyle(
               fontFamily: FdType.latin,
-              fontSize: 19,
+              fontSize: 15,
               fontWeight: FontWeight.w800,
               color:
                   myVote != 0 ? FdColors.primary : FdColors.ink,
             ),
           ),
-        ),
-        _voteBtn(
-          Icons.keyboard_arrow_down,
-          myVote == -1,
-          () => _vote(q, -1),
-        ),
-      ],
+          _voteBtn(
+            Icons.keyboard_arrow_down,
+            myVote == -1,
+            () => _vote(q, -1),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _voteBtn(IconData icon, bool active, VoidCallback onTap) {
-    return InkWell(
+    return _FdPress(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
-      child: Padding(
-        padding: const EdgeInsets.all(2),
+      child: SizedBox(
+        width: 44,
+        height: 36,
         child: Icon(
           icon,
-          size: 30,
-          color: active ? FdColors.primary : FdColors.muted,
+          size: 22,
+          color: active
+              ? FdColors.primary
+              : const Color(0xFF7B8E8A),
         ),
       ),
     );
@@ -592,21 +611,25 @@ class _AskSheet extends ConsumerStatefulWidget {
 }
 
 class _AskSheetState extends ConsumerState<_AskSheet> {
-  final _titleCtrl = TextEditingController();
-  final _bodyCtrl = TextEditingController();
+  final _qCtrl = TextEditingController();
   String? _city;
   String? _specialty;
   bool _busy = false;
 
   @override
+  void initState() {
+    super.initState();
+    _city = ref.read(cityProvider);
+  }
+
+  @override
   void dispose() {
-    _titleCtrl.dispose();
-    _bodyCtrl.dispose();
+    _qCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    if (_titleCtrl.text.trim().isEmpty) {
+    if (_qCtrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(tr(ref, 'com.fillTitle'))),
       );
@@ -624,8 +647,8 @@ class _AskSheetState extends ConsumerState<_AskSheet> {
       await ref.read(repositoryProvider).askQuestion(
             CommunityQuestion(
               id: '',
-              title: _titleCtrl.text.trim(),
-              body: _bodyCtrl.text.trim(),
+              title: _qCtrl.text.trim(),
+              body: '',
               city: _city ?? ref.read(cityProvider),
               specialty: _specialty ?? '',
               userId: user.uid,
@@ -644,152 +667,250 @@ class _AskSheetState extends ConsumerState<_AskSheet> {
     }
   }
 
+  Future<void> _pickMoreCity(List<String> rest) async {
+    final urMore = fdIsUrdu(ref.read(localeProvider));
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(tr(ref, 'city'),
+            style: FdType.title(urMore, size: 18)),
+        children: [
+          for (final c in rest)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(ctx).pop(c),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8),
+                child: Text(c,
+                    style: FdType.body(urMore,
+                        size: 16, color: FdColors.ink)),
+              ),
+            ),
+        ],
+      ),
+    );
+    if (picked != null) setState(() => _city = picked);
+  }
+
   @override
   Widget build(BuildContext context) {
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
     final repo = ref.watch(repositoryProvider);
+    // Spec: padding 18 20 30, radius 24 24 0 0.
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.only(
-          left: FdDim.page,
-          right: FdDim.page,
-          top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          left: 20,
+          right: 20,
+          top: 18,
+          bottom:
+              MediaQuery.of(context).viewInsets.bottom + 30,
         ),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(tr(ref, 'com.askTitle'),
-                  style: FdType.title(ur, size: 21)),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _titleCtrl,
-                style:
-                    FdType.body(ur, size: 16, color: FdColors.ink),
-                decoration: InputDecoration(
-                  hintText: tr(ref, 'com.qTitleHint'),
-                  hintStyle:
-                      FdType.body(ur, size: 16, color: FdColors.muted),
-                  filled: true,
-                  fillColor: FdColors.bg,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide:
-                        const BorderSide(color: FdColors.line),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide:
-                        const BorderSide(color: FdColors.line),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _bodyCtrl,
-                maxLines: 3,
-                style:
-                    FdType.body(ur, size: 16, color: FdColors.ink),
-                decoration: InputDecoration(
-                  hintText: tr(ref, 'com.qBodyHint'),
-                  hintStyle:
-                      FdType.body(ur, size: 16, color: FdColors.muted),
-                  filled: true,
-                  fillColor: FdColors.bg,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide:
-                        const BorderSide(color: FdColors.line),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide:
-                        const BorderSide(color: FdColors.line),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                    child: StreamBuilder<List<String>>(
-                      stream: repo.watchCities(),
-                      builder: (context, snap) {
-                        final cities =
-                            snap.data ?? const <String>[];
-                        final val = cities.contains(_city)
-                            ? _city
-                            : null;
-                        return DropdownButtonFormField<String>(
-                          initialValue: val,
-                          decoration: InputDecoration(
-                            labelText: tr(ref, 'city'),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            isDense: true,
-                          ),
-                          items: [
-                            for (final c in cities)
-                              DropdownMenuItem(
-                                  value: c, child: Text(c)),
-                          ],
-                          onChanged: (v) =>
-                              setState(() => _city = v),
-                        );
-                      },
-                    ),
+                    child: Text(tr(ref, 'com.askTitle'),
+                        style: FdType.title(ur,
+                            size: 20, w: FontWeight.w800)),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: StreamBuilder<List<String>>(
-                      stream: repo.watchSpecialties(),
-                      builder: (context, snap) {
-                        final specs =
-                            snap.data ?? const <String>[];
-                        final val = specs.contains(_specialty)
-                            ? _specialty
-                            : null;
-                        return DropdownButtonFormField<String>(
-                          initialValue: val,
-                          decoration: InputDecoration(
-                            labelText: tr(ref, 'specialty'),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            isDense: true,
-                          ),
-                          items: [
-                            for (final s in specs)
-                              DropdownMenuItem(
-                                value: s,
-                                child: Text(
-                                    specialtyLabel(locale, s)),
-                              ),
-                          ],
-                          onChanged: (v) =>
-                              setState(() => _specialty = v),
-                        );
-                      },
+                  _FdPress(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      margin:
+                          const EdgeInsets.only(right: -10),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.close,
+                          size: 22, color: FdColors.ink),
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _qCtrl,
+                minLines: 3,
+                maxLines: 3,
+                style: FdType.body(ur,
+                    size: 15,
+                    w: FontWeight.w500,
+                    color: FdColors.ink),
+                decoration: InputDecoration(
+                  hintText: tr(ref, 'com.qTitleHint'),
+                  hintStyle: FdType.body(ur,
+                      size: 15,
+                      w: FontWeight.w500,
+                      color: FdColors.muted),
+                  filled: true,
+                  fillColor: FdColors.bg,
+                  contentPadding: const EdgeInsets.all(12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        const BorderSide(color: Color(0xFFD5DEDA)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        const BorderSide(color: Color(0xFFD5DEDA)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        const BorderSide(color: FdColors.primary),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                tr(ref, 'city').toUpperCase(),
+                style: FdType.label(ur,
+                    size: 12,
+                    w: FontWeight.w700,
+                    color: FdColors.muted),
+              ),
+              const SizedBox(height: 6),
+              StreamBuilder<List<String>>(
+                stream: repo.watchCities(),
+                builder: (context, snap) {
+                  final cities = snap.data ?? const <String>[];
+                  final shown = cities.take(3).toList();
+                  final rest = cities.skip(3).toList();
+                  return Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final c in shown)
+                        _sheetChip(c, _city == c,
+                            () => setState(() => _city = c)),
+                      if (rest.isNotEmpty)
+                        _sheetChip(tr(ref, 'com.more'), rest.contains(_city),
+                            () => _pickMoreCity(rest)),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              Text(
+                tr(ref, 'specialty').toUpperCase(),
+                style: FdType.label(ur,
+                    size: 12,
+                    w: FontWeight.w700,
+                    color: FdColors.muted),
+              ),
+              const SizedBox(height: 6),
+              StreamBuilder<List<String>>(
+                stream: repo.watchSpecialties(),
+                builder: (context, snap) {
+                  final specs = snap.data ?? const <String>[];
+                  return Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final s in specs)
+                        _sheetChip(
+                          specialtyLabel(locale, s),
+                          _specialty == s,
+                          () => setState(() => _specialty =
+                              _specialty == s ? null : s),
+                        ),
+                    ],
+                  );
+                },
+              ),
               const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: FdButton(
-                  label: tr(ref, 'com.post'),
-                  isUrdu: ur,
-                  onTap: _busy ? null : _submit,
+              _FdPress(
+                onTap: _busy ? null : _submit,
+                child: Container(
+                  width: double.infinity,
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: FdColors.primary,
+                    borderRadius: BorderRadius.circular(26),
+                  ),
+                  child: Text(
+                    tr(ref, 'com.post'),
+                    style: FdType.body(ur,
+                        size: 16,
+                        w: FontWeight.w700,
+                        color: Colors.white),
+                  ),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _sheetChip(String label, bool selected, VoidCallback onTap) {
+    // Spec: 36px, padding 0 14, radius 18, 13/600;
+    // selected = ink fill, else white with line border.
+    return _FdPress(
+      onTap: onTap,
+      child: Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? FdColors.ink : Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border:
+              selected ? null : Border.all(color: FdColors.line),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: FdType.latin,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : FdColors.ink,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Spec `.press`: scale to 0.97 in 80 ms on press.
+class _FdPress extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _FdPress({required this.child, this.onTap});
+
+  @override
+  State<_FdPress> createState() => _FdPressState();
+}
+
+class _FdPressState extends State<_FdPress> {
+  double _scale = 1;
+
+  void _set(double s) {
+    if (_scale != s) setState(() => _scale = s);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _set(0.97),
+      onTapUp: (_) => _set(1),
+      onTapCancel: () => _set(1),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 80),
+        child: widget.child,
       ),
     );
   }

@@ -120,9 +120,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: user == null
             ? _LoggedOutBody(
                 ur: ur,
-                onSignIn: () => _go(const AuthScreen()),
-                onGuest: () =>
-                    ref.read(tabIndexProvider.notifier).setTab(0),
+                onSendCode: (phone) =>
+                    _go(AuthScreen(initialPhone: phone)),
+                onSoon: () => _snack(tr(ref, 'prof.soon')),
               )
             : _LoggedInBody(
                 ur: ur,
@@ -178,68 +178,249 @@ Widget _sheetField(TextEditingController ctrl, String hint, bool ur,
   );
 }
 
-/// Logged-out state: centered sign-in card.
-class _LoggedOutBody extends StatelessWidget {
-  final bool ur;
-  final VoidCallback onSignIn;
-  final VoidCallback onGuest;
+/// `.press` from the spec: scale to 0.97 in 80 ms while pressed.
+class _Press extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  const _Press({required this.child, this.onTap});
 
-  const _LoggedOutBody({
-    required this.ur,
-    required this.onSignIn,
-    required this.onGuest,
-  });
+  @override
+  State<_Press> createState() => _PressState();
+}
+
+class _PressState extends State<_Press> {
+  bool _down = false;
+
+  void _set(bool v) {
+    if (_down != v) setState(() => _down = v);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, _) => Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(FdDim.page),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(FdDim.cardRadius),
-              border: Border.all(color: FdColors.line),
-            ),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 28, vertical: 34),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 84,
-                    height: 84,
-                    decoration: const BoxDecoration(
-                      color: FdColors.mintDeep,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.person,
-                        color: FdColors.primary, size: 44),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Text(tr(ref, 'prof.signInPrompt'),
-                    style: FdType.body(ur, size: 16),
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 24),
-                FdButton(
-                    label: tr(ref, 'prof.signIn'),
-                    isUrdu: ur,
-                    onTap: onSignIn),
-                const SizedBox(height: 12),
-                FdButton(
-                    label: tr(ref, 'prof.guest'),
-                    style: FdButtonStyle.outline,
-                    isUrdu: ur,
-                    onTap: onGuest),
-              ],
-            ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _set(true),
+      onTapUp: (_) => _set(false),
+      onTapCancel: () => _set(false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 80),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// Screen title: 28/800, letter-spacing -0.02em (spec §13).
+Widget _screenTitle(bool ur, String text) => Text(
+      text,
+      style: TextStyle(
+        fontFamily: FdType.family(ur),
+        fontSize: 28,
+        fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
+        letterSpacing: ur ? 0 : -0.56,
+        color: FdColors.ink,
+        height: FdType.height(ur, 1.2),
+      ),
+    );
+
+/// Uppercase section label with trailing hairline (spec §13):
+/// 12/700, letter-spacing 0.08em, muted.
+Widget _capsRow(bool ur, String label) => Row(
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontFamily: FdType.family(ur),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: ur ? 0 : 0.96,
+            color: FdColors.muted,
           ),
         ),
+        const SizedBox(width: 10),
+        const Expanded(
+            child: Divider(color: FdColors.line, height: 1, thickness: 1)),
+      ],
+    );
+
+/// "Fauridoc 1.0 · No ads, no data selling" — 12/500 muted, centered.
+Widget _footer(WidgetRef ref, bool ur) => Center(
+      child: Text(
+        tr(ref, 'prof.footer'),
+        style: FdType.body(ur,
+            size: 12, w: FontWeight.w500, color: FdColors.muted),
+        textAlign: TextAlign.center,
       ),
+    );
+
+/// Logged-out (guest) state: "browsing as a guest" card with inline
+/// phone field + Send code (spec §13 guest state).
+class _LoggedOutBody extends ConsumerStatefulWidget {
+  final bool ur;
+  final ValueChanged<String> onSendCode;
+  final VoidCallback onSoon;
+
+  const _LoggedOutBody({
+    required this.ur,
+    required this.onSendCode,
+    required this.onSoon,
+  });
+
+  @override
+  ConsumerState<_LoggedOutBody> createState() => _LoggedOutBodyState();
+}
+
+class _LoggedOutBodyState extends ConsumerState<_LoggedOutBody> {
+  final _phoneCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _phoneCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ur = widget.ur;
+    final ref = this.ref;
+    return ListView(
+      padding:
+          const EdgeInsets.fromLTRB(FdDim.page, 14, FdDim.page, 16),
+      children: [
+        _screenTitle(ur, tr(ref, 'prof.title')),
+        Container(
+          margin: const EdgeInsets.only(top: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: FdColors.line),
+          ),
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                tr(ref, 'prof.browsingAsGuest'),
+                style: TextStyle(
+                  fontFamily: FdType.family(ur),
+                  fontSize: 19,
+                  fontWeight:
+                      ur ? FontWeight.w700 : FontWeight.w800,
+                  letterSpacing: ur ? 0 : -0.19,
+                  color: FdColors.ink,
+                  height: FdType.height(ur, 1.25),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                tr(ref, 'prof.guestSub'),
+                style: FdType.body(ur,
+                        size: 14,
+                        w: FontWeight.w500,
+                        color: FdColors.muted)
+                    .copyWith(height: FdType.height(ur, 1.5)),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                tr(ref, 'prof.mobileNumber').toUpperCase(),
+                style: TextStyle(
+                  fontFamily: FdType.family(ur),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: ur ? 0 : 0.72,
+                  color: FdColors.muted,
+                ),
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                height: 50,
+                child: TextField(
+                  controller: _phoneCtrl,
+                  keyboardType: TextInputType.phone,
+                  style: FdType.body(ur,
+                      size: 16,
+                      w: FontWeight.w600,
+                      color: FdColors.ink),
+                  decoration: InputDecoration(
+                    hintText: '03XX XXXXXXX',
+                    hintStyle: FdType.body(ur,
+                        size: 16, color: FdColors.muted),
+                    filled: true,
+                    fillColor: FdColors.bg,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                          color: Color(0xFFD5DEDA)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                          color: Color(0xFFD5DEDA)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                          color: FdColors.primary, width: 1.6),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _Press(
+                onTap: () {
+                  final phone = _phoneCtrl.text.trim();
+                  if (phone.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                tr(ref, 'auth.fillNamePhone'))));
+                    return;
+                  }
+                  widget.onSendCode(phone);
+                },
+                child: Container(
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: FdColors.primary,
+                    borderRadius: BorderRadius.circular(26),
+                  ),
+                  child: Text(
+                    tr(ref, 'auth.sendSms'),
+                    style: TextStyle(
+                      fontFamily: FdType.family(ur),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 22),
+        _capsRow(ur, tr(ref, 'prof.language')),
+        const SizedBox(height: 4),
+        _LanguageSegment(ur: ur),
+        const SizedBox(height: 14),
+        _MenuCard(
+          ur: ur,
+          rows: [
+            // Spec: logged-out menu shows only non-login rows.
+            _MenuRow(
+                icon: Icons.help_outline,
+                label: tr(ref, 'prof.help'),
+                onTap: widget.onSoon),
+          ],
+        ),
+        const SizedBox(height: 14),
+        _footer(ref, ur),
+      ],
     );
   }
 }
@@ -274,21 +455,64 @@ class _LoggedInBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Spec §13: the admin entry is the last row of the same menu card.
+    final menuRows = <_MenuRow>[
+      _MenuRow(
+          icon: Icons.star_outline,
+          label: tr(ref, 'prof.myReviews'),
+          onTap: onSoon),
+      _MenuRow(
+          icon: Icons.bookmark_outline,
+          label: tr(ref, 'prof.savedDoctors'),
+          onTap: onSaved),
+      _MenuRow(
+          icon: Icons.forum_outlined,
+          label: tr(ref, 'prof.myQuestions'),
+          onTap: onSoon),
+      _MenuRow(
+          icon: Icons.help_outline,
+          label: tr(ref, 'prof.help'),
+          onTap: onSoon),
+      if (user.isAdmin)
+        _MenuRow(
+          icon: Icons.admin_panel_settings_outlined,
+          label: tr(ref, 'prof.adminPanel'),
+          onTap: onOpenAdmin,
+          badge: tr(ref, 'prof.adminBadge'),
+        ),
+    ];
     return ListView(
       padding:
-          const EdgeInsets.fromLTRB(FdDim.page, 14, FdDim.page, 28),
+          const EdgeInsets.fromLTRB(FdDim.page, 14, FdDim.page, 16),
       children: [
-        Text(tr(ref, 'prof.title'), style: FdType.display(ur, size: 34)),
+        _screenTitle(ur, tr(ref, 'prof.title')),
         const SizedBox(height: 16),
         _UserCard(ur: ur, user: user, onEdit: onEdit),
-        const SizedBox(height: 24),
-        FdSectionHeader(
-          title: tr(ref, 'prof.myListings'),
-          actionLabel: tr(ref, 'prof.addNew'),
-          onAction: onAddNew,
-          isUrdu: ur,
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: Text(tr(ref, 'prof.myListings'),
+                  style:
+                      FdType.title(ur, size: 17, w: FontWeight.w800)),
+            ),
+            _Press(
+              onTap: onAddNew,
+              child: Container(
+                height: 44,
+                alignment: Alignment.center,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(tr(ref, 'prof.addNew'),
+                    style: FdType.body(ur,
+                        size: 14,
+                        w: FontWeight.w700,
+                        color: FdColors.primary)),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         _MyListings(
           ur: ur,
           uid: user.uid,
@@ -296,52 +520,33 @@ class _LoggedInBody extends ConsumerWidget {
           onTapLab: onTapLab,
           onTapHospital: onTapHospital,
         ),
-        const SizedBox(height: 24),
-        FdCapsLabel(label: tr(ref, 'prof.language'), isUrdu: ur),
-        const SizedBox(height: 10),
+        const SizedBox(height: 22),
+        _capsRow(ur, tr(ref, 'prof.language')),
+        const SizedBox(height: 4),
         _LanguageSegment(ur: ur),
-        const SizedBox(height: 20),
-        _MenuCard(
-          ur: ur,
-          rows: [
-            _MenuRow(
-                icon: Icons.star_outline,
-                label: tr(ref, 'prof.myReviews'),
-                onTap: onSoon),
-            _MenuRow(
-                icon: Icons.bookmark_outline,
-                label: tr(ref, 'prof.savedDoctors'),
-                onTap: onSaved),
-            _MenuRow(
-                icon: Icons.forum_outlined,
-                label: tr(ref, 'prof.myQuestions'),
-                onTap: onSoon),
-            _MenuRow(
-                icon: Icons.help_outline,
-                label: tr(ref, 'prof.help'),
-                onTap: onSoon),
-          ],
-        ),
-        if (user.isAdmin) ...[
-          const SizedBox(height: 14),
-          _MenuCard(
-            ur: ur,
-            rows: [
-              _MenuRow(
-                icon: Icons.admin_panel_settings_outlined,
-                label: tr(ref, 'prof.adminPanel'),
-                onTap: onOpenAdmin,
-              ),
-            ],
-          ),
-        ],
-        const SizedBox(height: 20),
-        FdButton(
-          label: tr(ref, 'prof.signOut'),
-          style: FdButtonStyle.dangerOutline,
-          isUrdu: ur,
+        const SizedBox(height: 14),
+        _MenuCard(ur: ur, rows: menuRows),
+        const SizedBox(height: 14),
+        _Press(
           onTap: onSignOut,
+          child: Container(
+            height: 50,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(25),
+              border:
+                  Border.all(color: FdColors.line, width: 1.5),
+            ),
+            child: Text(tr(ref, 'prof.signOut'),
+                style: FdType.body(ur,
+                    size: 15,
+                    w: FontWeight.w700,
+                    color: const Color(0xFFA11F1F))),
+          ),
         ),
+        const SizedBox(height: 14),
+        _footer(ref, ur),
       ],
     );
   }
@@ -360,17 +565,17 @@ class _UserCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: FdColors.line),
       ),
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Container(
-            width: 72,
-            height: 72,
+            width: 56,
+            height: 56,
             decoration: const BoxDecoration(
-              color: FdColors.mintDeep,
+              color: FdColors.mint,
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
@@ -378,43 +583,48 @@ class _UserCard extends StatelessWidget {
               _initials(user.name),
               style: const TextStyle(
                 fontFamily: FdType.latin,
-                fontSize: 26,
-                fontWeight: FontWeight.w700,
-                color: FdColors.primary,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: FdColors.primaryDark,
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(user.name,
-                    style: FdType.title(ur, size: 20),
+                    style: FdType.title(ur, size: 18, w: FontWeight.w800),
                     overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 4),
+                const SizedBox(height: 1),
+                // Spec shows "number · city"; AppUser carries no city,
+                // so show phone (or email) without inventing one.
                 Text(
                   user.phone.isEmpty
                       ? (user.email.isEmpty ? '' : user.email)
                       : user.phone,
-                  style: FdType.body(ur, size: 14),
+                  style: FdType.body(ur,
+                      size: 13,
+                      w: FontWeight.w500,
+                      color: FdColors.muted),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
           const SizedBox(width: 8),
-          GestureDetector(
+          _Press(
             onTap: onEdit,
             child: Container(
-              width: 52,
-              height: 52,
+              width: 44,
+              height: 44,
               decoration: const BoxDecoration(
                 color: FdColors.bg,
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.edit_outlined,
-                  color: FdColors.ink, size: 24),
+                  color: FdColors.ink, size: 20),
             ),
           ),
         ],
@@ -488,8 +698,10 @@ class _MyListings extends ConsumerWidget {
                 for (final d in doctors)
                   _ListingRow(
                     ur: ur,
-                    tile: FdAvatarTile(
-                        name: d.name, size: 62, bg: FdColors.peach),
+                    tile: _InitialsTile(
+                        name: d.name,
+                        bg: FdColors.peach,
+                        fg: FdColors.peachInk),
                     title: d.name,
                     subtitle: d.approved
                         ? '${tr(ref, 'prof.typeDoctor')} · ${specialtyLabel(ref.watch(localeProvider), d.specialty)}'
@@ -539,6 +751,44 @@ class _MyListings extends ConsumerWidget {
   }
 }
 
+/// 44px rounded tile with initials (spec §13 listing rows): 15/800.
+class _InitialsTile extends StatelessWidget {
+  final String name;
+  final Color bg;
+  final Color fg;
+
+  const _InitialsTile(
+      {required this.name, required this.bg, required this.fg});
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = name
+        .replaceFirst(RegExp(r'^Dr\.\s*'), '')
+        .split(' ')
+        .where((w) => w.isNotEmpty)
+        .take(2)
+        .map((w) => w[0])
+        .join()
+        .toUpperCase();
+    return Container(
+      width: 44,
+      height: 44,
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
+      alignment: Alignment.center,
+      child: Text(
+        initials.isEmpty ? '•' : initials,
+        style: TextStyle(
+          fontFamily: FdType.latin,
+          fontSize: 15,
+          fontWeight: FontWeight.w800,
+          color: fg,
+        ),
+      ),
+    );
+  }
+}
+
 class _IconTile extends StatelessWidget {
   final Color bg;
   final IconData icon;
@@ -550,13 +800,13 @@ class _IconTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 62,
-      height: 62,
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(icon, color: iconColor, size: 30),
+      child: Icon(icon, color: iconColor, size: 22),
     );
   }
 }
@@ -582,64 +832,63 @@ class _ListingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, _) => Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(FdDim.cardRadius),
-          border: Border.all(color: FdColors.line),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(FdDim.cardRadius),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  tile,
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(title,
-                            style: FdType.title(ur, size: 18),
-                            overflow: TextOverflow.ellipsis),
-                        const SizedBox(height: 3),
-                        Text(subtitle,
-                            style: FdType.body(ur, size: 14),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2),
-                      ],
-                    ),
+        margin: const EdgeInsets.only(bottom: 8),
+        child: _Press(
+          onTap: onTap,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: FdColors.line),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                tile,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: FdType.title(ur,
+                              size: 15, w: FontWeight.w700),
+                          overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 2),
+                      Text(subtitle,
+                          style: FdType.body(ur,
+                              size: 12.5,
+                              w: FontWeight.w500,
+                              color: FdColors.muted),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: approved
+                        ? const Color(0xFFE4F3EF)
+                        : const Color(0xFFFFF0DC),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Text(
+                    tr(ref,
+                        approved ? 'prof.approved' : 'prof.pending'),
+                    style: FdType.body(
+                      ur,
+                      size: 12,
+                      w: FontWeight.w700,
                       color: approved
-                          ? FdColors.mintDeep
-                          : FdColors.amberSoft,
-                      borderRadius:
-                          BorderRadius.circular(FdDim.pillRadius),
-                    ),
-                    child: Text(
-                      tr(ref,
-                          approved ? 'prof.approved' : 'prof.pending'),
-                      style: FdType.body(
-                        ur,
-                        size: 13,
-                        w: FontWeight.w700,
-                        color: approved
-                            ? FdColors.primary
-                            : FdColors.amberInk,
-                      ),
+                          ? FdColors.primaryDark
+                          : const Color(0xFF8A4B00),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -648,29 +897,30 @@ class _ListingRow extends StatelessWidget {
   }
 }
 
-/// EN | اردو segmented control on a mint track.
+/// EN | اردو segmented control (spec §13): grey track, 42px halves.
 class _LanguageSegment extends ConsumerWidget {
   final bool ur;
   const _LanguageSegment({required this.ur});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Widget half(String label, bool active, VoidCallback onTap) {
+    Widget half(
+        String label, bool labelUr, bool active, VoidCallback onTap) {
       return Expanded(
-        child: GestureDetector(
+        child: _Press(
           onTap: onTap,
           child: Container(
-            height: 56,
+            height: 42,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: active ? Colors.white : Colors.transparent,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(11),
               boxShadow: active
                   ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                      const BoxShadow(
+                        color: Color.fromRGBO(15, 42, 46, 0.14),
+                        blurRadius: 3,
+                        offset: Offset(0, 1),
                       )
                     ]
                   : null,
@@ -678,9 +928,9 @@ class _LanguageSegment extends ConsumerWidget {
             child: Text(
               label,
               style: FdType.body(
-                label == 'اردو',
-                size: 16,
-                w: FontWeight.w700,
+                labelUr,
+                size: 14,
+                w: active ? FontWeight.w800 : FontWeight.w500,
                 color: active ? FdColors.primary : FdColors.muted,
               ),
             ),
@@ -691,15 +941,15 @@ class _LanguageSegment extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: FdColors.mint,
-        borderRadius: BorderRadius.circular(22),
+        color: const Color(0xFFE8EEEC),
+        borderRadius: BorderRadius.circular(14),
       ),
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(4),
       child: Row(
         children: [
-          half('English', !ur,
+          half('English', false, !ur,
               () => ref.read(localeProvider.notifier).setLocale('en')),
-          half('اردو', ur,
+          half('اردو', true, ur,
               () => ref.read(localeProvider.notifier).setLocale('ur')),
         ],
       ),
@@ -711,8 +961,12 @@ class _MenuRow {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final String? badge;
   const _MenuRow(
-      {required this.icon, required this.label, required this.onTap});
+      {required this.icon,
+      required this.label,
+      required this.onTap,
+      this.badge});
 }
 
 class _MenuCard extends StatelessWidget {
@@ -725,40 +979,58 @@ class _MenuCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(FdDim.cardRadius),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: FdColors.line),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Column(
         children: [
           for (var i = 0; i < rows.length; i++) ...[
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: rows[i].onTap,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Row(
-                    children: [
-                      Icon(rows[i].icon,
-                          color: FdColors.muted, size: 26),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(rows[i].label,
-                            style: FdType.body(ur,
-                                size: 16,
-                                w: FontWeight.w500,
-                                color: FdColors.ink)),
+            _Press(
+              onTap: rows[i].onTap,
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 54),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Icon(rows[i].icon,
+                        color: FdColors.muted, size: 22),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(rows[i].label,
+                          style: FdType.body(ur,
+                              size: 15,
+                              w: FontWeight.w600,
+                              color: FdColors.ink)),
+                    ),
+                    if (rows[i].badge != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: FdColors.ink,
+                          borderRadius:
+                              BorderRadius.circular(10),
+                        ),
+                        child: Text(rows[i].badge!,
+                            style: const TextStyle(
+                                fontFamily: FdType.latin,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white)),
                       ),
-                      const Icon(Icons.chevron_right,
-                          color: FdColors.muted, size: 24),
+                      const SizedBox(width: 8),
                     ],
-                  ),
+                    const Icon(Icons.chevron_right,
+                        color: Color(0xFF9AA9A5), size: 16),
+                  ],
                 ),
               ),
             ),
             if (i < rows.length - 1)
-              const Divider(color: FdColors.line, height: 1),
+              const Divider(
+                  color: Color(0xFFEEF1F0), height: 1, thickness: 1),
           ],
         ],
       ),
@@ -801,8 +1073,10 @@ class _SavedDoctorsScreen extends ConsumerWidget {
               final d = doctors[i];
               return _ListingRow(
                 ur: ur,
-                tile: FdAvatarTile(
-                    name: d.name, size: 62, bg: FdColors.peach),
+                tile: _InitialsTile(
+                    name: d.name,
+                    bg: FdColors.peach,
+                    fg: FdColors.peachInk),
                 title: d.name,
                 subtitle:
                     '${tr(ref, 'prof.typeDoctor')} · ${specialtyLabel(ref.watch(localeProvider), d.specialty)}',

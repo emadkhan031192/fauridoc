@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Search</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F5F7F6}
+button{font-family:inherit}
+input{font-family:inherit}
+a{text-decoration:none;color:inherit}
+.noscroll{scrollbar-width:none}
+.noscroll::-webkit-scrollbar{display:none}
+.press{transition:transform .08s ease-out;-webkit-tap-highlight-color:transparent}
+.press:active{transform:scale(.97)}
+.press:focus-visible{outline:2px solid #0B6B5C;outline-offset:2px}
+input::placeholder{color:#6B7F7B}
+input:focus-visible{outline:2px solid #0B6B5C;outline-offset:0}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F5F7F6;color:#0F2A2E;font-family:'Albert Sans',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden">
+
+  <div style="flex:none;padding:52px 20px 0">
+    <span style="font-size:28px;font-weight:800;letter-spacing:-.02em">Search</span>
+
+    <label style="display:flex;align-items:center;gap:10px;margin-top:14px;height:50px;padding:0 14px;border-radius:14px;border:1px solid #E1E7E4;background:#fff;color:#566B68">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4"></path></svg>
+      <input type="text" aria-label="Search" placeholder="{{placeholder}}" style="flex:1;min-width:0;height:46px;border:0;background:transparent;font-size:15px;font-weight:500;color:#0F2A2E;outline-offset:6px">
+    </label>
+
+    <div style="display:flex;gap:4px;margin-top:12px;padding:4px;border-radius:14px;background:#E8EEEC" role="group" aria-label="What to search">
+      <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+        <button class="press" aria-pressed="{{m.on}}" onClick="{{m.pick}}" style="flex:1;min-width:0;height:40px;border:0;border-radius:11px;background:{{m.bg}};color:{{m.fg}};box-shadow:{{m.shadow}};font-size:14px;font-weight:{{m.weight}};padding:0;cursor:pointer">{{m.name}}</button>
+      </sc-for>
+    </div>
+
+    <div class="noscroll" style="display:flex;gap:8px;margin:12px -20px 0;padding:0 20px;overflow-x:auto">
+      <button class="press" style="flex:none;display:flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:19px;border:1px solid #E1E7E4;background:#fff;color:#0F2A2E;font-size:13px;font-weight:600">
+        Mardan
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+      </button>
+      <sc-if value="{{isDoctors}}" hint-placeholder-val="{{ true }}">
+        <button class="press" style="flex:none;display:flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:19px;border:1px solid #E1E7E4;background:#fff;color:#0F2A2E;font-size:13px;font-weight:600">
+          All specialties
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+        </button>
+      </sc-if>
+      <button class="press" aria-pressed="{{near}}" onClick="{{toggleNear}}" style="flex:none;display:flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:19px;border:1px solid {{nearBorder}};background:{{nearBg}};color:{{nearFg}};font-size:13px;font-weight:600;cursor:pointer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+        Within 5 km
+      </button>
+      <button class="press" onClick="{{cycleSort}}" style="flex:none;display:flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:19px;border:1px solid #E1E7E4;background:#fff;color:#0F2A2E;font-size:13px;font-weight:600;cursor:pointer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5v14M4 16l3 3 3-3M17 19V5M14 8l3-3 3 3"></path></svg>
+        {{sortName}}
+      </button>
+    </div>
+
+    <sc-if value="{{isLabs}}" hint-placeholder-val="{{ false }}">
+      <div class="noscroll" style="display:flex;gap:8px;margin:10px -20px 0;padding:0 20px;overflow-x:auto">
+        <sc-for list="{{tests}}" as="t" hint-placeholder-count="5">
+          <button class="press" aria-pressed="{{t.on}}" onClick="{{t.pick}}" style="flex:none;height:34px;padding:0 14px;border-radius:17px;border:1px solid {{t.border}};background:{{t.bg}};color:{{t.fg}};font-size:13px;font-weight:600;cursor:pointer">{{t.name}}</button>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+
+  <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto;padding:14px 20px 16px">
+    <span style="font-size:13px;font-weight:600;color:#566B68">{{count}}</span>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+      <sc-if value="{{isDoctors}}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{doctors}}" as="d" hint-placeholder-count="3">
+          <div style="padding:12px;border-radius:22px;background:{{d.card}}">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="flex:none;display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:#fff;color:#0F2A2E;font-size:19px;font-weight:800">{{d.initials}}</span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+                <span style="display:flex;align-items:center;gap:5px"><span style="font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{d.name}}</span><svg width="16" height="16" viewBox="0 0 24 24" aria-label="Verified" role="img" style="flex:none"><circle cx="12" cy="12" r="11" fill="#0B6B5C"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+                <span style="font-size:13px;font-weight:600;color:#3E5754">{{d.spec}}</span>
+              </span>
+              <span style="flex:none;display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:14px;background:#fff;font-size:13px;font-weight:800"><svg width="13" height="13" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>{{d.rating}}</span>
+            </div>
+            <div style="display:flex;margin-top:10px;padding:10px 0;border-radius:16px;background:#fff">
+              <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:11px;font-weight:600;color:#566B68">Fee</span><span style="font-size:14px;font-weight:800">Rs {{d.fee}}</span></span>
+              <span style="width:1px;background:#E1E7E4"></span>
+              <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:11px;font-weight:600;color:#566B68">Distance</span><span style="font-size:14px;font-weight:800">{{d.dist}} km</span></span>
+              <span style="width:1px;background:#E1E7E4"></span>
+              <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:11px;font-weight:600;color:#566B68">Reviews</span><span style="font-size:14px;font-weight:800">{{d.reviews}}</span></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px;margin-top:10px;font-size:13px;font-weight:700"><span style="width:9px;height:9px;border-radius:50%;background:{{d.dot}};box-shadow:0 0 0 2px #fff"></span>{{d.status}}</div>
+            <div style="display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:12.5px;font-weight:600;line-height:1.35;color:#3E5754"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.800 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg><span>{{d.addr}}</span></div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <a href="Doctor.dc.html" class="press" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;height:46px;border-radius:23px;background:#fff;color:#0F2A2E;font-size:14px;font-weight:700">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                View profile
+              </a>
+              <button class="press" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;height:46px;border:0;border-radius:23px;background:#0F2A2E;color:#fff;font-size:14px;font-weight:700;cursor:pointer">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>
+                Call now
+              </button>
+            </div>
+          </div>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{isLabs}}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{labs}}" as="l" hint-placeholder-count="3">
+          <a href="Lab.dc.html" class="press" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;border:1px solid {{l.border}};background:#fff">
+            <span style="flex:none;display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:#E3E9FF;color:#2B3F9E">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3M8 15h8"></path></svg>
+            </span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{l.name}}</span>
+              <span style="font-size:12.5px;font-weight:500;color:#566B68">{{l.dist}} km  ·  {{l.hours}}</span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>{{l.rating}}<span style="font-weight:500;color:#566B68">({{l.reviews}})</span></span>
+            </span>
+            <span style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+              <sc-if value="{{l.lowest}}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border-radius:9px;background:#FF7A1A;color:#2A1300;font-size:10.5px;font-weight:800;letter-spacing:.04em">LOWEST</span></sc-if>
+              <span style="font-size:20px;font-weight:800;letter-spacing:-.01em;color:#0B6B5C">Rs {{l.price}}</span>
+              <span style="font-size:12px;font-weight:500;color:#566B68">{{testName}}</span>
+            </span>
+          </a>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{isHospitals}}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{hospitals}}" as="h" hint-placeholder-count="3">
+          <a href="Hospital.dc.html" class="press" style="display:flex;gap:12px;padding:12px;border-radius:16px;border:1px solid #E1E7E4;background:#fff">
+            <span style="flex:none;display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:#F8DDDB;color:#C62828">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            </span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+              <span style="font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{h.name}}</span>
+              <span style="font-size:12.5px;font-weight:500;color:#566B68">{{h.dist}} km  ·  {{h.deps}}</span>
+              <span style="display:flex;align-items:center;gap:8px">
+                <span style="padding:2px 9px;border-radius:10px;background:{{h.emBg}};color:{{h.emFg}};font-size:12px;font-weight:700">{{h.em}}</span>
+                <span style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>{{h.rating}}</span>
+              </span>
+            </span>
+          </a>
+        </sc-for>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="flex:none;height:84px;box-sizing:border-box;background:#fff;border-top:1px solid #E1E7E4;display:flex;justify-content:space-around;align-items:flex-start;padding:8px 8px 0">
+    <a href="Main.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4zM10 20v-6h4v6"></path></svg></span>Home
+    </a>
+    <a href="Search.dc.html" class="press" style="width:68px;color:#0B6B5C;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px;border-radius:15px;background:#DDF0EA"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4"></path></svg></span>Search
+    </a>
+    <a href="Map.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg></span>Map
+    </a>
+    <a href="Community.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h12v9H9l-4 3v-3H4zM16 9h4v8h-1v3l-3-3h-5v-2"></path></svg></span>Community
+    </a>
+    <a href="Profile.dc.html" class="press" style="width:68px;color:#566B68;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600">
+      <span style="display:flex;align-items:center;justify-content:center;width:52px;height:30px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 4-6 8-6s8 2 8 6"></path></svg></span>Profile
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'doctors', near: false, sort: 0, test: 0 };
+  }
+  renderVals() {
+    const { mode, near, sort, test } = this.state;
+    const sortNames = ['Top rated', 'Most reviewed', 'Newest'];
+    const tintSet = [['#DDF0EA', '#0B5446'], ['#FFE6D2', '#8A3F00'], ['#E3E9FF', '#2B3F9E'], ['#F8E1EC', '#8E2A57'], ['#EDEBD2', '#5C5410']];
+    const sorter = (a, b) => sort === 0 ? b.rating - a.rating : (sort === 1 ? b.reviews - a.reviews : a.age - b.age);
+    const within = (x) => !near || x.dist <= 5;
+
+    const ADDR = {"Dr. Sana Yousafzai": "Sana Clinic, Bank Road, Mardan", "Dr. Imran Khattak": "Heart Care Centre, Sheikh Maltoon Town", "Dr. Naeem Shah": "Child Care Clinic, Takht Bhai Road", "Dr. Zarmina Gul": "Skin & Beauty Clinic, Hoti Mardan", "Dr. Fawad Ali": "City Medical Centre, Shamsi Road", "Dr. Aisha Rehman": "Rehman Clinic, Par Hoti", "Dr. Bilal Afridi": "ENT Clinic, Mardan Medical Complex"};
+    const docsAll = [
+      { name: 'Dr. Sana Yousafzai', spec: 'Gynecologist', dist: 1.2, rating: 4.9, reviews: 186, age: 3, fee: '1,500', st: 'open', status: 'Open now  ·  until 8 PM' },
+      { name: 'Dr. Imran Khattak', spec: 'Cardiologist', dist: 2.8, rating: 4.8, reviews: 143, age: 5, fee: '2,000', st: 'closed', status: 'Closed  ·  opens 5 PM' },
+      { name: 'Dr. Zarmina Gul', spec: 'Dermatologist', dist: 3.4, rating: 4.7, reviews: 98, age: 1, fee: '1,200', st: 'open', status: 'Open now  ·  until 6 PM' },
+      { name: 'Dr. Fawad Ali', spec: 'General Physician', dist: 0.9, rating: 4.6, reviews: 311, age: 6, fee: '800', st: 'leave', status: 'On leave till 20 Oct' },
+      { name: 'Dr. Bilal Afridi', spec: 'ENT', dist: 7.4, rating: 4.7, reviews: 64, age: 2, fee: '1,000', st: 'open', status: 'Open now  ·  until 7 PM' }
+    ];
+    const tests = [
+      { name: 'CBC', m: 1 }, { name: 'Blood Sugar', m: 0.4 }, { name: 'Liver Function', m: 2.2 }, { name: 'X-Ray', m: 2 }, { name: 'Urine R/E', m: 0.5 }
+    ];
+    const labsAll = [
+      { name: 'Hayat Diagnostics', dist: 1.5, base: 450, rating: 4.7, reviews: 221, age: 4, hours: 'Open until 10 PM' },
+      { name: 'Prime Lab Mardan', dist: 2.2, base: 600, rating: 4.8, reviews: 310, age: 7, hours: 'Open until 9 PM' },
+      { name: 'Sehat Clinical Lab', dist: 3.8, base: 500, rating: 4.5, reviews: 87, age: 2, hours: 'Open 24 hours' },
+      { name: 'Al-Noor Lab', dist: 6.3, base: 400, rating: 4.2, reviews: 45, age: 1, hours: 'Closed  ·  opens 8 AM' }
+    ];
+    const hospAll = [
+      { name: 'Noor General Hospital', dist: 2.1, em: true, deps: 'Surgery, Cardiology +5', rating: 4.5, reviews: 402, age: 6 },
+      { name: 'Green Valley Hospital', dist: 3.0, em: true, deps: 'Medicine, Orthopedic +3', rating: 4.3, reviews: 255, age: 3 },
+      { name: 'Mardan Women & Child Care', dist: 4.4, em: false, deps: 'Maternity, Pediatrics +2', rating: 4.6, reviews: 178, age: 5 },
+      { name: 'City Heart Institute', dist: 8.2, em: true, deps: 'Cardiology, ICU +2', rating: 4.4, reviews: 120, age: 1 }
+    ];
+
+    const doctors = docsAll.filter(within).sort(sorter);
+    const labRows = labsAll.filter(within).map((l) => ({ ...l, price: Math.round(l.base * tests[test].m / 10) * 10 }));
+    const minPrice = labRows.length ? Math.min.apply(null, labRows.map((l) => l.price)) : 0;
+    const labs = labRows.sort(sorter);
+    const hospitals = hospAll.filter(within).sort(sorter);
+
+    const nearTxt = near ? ' within 5 km' : '';
+    const count = mode === 'doctors' ? doctors.length + ' doctors in Mardan' + nearTxt
+      : (mode === 'labs' ? labs.length + ' labs offer ' + tests[test].name + nearTxt : hospitals.length + ' hospitals in Mardan' + nearTxt);
+
+    const modeDefs = [['doctors', 'Doctors'], ['labs', 'Lab Tests'], ['hospitals', 'Hospitals']];
+    return {
+      isDoctors: mode === 'doctors', isLabs: mode === 'labs', isHospitals: mode === 'hospitals',
+      placeholder: mode === 'doctors' ? 'Search by name or keyword' : (mode === 'labs' ? 'Search a test, like CBC' : 'Search hospitals'),
+      modes: modeDefs.map((m) => ({
+        name: m[1], on: mode === m[0],
+        bg: mode === m[0] ? '#fff' : 'transparent',
+        fg: mode === m[0] ? '#0B6B5C' : '#566B68',
+        weight: mode === m[0] ? 800 : 600,
+        shadow: mode === m[0] ? '0 1px 3px rgba(15,42,46,.14)' : 'none',
+        pick: () => this.setState({ mode: m[0] })
+      })),
+      near: near,
+      nearBg: near ? '#0B6B5C' : '#fff',
+      nearBorder: near ? '#0B6B5C' : '#E1E7E4',
+      nearFg: near ? '#fff' : '#0F2A2E',
+      toggleNear: () => this.setState({ near: !this.state.near }),
+      sortName: sortNames[sort],
+      cycleSort: () => this.setState({ sort: (this.state.sort + 1) % 3 }),
+      count: count,
+      testName: tests[test].name,
+      tests: tests.map((t, i) => ({
+        name: t.name, on: i === test,
+        bg: i === test ? '#0F2A2E' : '#fff', border: i === test ? '#0F2A2E' : '#E1E7E4', fg: i === test ? '#fff' : '#0F2A2E',
+        pick: () => this.setState({ test: i })
+      })),
+      doctors: doctors.map((d, i) => ({
+        addr: ADDR[d.name], name: d.name, spec: d.spec, dist: d.dist.toFixed(1), rating: d.rating.toFixed(1), reviews: d.reviews, fee: d.fee,
+        initials: d.name.replace('Dr. ', '').split(' ').map((w) => w[0]).join(''),
+        status: d.status, dot: { open: '#1FA463', closed: '#8A9A96', leave: '#FF7A1A' }[d.st],
+        card: ['#E1F3EC', '#E3EBFF', '#FFE9DA', '#F8E3EE', '#F1EFD8'][i % 5]
+      })),
+      labs: labs.map((l) => ({
+        name: l.name, dist: l.dist.toFixed(1), hours: l.hours, rating: l.rating.toFixed(1), reviews: l.reviews,
+        price: l.price, lowest: l.price === minPrice,
+        border: l.price === minPrice ? '#0B6B5C' : '#E1E7E4'
+      })),
+      hospitals: hospitals.map((h) => ({
+        name: h.name, dist: h.dist.toFixed(1), deps: h.deps, rating: h.rating.toFixed(1),
+        em: h.em ? 'Emergency 24/7' : 'No emergency ward',
+        emBg: h.em ? '#F8DDDB' : '#EEF1F0', emFg: h.em ? '#A11F1F' : '#566B68'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

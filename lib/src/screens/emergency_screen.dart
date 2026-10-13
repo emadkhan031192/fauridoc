@@ -11,9 +11,22 @@ import '../utils/actions.dart';
 import '../utils/geo.dart';
 import '../widgets/theme.dart';
 
-/// Nearest-emergency screen (design page 06): stylized route map,
-/// hospital summary, call/directions/share actions, Rescue 1122 card,
-/// and other emergency wards nearby.
+/// Spec-exact colors not present in the shared tokens.
+const _openPillBg = Color(0xFFE4F3EF);
+const _openPillInk = Color(0xFF0B5446);
+const _deptChipBg = Color(0xFFEEF1F0);
+const _amberCard = Color(0xFFFFF0DC);
+const _amberBorder = Color(0xFFF4D9B2);
+const _rescueBadge = Color(0xFFFF7A1A);
+const _rescueInk = Color(0xFF2A1300);
+const _amberBody = Color(0xFF6B4A0E);
+const _mapBg = Color(0xFFE7EDEA);
+const _mapBlock = Color(0xFFD5E4DC);
+const _userDot = Color(0xFF2F6BFF);
+
+/// Nearest-emergency screen (design page 06): custom header, stylized
+/// route-map card with hospital summary, call/directions/share actions,
+/// Rescue 1122 card, and other emergency wards nearby.
 class EmergencyScreen extends ConsumerStatefulWidget {
   const EmergencyScreen({super.key});
 
@@ -84,35 +97,69 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
 
     return Scaffold(
       backgroundColor: FdColors.bg,
-      appBar: AppBar(
-        title: Text(
-          trB(ref, 'emg.title'),
-          style: FdType.title(ur, size: 22),
-        ),
+      body: Column(
+        children: [
+          _header(ur),
+          Expanded(
+            child: async.when(
+              loading: () => const Center(
+                  child:
+                      CircularProgressIndicator(color: FdColors.primary)),
+              error: (_, _) => const SizedBox.shrink(),
+              data: (hospitals) {
+                final nearest = _nearest(hospitals);
+                if (nearest == null) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(
+                        fill(trB(ref, 'emg.noHospital'), {'city': city}),
+                        style: FdType.body(ur, color: FdColors.muted),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
+                final others = hospitals
+                    .where((h) => h.id != nearest.id && h.emergency247)
+                    .toList();
+                return _body(nearest, others, ur);
+              },
+            ),
+          ),
+        ],
       ),
-      body: async.when(
-        loading: () => const Center(
-            child: CircularProgressIndicator(color: FdColors.primary)),
-        error: (_, _) => const SizedBox.shrink(),
-        data: (hospitals) {
-          final nearest = _nearest(hospitals);
-          if (nearest == null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(FdDim.page),
-                child: Text(
-                  fill(trB(ref, 'emg.noHospital'), {'city': city}),
-                  style: FdType.body(ur, color: FdColors.muted),
-                  textAlign: TextAlign.center,
-                ),
+    );
+  }
+
+  /// Plain 44px back button + 20/800 title, 48px top padding (spec).
+  Widget _header(bool ur) {
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 48, 10, 0),
+      child: Row(
+        children: [
+          _Press(
+            onTap: () => Navigator.of(context).maybePop(),
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Icon(
+                rtl ? Icons.chevron_right : Icons.chevron_left,
+                color: FdColors.ink,
+                size: 24,
               ),
-            );
-          }
-          final others = hospitals
-              .where((h) => h.id != nearest.id && h.emergency247)
-              .toList();
-          return _body(nearest, others, ur);
-        },
+            ),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              trB(ref, 'emg.title'),
+              style: FdType.title(ur, size: 20, w: FontWeight.w800)
+                  .copyWith(letterSpacing: ur ? 0 : -0.2),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -123,189 +170,253 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
     final phone = h.emergencyPhone.trim().isNotEmpty
         ? h.emergencyPhone.trim()
         : h.phone.trim();
-    final depts = h.departments.take(4).toList();
+    final depts = h.departments.take(3).toList();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
-          FdDim.page, 8, FdDim.page, 28),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Route illustration.
+          // Route-map card with hospital summary.
           Container(
-            height: 250,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(color: FdColors.line),
             ),
             clipBehavior: Clip.antiAlias,
-            child: const CustomPaint(
-              painter: _RoutePainter(),
-              child: SizedBox.expand(),
-            ),
-          ),
-          const SizedBox(height: 18),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(h.name, style: FdType.title(ur, size: 24)),
-                    const SizedBox(height: 4),
-                    Text(
-                      [if (h.address.isNotEmpty) h.address, h.city]
-                          .join(', '),
-                      style:
-                          FdType.body(ur, size: 15, color: FdColors.muted),
-                    ),
-                  ],
-                ),
-              ),
-              if (dist != null) ...[
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      formatDistance(dist),
-                      style: FdType.body(ur,
-                          size: 22,
-                          w: FontWeight.w800,
-                          color: FdColors.redInk),
-                    ),
-                    if (mins != null)
-                      Text(
-                        fill(trB(ref, 'emg.aboutMin'), {'n': '$mins'}),
-                        style: FdType.body(ur,
-                            size: 14, color: FdColors.muted),
-                      ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-          if (depts.isNotEmpty || h.emergency247) ...[
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (h.emergency247)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: FdColors.mint,
-                      borderRadius:
-                          BorderRadius.circular(FdDim.pillRadius),
-                    ),
-                    child: Text(
-                      trB(ref, 'emg.emergencyOpen247'),
-                      style: FdType.body(ur,
-                          size: 14,
-                          w: FontWeight.w700,
-                          color: FdColors.primary),
-                    ),
+                const SizedBox(
+                  height: 168,
+                  width: double.infinity,
+                  child: CustomPaint(
+                    painter: _RoutePainter(),
+                    child: SizedBox.expand(),
                   ),
-                for (final dep in depts)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius:
-                          BorderRadius.circular(FdDim.pillRadius),
-                      border: Border.all(color: FdColors.line, width: 1.4),
-                    ),
-                    child: Text(
-                      dep,
-                      style: FdType.body(ur,
-                          size: 14,
-                          w: FontWeight.w600,
-                          color: FdColors.inkSoft),
-                    ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  h.name,
+                                  style: FdType.title(ur,
+                                          size: 21,
+                                          w: FontWeight.w800)
+                                      .copyWith(
+                                    letterSpacing: ur ? 0 : -0.32,
+                                    height: ur ? null : 1.15,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  [h.address, h.city]
+                                      .where((s) => s.trim().isNotEmpty)
+                                      .join(', '),
+                                  style: FdType.body(ur,
+                                      size: 14,
+                                      w: FontWeight.w500,
+                                      color: FdColors.muted),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (dist != null) ...[
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  formatDistance(dist),
+                                  style: FdType.body(ur,
+                                          size: 22,
+                                          w: FontWeight.w800,
+                                          color: FdColors.red)
+                                      .copyWith(
+                                          letterSpacing: ur ? 0 : -0.22),
+                                ),
+                                if (mins != null)
+                                  Text(
+                                    fill(trB(ref, 'emg.aboutMin'),
+                                        {'n': '$mins'}),
+                                    style: FdType.body(ur,
+                                        size: 12,
+                                        w: FontWeight.w600,
+                                        color: FdColors.muted),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                      if (depts.isNotEmpty || h.emergency247) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            if (h.emergency247)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: _openPillBg,
+                                  borderRadius:
+                                      BorderRadius.circular(11),
+                                ),
+                                child: Text(
+                                  trB(ref, 'emg.emergencyOpen247'),
+                                  style: FdType.body(ur,
+                                      size: 12,
+                                      w: FontWeight.w700,
+                                      color: _openPillInk),
+                                ),
+                              ),
+                            for (final dep in depts)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: _deptChipBg,
+                                  borderRadius:
+                                      BorderRadius.circular(11),
+                                ),
+                                child: Text(
+                                  dep,
+                                  style: FdType.body(ur,
+                                      size: 12,
+                                      w: FontWeight.w700,
+                                      color: FdColors.muted),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
+                ),
               ],
             ),
-          ],
-          const SizedBox(height: 20),
-          FdButton(
-            label: fill(trB(ref, 'emg.callEmergency'), {'phone': phone}),
-            style: FdButtonStyle.danger,
-            icon: Icons.phone_outlined,
-            isUrdu: ur,
-            onTap: () => callNumber(context, phone),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+          _Press(
+            onTap: () => callNumber(context, phone),
+            child: Container(
+              height: 58,
+              decoration: BoxDecoration(
+                color: FdColors.red,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.phone_outlined,
+                      color: Colors.white, size: 22),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      fill(trB(ref, 'emg.callEmergency'),
+                          {'phone': phone}),
+                      style: FdType.body(ur,
+                          size: 17,
+                          w: FontWeight.w800,
+                          color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
-                child: FdButton(
+                child: _ActionButton(
                   label: trB(ref, 'emg.directions'),
-                  style: FdButtonStyle.primary,
                   icon: Icons.navigation_outlined,
+                  filled: true,
                   isUrdu: ur,
-                  onTap: () => openDirections(context, h.lat, h.lng, h.name),
+                  onTap: () =>
+                      openDirections(context, h.lat, h.lng, h.name),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
-                child: FdButton(
+                child: _ActionButton(
                   label: trB(ref, 'emg.shareLocation'),
-                  style: FdButtonStyle.outline,
                   icon: Icons.ios_share_outlined,
+                  filled: false,
                   isUrdu: ur,
                   onTap: () => _shareLocation(h),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
           // Rescue 1122 card.
           Container(
             decoration: BoxDecoration(
-              color: FdColors.amberCard,
-              borderRadius: BorderRadius.circular(FdDim.bannerRadius),
-              border: Border.all(
-                  color: FdColors.amberStrong.withValues(alpha: 0.35)),
+              color: _amberCard,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _amberBorder),
             ),
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width: 62,
-                  height: 62,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    color: FdColors.amberStrong,
-                    borderRadius: BorderRadius.circular(18),
+                    color: _rescueBadge,
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     '1122',
                     style: FdType.body(false,
-                        size: 17, w: FontWeight.w800, color: FdColors.ink),
+                        size: 13,
+                        w: FontWeight.w800,
+                        color: _rescueInk),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         trB(ref, 'emg.ambulanceTitle'),
                         style: FdType.body(ur,
-                            size: 17,
-                            w: FontWeight.w800,
+                            size: 14,
+                            w: FontWeight.w700,
                             color: FdColors.ink),
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 1),
                       Text(
                         trB(ref, 'emg.ambulanceBody'),
                         style: FdType.body(ur,
-                            size: 14, color: FdColors.amberInk),
+                            size: 12,
+                            w: FontWeight.w500,
+                            color: _amberBody),
                       ),
                     ],
                   ),
@@ -313,10 +424,25 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 22),
-          FdCapsLabel(
-              label: trB(ref, 'emg.otherWards'), isUrdu: ur),
-          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 20, 0, 4),
+            child: Row(
+              children: [
+                Text(
+                  trB(ref, 'emg.otherWards').toUpperCase(),
+                  style: FdType.body(ur,
+                          size: 12,
+                          w: FontWeight.w700,
+                          color: FdColors.muted)
+                      .copyWith(letterSpacing: ur ? 0 : 0.96),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Divider(color: FdColors.line, height: 1),
+                ),
+              ],
+            ),
+          ),
           for (final o in others) _wardRow(o, ur),
         ],
       ),
@@ -328,49 +454,123 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
     final phone = h.emergencyPhone.trim().isNotEmpty
         ? h.emergencyPhone.trim()
         : h.phone.trim();
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 60),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(h.name, style: FdType.title(ur, size: 18)),
-                const SizedBox(height: 3),
-                Text(
-                  [
-                    if (dist != null) formatDistance(dist),
-                    if (h.emergency247) trB(ref, 'search.emergency247'),
-                  ].join(' · '),
-                  style: FdType.body(ur, size: 14, color: FdColors.muted),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(h.name,
+                          style: FdType.body(ur,
+                              size: 15,
+                              w: FontWeight.w700,
+                              color: FdColors.ink)),
+                      const SizedBox(height: 1),
+                      Text(
+                        [
+                          if (dist != null) formatDistance(dist),
+                          if (h.emergency247)
+                            trB(ref, 'search.emergency247'),
+                        ].join(' · '),
+                        style: FdType.body(ur,
+                            size: 12.5,
+                            w: FontWeight.w500,
+                            color: FdColors.muted),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                _Press(
+                  onTap: () => callNumber(context, phone),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      color: FdColors.redSoft,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.phone_outlined,
+                        color: FdColors.red, size: 20),
+                  ),
                 ),
               ],
             ),
           ),
-          Material(
-            color: FdColors.redSoft,
-            shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: () => callNumber(context, phone),
-              child: Container(
-                width: 56,
-                height: 56,
-                alignment: Alignment.center,
-                child: const Icon(Icons.phone_outlined,
-                    color: FdColors.redInk, size: 26),
+        ),
+        const Divider(color: FdColors.line, height: 1),
+      ],
+    );
+  }
+}
+
+/// 52px action button: filled teal or white with 1.5px teal border.
+class _ActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool filled;
+  final bool isUrdu;
+  final VoidCallback? onTap;
+
+  const _ActionButton({
+    required this.label,
+    required this.icon,
+    required this.filled,
+    this.isUrdu = false,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _Press(
+      onTap: onTap,
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: filled ? FdColors.primary : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: filled
+              ? null
+              : Border.all(color: FdColors.primary, width: 1.5),
+        ),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon,
+                color: filled ? Colors.white : FdColors.primary,
+                size: 20),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                label,
+                style: FdType.body(isUrdu,
+                    size: 15,
+                    w: FontWeight.w700,
+                    color: filled ? Colors.white : FdColors.primary),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-/// Stylized route illustration: light map, roads, teal route, user dot,
-/// and a red hospital pin — matching the design when live maps are off.
+/// Stylized route illustration matching the design: light map, white roads,
+/// teal route from the user dot to the red hospital pin.
 class _RoutePainter extends CustomPainter {
   const _RoutePainter();
 
@@ -378,90 +578,135 @@ class _RoutePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
+    final sx = w / 350;
+    final sy = h / 168;
 
     // Base.
     canvas.drawRect(
       Rect.fromLTWH(0, 0, w, h),
-      Paint()..color = const Color(0xFFE9EFEA),
+      Paint()..color = _mapBg,
     );
-
-    // Blocks.
-    final block = Paint()..color = const Color(0xFFDDE6DD);
-    for (final r in [
-      Rect.fromLTWH(w * 0.36, h * 0.30, w * 0.20, h * 0.14),
-      Rect.fromLTWH(w * 0.68, h * 0.30, w * 0.14, h * 0.20),
-      Rect.fromLTWH(w * 0.42, h * 0.62, w * 0.22, h * 0.16),
-    ]) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(r, const Radius.circular(10)),
-        block,
-      );
-    }
 
     // Roads.
     final road = Paint()
       ..color = Colors.white
-      ..strokeWidth = 14
+      ..strokeWidth = 9 * sx
       ..style = PaintingStyle.stroke;
-    for (final fy in [0.22, 0.52, 0.82]) {
-      canvas.drawLine(Offset(0, h * fy), Offset(w, h * fy), road);
+    for (final ry in [40.0, 108.0]) {
+      canvas.drawLine(Offset(0, ry * sy), Offset(w, ry * sy), road);
     }
-    for (final fx in [0.28, 0.62]) {
-      canvas.drawLine(Offset(w * fx, 0), Offset(w * fx, h), road);
+    for (final rx in [70.0, 190.0, 290.0]) {
+      canvas.drawLine(Offset(rx * sx, 0), Offset(rx * sx, h), road);
     }
     // Diagonal road.
-    canvas.drawLine(Offset(w * 0.30, h), Offset(w * 0.95, h * 0.35), road);
+    canvas.drawLine(
+      Offset(0, 140 * sy),
+      Offset(120 * sx, 110 * sy),
+      Paint()
+        ..color = Colors.white
+        ..strokeWidth = 6 * sx
+        ..style = PaintingStyle.stroke,
+    );
+    canvas.drawLine(
+      Offset(120 * sx, 110 * sy),
+      Offset(240 * sx, 70 * sy),
+      Paint()
+        ..color = Colors.white
+        ..strokeWidth = 6 * sx
+        ..style = PaintingStyle.stroke,
+    );
+    canvas.drawLine(
+      Offset(240 * sx, 70 * sy),
+      Offset(350 * sx, 50 * sy),
+      Paint()
+        ..color = Colors.white
+        ..strokeWidth = 6 * sx
+        ..style = PaintingStyle.stroke,
+    );
 
-    // Route: user -> right -> up -> right to hospital.
+    // Blocks.
+    final block = Paint()..color = _mapBlock;
+    for (final r in [
+      Rect.fromLTWH(96 * sx, 52 * sy, 70 * sx, 42 * sy),
+      Rect.fromLTWH(206 * sx, 118 * sy, 64 * sx, 36 * sy),
+      Rect.fromLTWH(304 * sx, 50 * sy, 34 * sx, 46 * sy),
+    ]) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(r, Radius.circular(6 * sx)),
+        block,
+      );
+    }
+
+    // Route: user -> right -> up -> right to the hospital pin.
     final route = Paint()
       ..color = FdColors.primary
-      ..strokeWidth = 7
+      ..strokeWidth = 5 * sx
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..style = PaintingStyle.stroke;
-    final start = Offset(w * 0.16, h * 0.52);
-    final p1 = Offset(w * 0.55, h * 0.52);
-    final p2 = Offset(w * 0.55, h * 0.22);
-    final end = Offset(w * 0.80, h * 0.22);
+    final start = Offset(44 * sx, 128 * sy);
     final path = Path()
       ..moveTo(start.dx, start.dy)
-      ..lineTo(p1.dx, p1.dy)
-      ..lineTo(p2.dx, p2.dy)
-      ..lineTo(end.dx, end.dy);
+      ..lineTo(190 * sx, 128 * sy)
+      ..lineTo(190 * sx, 40 * sy)
+      ..lineTo(290 * sx, 40 * sy);
     canvas.drawPath(path, route);
 
-    // User dot with halo.
-    canvas.drawCircle(
-        start, 30, Paint()..color = const Color(0xFF2563EB).withValues(alpha: 0.18));
-    canvas.drawCircle(start, 11, Paint()..color = const Color(0xFF2563EB));
-    canvas.drawCircle(
-        start,
-        11,
-        Paint()
-          ..color = Colors.white
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3);
+    // User dot: white ring + blue center.
+    canvas.drawCircle(start, 9 * sx, Paint()..color = Colors.white);
+    canvas.drawCircle(start, 6 * sx, Paint()..color = _userDot);
 
-    // Hospital pin.
-    final pin = Offset(w * 0.80, h * 0.22);
-    final pinPaint = Paint()..color = FdColors.red;
-    canvas.drawCircle(pin, 24, pinPaint);
+    // Hospital pin with white plus at (290, 40).
+    final pin = Offset(290 * sx, 40 * sy);
+    final red = Paint()..color = FdColors.red;
+    canvas.drawCircle(pin, 11 * sx, red);
     final tail = Path()
-      ..moveTo(pin.dx - 13, pin.dy + 16)
-      ..lineTo(pin.dx + 13, pin.dy + 16)
-      ..lineTo(pin.dx, pin.dy + 36)
+      ..moveTo(pin.dx - 7 * sx, pin.dy + 7 * sy)
+      ..lineTo(pin.dx + 7 * sx, pin.dy + 7 * sy)
+      ..lineTo(pin.dx, pin.dy + 20 * sy)
       ..close();
-    canvas.drawPath(tail, pinPaint);
+    canvas.drawPath(tail, red);
     final plus = Paint()
       ..color = Colors.white
-      ..strokeWidth = 6
+      ..strokeWidth = 3.4 * sx
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(
-        Offset(pin.dx - 9, pin.dy), Offset(pin.dx + 9, pin.dy), plus);
-    canvas.drawLine(
-        Offset(pin.dx, pin.dy - 9), Offset(pin.dx, pin.dy + 9), plus);
+    canvas.drawLine(Offset(pin.dx - 4.5 * sx, pin.dy),
+        Offset(pin.dx + 4.5 * sx, pin.dy), plus);
+    canvas.drawLine(Offset(pin.dx, pin.dy - 4.5 * sx),
+        Offset(pin.dx, pin.dy + 4.5 * sx), plus);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Press feedback: scale to 0.97 over 80 ms (spec `.press` class).
+class _Press extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _Press({required this.child, this.onTap});
+
+  @override
+  State<_Press> createState() => _PressState();
+}
+
+class _PressState extends State<_Press> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => setState(() => _down = true),
+      onTapUp: (_) => setState(() => _down = false),
+      onTapCancel: () => setState(() => _down = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 80),
+        child: widget.child,
+      ),
+    );
+  }
 }

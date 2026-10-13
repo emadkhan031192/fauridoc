@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lab profile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F5F7F6}
+button{font-family:inherit}
+input{font-family:inherit}
+a{text-decoration:none;color:inherit}
+.noscroll{scrollbar-width:none}
+.noscroll::-webkit-scrollbar{display:none}
+.press{transition:transform .08s ease-out;-webkit-tap-highlight-color:transparent}
+.press:active{transform:scale(.97)}
+.press:focus-visible{outline:2px solid #0B6B5C;outline-offset:2px}
+input::placeholder{color:#6B7F7B}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F5F7F6;color:#0F2A2E;font-family:'Albert Sans',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden">
+
+  <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto">
+    <div style="position:relative;height:150px;background:#E3E9FF;display:flex;align-items:center;justify-content:center;color:#2B3F9E">
+      <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.4"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3M8 15h8"></path></svg>
+      <a href="Search.dc.html" class="press" aria-label="Back to search" style="position:absolute;left:14px;top:48px;width:44px;height:44px;border-radius:22px;background:#fff;color:#0F2A2E;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(15,42,46,.18)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+      </a>
+    </div>
+
+    <div style="padding:16px 20px 24px">
+      <div style="display:flex;align-items:center;gap:7px">
+        <h1 style="margin:0;font-size:25px;line-height:1.15;font-weight:800;letter-spacing:-.02em">Hayat Diagnostics</h1>
+        <svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Verified by Fauridoc" style="flex:none"><circle cx="12" cy="12" r="11" fill="#0B6B5C"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+      <div style="margin-top:4px;font-size:14px;font-weight:500;color:#566B68">Clinical laboratory  ·  Mardan  ·  1.5 km away</div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;font-weight:700">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>
+        4.7<span style="font-weight:500;color:#566B68">(221 reviews)</span>
+        <span style="margin-left:6px;padding:3px 10px;border-radius:11px;background:#E4F3EF;color:#0B5446;font-size:12px;font-weight:700">Open until 10 PM</span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;margin-top:14px;background:#fff;border:1px solid #E1E7E4;border-radius:16px;padding:0 14px">
+        <sc-for list="{{info}}" as="r" hint-placeholder-count="4">
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid {{r.line}}">
+            <span style="flex:none;width:92px;font-size:13px;font-weight:600;color:#566B68">{{r.k}}</span>
+            <span style="flex:1;min-width:0;font-size:14px;font-weight:600;line-height:1.35;white-space:pre-line">{{r.v}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px">
+        <h2 style="margin:0;font-size:17px;font-weight:800">Tests and prices</h2>
+        <span style="font-size:13px;font-weight:600;color:#566B68">42 tests</span>
+      </div>
+
+      <label style="display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:14px;border:1px solid #E1E7E4;background:#fff;color:#566B68">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4"></path></svg>
+        <input type="text" aria-label="Search tests at this lab" placeholder="Search a test at this lab" style="flex:1;min-width:0;height:42px;border:0;background:transparent;font-size:14px;font-weight:500;color:#0F2A2E;outline-offset:6px">
+      </label>
+
+      <div class="noscroll" style="display:flex;gap:8px;margin:10px -20px 0;padding:0 20px;overflow-x:auto">
+        <sc-for list="{{cats}}" as="c" hint-placeholder-count="5">
+          <span style="flex:none;display:flex;align-items:center;height:34px;padding:0 14px;border-radius:17px;border:1px solid {{c.border}};background:{{c.bg}};color:{{c.fg}};font-size:13px;font-weight:600">{{c.name}}</span>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;flex-direction:column;margin-top:10px;background:#fff;border:1px solid #E1E7E4;border-radius:16px;padding:0 14px">
+        <sc-for list="{{tests}}" as="t" hint-placeholder-count="6">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;border-bottom:1px solid {{t.line}}">
+            <span style="display:flex;flex-direction:column;gap:1px;min-width:0">
+              <span style="font-size:15px;font-weight:700">{{t.name}}</span>
+              <span style="font-size:12px;font-weight:500;color:#566B68">{{t.note}}</span>
+            </span>
+            <span style="flex:none;font-size:16px;font-weight:800;color:#0B6B5C">Rs {{t.price}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;height:44px;margin-top:6px;font-size:14px;font-weight:700;color:#0B6B5C">Show all 42 tests</div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:12px;font-weight:500;color:#566B68;line-height:1.45">
+        Prices are entered by the lab and may change. Call to confirm before you go.
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:none;box-sizing:border-box;padding:10px 16px 26px;background:#fff;border-top:1px solid #E1E7E4;display:flex;gap:10px">
+    <a href="Profile.dc.html" class="press" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:16px;background:#0B6B5C;color:#fff;font-size:15px;font-weight:700">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>
+      Call
+    </a>
+    <a href="Map.dc.html" class="press" style="flex:1.3;display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:16px;border:1.5px solid #0B6B5C;background:#fff;color:#0B6B5C;font-size:15px;font-weight:700">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+      View on Map
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const info = [
+      { k: 'Address', v: 'Bank Road, opposite the old bus stand, Mardan' },
+      { k: 'Phone', v: '0937 XXX XXX' },
+      { k: 'Hours', v: 'Mon to Sat  8 AM – 10 PM\nSunday  9 AM – 2 PM' },
+      { k: 'Parking', v: 'Available' }
+    ];
+    const cats = ['All', 'Blood', 'Urine', 'X-Ray', 'Ultrasound', 'Hormones'];
+    const tests = [
+      { name: 'CBC', note: 'Complete blood count  ·  report in 3 hours', price: '450' },
+      { name: 'Blood Sugar (random)', note: 'Report in 30 minutes', price: '180' },
+      { name: 'Liver Function Test', note: 'Fasting not needed  ·  same day', price: '990' },
+      { name: 'Urine R/E', note: 'Report in 2 hours', price: '225' },
+      { name: 'X-Ray Chest', note: 'Digital  ·  walk in', price: '900' },
+      { name: 'Ultrasound Abdomen', note: 'Appointment suggested', price: '1,800' }
+    ];
+    return {
+      info: info.map((r, i) => ({ k: r.k, v: r.v, line: i === info.length - 1 ? 'transparent' : '#EEF1F0' })),
+      cats: cats.map((c, i) => ({ name: c, bg: i === 0 ? '#0F2A2E' : '#fff', border: i === 0 ? '#0F2A2E' : '#E1E7E4', fg: i === 0 ? '#fff' : '#0F2A2E' })),
+      tests: tests.map((t, i) => ({ name: t.name, note: t.note, price: t.price, line: i === tests.length - 1 ? 'transparent' : '#EEF1F0' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

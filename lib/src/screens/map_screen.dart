@@ -98,6 +98,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               hospitals: hospitals,
                               onPinTap: (kind) =>
                                   _selectFirstOf(kind, doctors, labs, hospitals),
+                              selectedKind: _selKind,
                             ),
                     ),
                     _topBar(context, ref, ur, city),
@@ -167,6 +168,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   Widget _topBar(
       BuildContext context, WidgetRef ref, bool ur, String city) {
+    // Spec: city pill 48px, radius 24, 15/700 text, 20px teal pin icon,
+    // 16px chevron; round search button 48px with 21px icon.
     return SafeArea(
       child: Padding(
         padding:
@@ -174,63 +177,69 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         child: Row(
           children: [
             Expanded(
-              child: GestureDetector(
+              child: _FdPress(
                 onTap: () => _pickCity(context, ref, city),
                 child: Container(
-                  height: FdDim.searchHeight,
+                  height: 48,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 20),
+                      const EdgeInsets.symmetric(horizontal: 14),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius:
-                        BorderRadius.circular(FdDim.pillRadius),
+                    borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 12,
-                        offset: const Offset(0, 3),
+                        color:
+                            FdColors.ink.withValues(alpha: 0.16),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.location_on_outlined,
-                          color: FdColors.primary, size: 26),
-                      const SizedBox(width: 10),
+                          color: FdColors.primary, size: 20),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           city,
                           style: FdType.body(false,
-                              size: 17,
+                              size: 15,
                               w: FontWeight.w700,
                               color: FdColors.ink),
                         ),
                       ),
                       const Icon(Icons.keyboard_arrow_down,
-                          color: FdColors.ink, size: 26),
+                          color: FdColors.ink, size: 16),
                     ],
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            Material(
-              color: Colors.white,
-              shape: const CircleBorder(),
-              elevation: 3,
-              shadowColor: Colors.black26,
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (_) => const SearchScreen()),
+            const SizedBox(width: 8),
+            _FdPress(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const SearchScreen()),
+              ),
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color:
+                          FdColors.ink.withValues(alpha: 0.16),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: const SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: Icon(Icons.search,
-                      color: FdColors.ink, size: 28),
-                ),
+                alignment: Alignment.center,
+                child: const Icon(Icons.search,
+                    color: FdColors.ink, size: 21),
               ),
             ),
           ],
@@ -295,14 +304,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     ];
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.only(top: 84),
+        padding: const EdgeInsets.only(top: 70),
         child: SizedBox(
-          height: FdDim.chipHeight,
+          height: 38,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: chips.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 10),
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (_, i) {
               final (kind, label, dot) = chips[i];
               final selected = _type == kind;
@@ -325,6 +334,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   /// "All" is ink-filled when selected; type chips are white with a dot.
+  /// Spec: 38px tall, 13/700, 10px dot, no border.
   Widget _typeChip({
     required String label,
     required Color? dot,
@@ -332,51 +342,50 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     required bool dark,
     required VoidCallback onTap,
   }) {
-    final bg = dark
-        ? (selected ? FdColors.ink : Colors.white)
-        : Colors.white;
+    final bg = dark && selected ? FdColors.ink : Colors.white;
     final fg = dark && selected ? Colors.white : FdColors.ink;
-    return Material(
-      color: bg,
-      borderRadius: BorderRadius.circular(FdDim.pillRadius),
-      elevation: 2,
-      shadowColor: Colors.black12,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(FdDim.pillRadius),
-        onTap: onTap,
-        child: Container(
-          height: FdDim.chipHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(FdDim.pillRadius),
-            border: (!dark || !selected)
-                ? Border.all(color: FdColors.line, width: 1.2)
-                : null,
-          ),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (dot != null) ...[
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration:
-                      BoxDecoration(color: dot, shape: BoxShape.circle),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: FdType.latin,
-                  fontSize: 15.5,
-                  fontWeight: FontWeight.w600,
-                  color: fg,
-                ),
+    return _FdPress(
+      onTap: onTap,
+      child: Container(
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(19),
+          boxShadow: [
+            BoxShadow(
+              color: FdColors.ink.withValues(alpha: 0.14),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                // Spec: the selected "All" dot is ink on ink (invisible).
+                color: dark
+                    ? (selected ? FdColors.ink : FdColors.primary)
+                    : dot,
+                shape: BoxShape.circle,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 7),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: FdType.latin,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: fg,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -439,23 +448,30 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   // ---------- locate button ----------
 
   Widget _locateButton(BuildContext context, WidgetRef ref) {
+    // Spec: 48px circle at right:16, top:536 on the 844 artboard
+    // (bottom offset 260), 22px #2F6BFF crosshair icon.
     return Positioned(
       right: 16,
-      bottom: 168,
-      child: Material(
-        color: Colors.white,
-        shape: const CircleBorder(),
-        elevation: 3,
-        shadowColor: Colors.black26,
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: () => _goToMyLocation(context, ref),
-          child: const SizedBox(
-            width: 56,
-            height: 56,
-            child: Icon(Icons.my_location,
-                color: Color(0xFF2B6CB0), size: 28),
+      bottom: 260,
+      child: _FdPress(
+        onTap: () => _goToMyLocation(context, ref),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: FdColors.ink.withValues(alpha: 0.18),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
+          alignment: Alignment.center,
+          child: const Icon(Icons.my_location,
+              color: Color(0xFF2F6BFF), size: 22),
         ),
       ),
     );
@@ -507,7 +523,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final pos = ref.watch(userLocationProvider).value;
     late final String name;
     late final String sub;
-    late final String ratingLine;
+    late final double? rating;
+    late final String statusText;
     late final Color tileBg;
     late final Color tileFg;
     late final IconData tileIcon;
@@ -523,10 +540,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // ignore: use_null_aware_elements
         if (dist != null) dist,
       ].join(' · ');
-      final r =
-          h.reviewCount > 0 ? '★ ${h.rating.toStringAsFixed(1)}  ' : '';
-      ratingLine =
-          '$r${h.emergency247 ? tr(ref, 'map.emergencyOpen') : ''}'.trim();
+      rating = h.reviewCount > 0 ? h.rating : null;
+      statusText =
+          h.emergency247 ? tr(ref, 'map.emergencyOpen') : '';
       tileBg = FdColors.redSoft;
       tileFg = FdColors.red;
       tileIcon = Icons.add;
@@ -541,9 +557,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // ignore: use_null_aware_elements
         if (dist != null) dist,
       ].join(' · ');
-      ratingLine = l.reviewCount > 0
-          ? '★ ${l.rating.toStringAsFixed(1)}'
-          : tr(ref, 'map.new');
+      rating = l.reviewCount > 0 ? l.rating : null;
+      statusText = l.reviewCount > 0 ? '' : tr(ref, 'map.new');
       tileBg = FdColors.lavender;
       tileFg = FdColors.lavenderInk;
       tileIcon = Icons.science_outlined;
@@ -558,9 +573,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // ignore: use_null_aware_elements
         if (dist != null) dist,
       ].join(' · ');
-      ratingLine = d.reviewCount > 0
-          ? '★ ${d.rating.toStringAsFixed(1)}'
-          : tr(ref, 'map.new');
+      rating = d.reviewCount > 0 ? d.rating : null;
+      statusText = d.reviewCount > 0 ? '' : tr(ref, 'map.new');
       tileBg = FdColors.mint;
       tileFg = FdColors.primary;
       tileIcon = Icons.person_outline;
@@ -568,62 +582,96 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
 
     return Positioned(
-      left: 16,
-      right: 16,
-      bottom: 16,
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(FdDim.cardRadius),
-        elevation: 4,
-        shadowColor: Colors.black26,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(FdDim.cardRadius),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => opener()),
+      left: 12,
+      right: 12,
+      bottom: 12,
+      child: _FdPress(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => opener()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: FdColors.ink.withValues(alpha: 0.2),
+                blurRadius: 24,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: tileBg,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(tileIcon, color: tileFg, size: 32),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: tileBg,
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(name,
-                          style: FdType.body(ur,
-                              size: 18,
-                              w: FontWeight.w700,
-                              color: FdColors.ink)),
-                      const SizedBox(height: 2),
-                      Text(sub,
-                          style: FdType.body(ur,
-                              size: 14, color: FdColors.muted)),
-                      if (ratingLine.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(ratingLine,
-                            style: FdType.body(ur,
-                                size: 15,
-                                w: FontWeight.w600,
-                                color: FdColors.primary)),
+                alignment: Alignment.center,
+                child: Icon(tileIcon, color: tileFg, size: 26),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: FdType.body(ur,
+                          size: 16,
+                          w: FontWeight.w800,
+                          color: FdColors.ink),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(sub,
+                        style: FdType.body(ur,
+                            size: 12.5,
+                            w: FontWeight.w600,
+                            color: FdColors.muted)),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        if (rating != null) ...[
+                          const Icon(Icons.star,
+                              size: 13, color: FdColors.starGold),
+                          const SizedBox(width: 3),
+                          Text(
+                            rating.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontFamily: FdType.latin,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: FdColors.ink,
+                            ),
+                          ),
+                        ],
+                        if (statusText.isNotEmpty) ...[
+                          if (rating != null)
+                            const SizedBox(width: 8),
+                          Text(
+                            statusText,
+                            style: const TextStyle(
+                              fontFamily: FdType.latin,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: FdColors.primary,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const Icon(Icons.chevron_right,
-                    color: FdColors.muted, size: 28),
-              ],
-            ),
+              ),
+              const Icon(Icons.chevron_right,
+                  color: FdColors.muted, size: 20),
+            ],
           ),
         ),
       ),
@@ -639,11 +687,15 @@ class _MapPlaceholder extends StatelessWidget {
   final List<Hospital> hospitals;
   final ValueChanged<String> onPinTap;
 
+  /// Kind of the currently selected pin (grows to 54px).
+  final String? selectedKind;
+
   const _MapPlaceholder({
     required this.doctors,
     required this.labs,
     required this.hospitals,
     required this.onPinTap,
+    this.selectedKind,
   });
 
   @override
@@ -667,7 +719,7 @@ class _MapPlaceholder extends StatelessWidget {
           },
           child: CustomPaint(
             size: size,
-            painter: _PlaceholderPainter(pins),
+            painter: _PlaceholderPainter(pins, selectedKind),
           ),
         );
       },
@@ -706,14 +758,15 @@ class _Pin {
 
 class _PlaceholderPainter extends CustomPainter {
   final List<_Pin> pins;
-  _PlaceholderPainter(this.pins);
+  final String? selectedKind;
+  _PlaceholderPainter(this.pins, this.selectedKind);
 
   @override
   void paint(Canvas canvas, Size size) {
     // background
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint()..color = const Color(0xFFE9F0EE),
+      Paint()..color = const Color(0xFFE7EDEA),
     );
     // blocks
     final block = Paint()..color = const Color(0xFFDDE8E4);
@@ -776,32 +829,46 @@ class _PlaceholderPainter extends CustomPainter {
     final Color color;
     switch (p.kind) {
       case 'doctor':
-        color = FdColors.primary;
+        color = FdColors.primary; // #0B6B5C
         break;
       case 'lab':
-        color = FdColors.lavenderInk;
+        color = const Color(0xFF3552D6); // spec lab blue
         break;
       default:
-        color = FdColors.red;
+        color = FdColors.red; // #C62828
     }
-    // shadow + white ring + colored circle
-    canvas.drawCircle(
-        p.offset + const Offset(0, 3),
-        27,
-        Paint()..color = Colors.black.withValues(alpha: 0.15));
-    canvas.drawCircle(p.offset, 27, Paint()..color = Colors.white);
-    canvas.drawCircle(p.offset, 22, Paint()..color = color);
-    // white glyph
+    // Spec: 44px pin, 3px white border, 0 2px 8px rgba(15,42,46,.3).
+    // Selected: 54px with a 5px rgba(15,42,46,.18) halo.
+    final selected = selectedKind != null && p.kind == selectedKind;
+    final r = selected ? 27.0 : 22.0;
+    final o = p.offset;
+    if (selected) {
+      canvas.drawCircle(
+          o, r + 5, Paint()..color = const Color(0x2E0F2A2E));
+      canvas.drawCircle(
+          o + const Offset(0, 4),
+          r,
+          Paint()..color = FdColors.ink.withValues(alpha: 0.3));
+    } else {
+      canvas.drawCircle(
+          o + const Offset(0, 2),
+          r,
+          Paint()..color = FdColors.ink.withValues(alpha: 0.3));
+    }
+    canvas.drawCircle(o, r, Paint()..color = Colors.white);
+    canvas.drawCircle(o, r - 3, Paint()..color = color);
+    // white glyph (~20px)
     final g = Paint()
       ..color = Colors.white
-      ..strokeWidth = 3.4
+      ..strokeWidth = 3.2
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
-    final o = p.offset;
     if (p.kind == 'doctor') {
-      canvas.drawCircle(o + const Offset(0, -6), 5.5, Paint()..color = Colors.white);
+      canvas.drawCircle(
+          o + const Offset(0, -5.5), 5, Paint()..color = Colors.white);
       canvas.drawArc(
-        Rect.fromCenter(center: o + const Offset(0, 10), width: 20, height: 14),
+        Rect.fromCenter(
+            center: o + const Offset(0, 9), width: 18, height: 13),
         3.6,
         2.1,
         false,
@@ -809,21 +876,56 @@ class _PlaceholderPainter extends CustomPainter {
       );
     } else if (p.kind == 'lab') {
       final path = Path()
-        ..moveTo(o.dx - 7, o.dy - 11)
-        ..lineTo(o.dx - 7, o.dy - 2)
-        ..lineTo(o.dx - 11, o.dy + 9)
-        ..lineTo(o.dx + 11, o.dy + 9)
-        ..lineTo(o.dx + 7, o.dy - 2)
-        ..lineTo(o.dx + 7, o.dy - 11)
+        ..moveTo(o.dx - 6, o.dy - 10)
+        ..lineTo(o.dx - 6, o.dy - 2)
+        ..lineTo(o.dx - 10, o.dy + 8)
+        ..lineTo(o.dx + 10, o.dy + 8)
+        ..lineTo(o.dx + 6, o.dy - 2)
+        ..lineTo(o.dx + 6, o.dy - 10)
         ..close();
       canvas.drawPath(path, g);
     } else {
-      canvas.drawLine(o + const Offset(-8, 0), o + const Offset(8, 0), g);
-      canvas.drawLine(o + const Offset(0, -8), o + const Offset(0, 8), g);
+      canvas.drawLine(o + const Offset(-7, 0), o + const Offset(7, 0), g);
+      canvas.drawLine(o + const Offset(0, -7), o + const Offset(0, 7), g);
     }
   }
 
   @override
   bool shouldRepaint(covariant _PlaceholderPainter old) =>
-      old.pins.length != pins.length;
+      old.pins.length != pins.length || old.selectedKind != selectedKind;
+}
+
+/// Spec `.press`: scale to 0.97 in 80 ms on press.
+class _FdPress extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _FdPress({required this.child, this.onTap});
+
+  @override
+  State<_FdPress> createState() => _FdPressState();
+}
+
+class _FdPressState extends State<_FdPress> {
+  double _scale = 1;
+
+  void _set(double s) {
+    if (_scale != s) setState(() => _scale = s);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _set(0.97),
+      onTapUp: (_) => _set(1),
+      onTapCancel: () => _set(1),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 80),
+        child: widget.child,
+      ),
+    );
+  }
 }

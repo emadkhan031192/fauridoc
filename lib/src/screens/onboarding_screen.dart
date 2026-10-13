@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../design/tokens.dart';
 import '../app.dart';
 import '../l10n/strings_b.dart';
 import '../providers/providers.dart';
@@ -9,6 +10,10 @@ import '../widgets/theme.dart';
 
 /// Single onboarding screen (design page-02). "Next"/"Skip" mark onboarding
 /// seen and enter the app shell.
+///
+/// Layout is pixel-matched to `design/fauridoc-screens.html` §Onboarding
+/// (390x844 artboard, 1 CSS px = 1 Flutter logical px). The seen-flag logic
+/// and navigation are untouched.
 class OnboardingScreen extends ConsumerStatefulWidget {
   final SharedPreferences prefs;
   final bool demoMode;
@@ -38,266 +43,336 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
+    final family = ur ? FdType.urdu : FdType.latin;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
+      backgroundColor: FdSpec.pageBg,
+      body: Padding(
+        // Spec: padding 48px 24px 40px.
+        padding: const EdgeInsets.fromLTRB(24, 48, 24, 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8, left: 20, right: 20),
-                child: TextButton(
-                  onPressed: _finish,
-                  child: Text(
-                    trB(ref, 'onb.skip'),
-                    style: FdType.body(ur,
-                        size: 16,
-                        w: FontWeight.w600,
-                        color: FdColors.primary),
-                  ),
-                ),
-              ),
-            ),
-            const Spacer(flex: 2),
-            // Illustration: mint circle, stacked cards, verified badge.
-            const Center(child: _OnboardingArt()),
-            const Spacer(flex: 2),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: FdDim.page),
-              child: Text(
-                trB(ref, 'onb.title'),
-                style: FdType.display(ur, size: 34),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: FdDim.page),
-              child: Text(
-                trB(ref, 'onb.body'),
-                style: FdType.body(ur, size: 16, color: FdColors.inkSoft),
-              ),
-            ),
-            const SizedBox(height: 28),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: FdDim.page),
+            // Skip row: 44 px tall, aligned right.
+            SizedBox(
+              height: 44,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Progress: teal dash + 2 grey dots.
-                  Container(
-                    width: 38,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: FdColors.primary,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  _progressDot(),
-                  const SizedBox(width: 8),
-                  _progressDot(),
-                  const Spacer(),
-                  FdButton(
-                    label: trB(ref, 'onb.next'),
-                    icon: Icons.arrow_forward,
-                    isUrdu: ur,
+                  _PressScale(
                     onTap: _finish,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Text(
+                        trB(ref, 'onb.skip'),
+                        style: TextStyle(
+                          fontFamily: family,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: FdColors.muted,
+                          height: 44 / 15,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 30),
+            // Illustration fills the flexible middle area, centered.
+            Expanded(
+              child: Center(
+                child: CustomPaint(
+                  size: const Size(320, 260),
+                  painter: _OnboardingArtPainter(),
+                ),
+              ),
+            ),
+            // Title + body block: 10 px gap.
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  trB(ref, 'onb.title'),
+                  style: TextStyle(
+                    fontFamily: family,
+                    fontSize: 30,
+                    fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
+                    letterSpacing: ur ? 0 : -0.75, // -0.025em
+                    height: ur ? 2.0 : 1.1,
+                    color: FdColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  trB(ref, 'onb.body'),
+                  style: TextStyle(
+                    fontFamily: family,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    height: ur ? 2.4 : 1.5,
+                    color: FdColors.muted,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // Dots + Next.
+            Row(
+              children: [
+                // Active dash: 26x8, radius 4, teal.
+                Container(
+                  width: 26,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: FdColors.primary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _dot(),
+                const SizedBox(width: 8),
+                _dot(),
+                const Spacer(),
+                _PressScale(
+                  onTap: _finish,
+                  child: Container(
+                    height: 52,
+                    padding: const EdgeInsets.symmetric(horizontal: 26),
+                    decoration: BoxDecoration(
+                      color: FdColors.primary,
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          trB(ref, 'onb.next'),
+                          style: TextStyle(
+                            fontFamily: family,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        CustomPaint(
+                          size: const Size(18, 18),
+                          painter: _ArrowPainter(ur: ur),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _progressDot() {
+  /// Inactive dot: 8x8, radius 4, #C9D3CF.
+  Widget _dot() {
     return Container(
-      width: 10,
-      height: 10,
+      width: 8,
+      height: 8,
       decoration: BoxDecoration(
-        color: FdColors.primary.withValues(alpha: 0.22),
-        shape: BoxShape.circle,
+        color: const Color(0xFFC9D3CF),
+        borderRadius: BorderRadius.circular(4),
       ),
     );
   }
 }
 
-/// The onboarding illustration, composed from widgets:
-/// mint disc, a tilted card behind, the doctor card, and a check badge.
-class _OnboardingArt extends StatelessWidget {
-  const _OnboardingArt();
+/// Press feedback for elements with the spec's `press` class:
+/// scales to 0.97 in 80 ms while pressed.
+class _PressScale extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _PressScale({required this.child, required this.onTap});
+
+  @override
+  State<_PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<_PressScale> {
+  bool _down = false;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 300,
-      height: 270,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Mint disc.
-          Container(
-            width: 260,
-            height: 260,
-            decoration: const BoxDecoration(
-              color: FdColors.mintDeep,
-              shape: BoxShape.circle,
-            ),
-          ),
-          // Card behind, slightly tilted.
-          Transform.rotate(
-            angle: -0.1,
-            child: Container(
-              width: 218,
-              height: 158,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(26),
-                border: Border.all(color: FdColors.line, width: 1.5),
-              ),
-            ),
-          ),
-          // Front card.
-          Container(
-            width: 218,
-            height: 158,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(26),
-              border: Border.all(color: FdColors.primary, width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: FdColors.primary.withValues(alpha: 0.10),
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    // Avatar.
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: const BoxDecoration(
-                        color: FdColors.peach,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.person,
-                        color: FdColors.peachInk,
-                        size: 32,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Name bars.
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            height: 13,
-                            width: 110,
-                            decoration: BoxDecoration(
-                              color: FdColors.ink,
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            height: 10,
-                            width: 70,
-                            decoration: BoxDecoration(
-                              color: FdColors.line,
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                // Star dots + rating pill.
-                Row(
-                  children: [
-                    for (var i = 0; i < 4; i++)
-                      Container(
-                        width: 16,
-                        height: 16,
-                        margin: const EdgeInsets.only(right: 7),
-                        decoration: const BoxDecoration(
-                          color: FdColors.starGold,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    Container(
-                      width: 16,
-                      height: 16,
-                      margin: const EdgeInsets.only(right: 10),
-                      decoration: BoxDecoration(
-                        color: FdColors.primary.withValues(alpha: 0.18),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    Container(
-                      width: 62,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: FdColors.mintDeep,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Verified badge overlapping the card's top corner.
-          const Positioned(
-            top: 34,
-            right: 26,
-            child: _CheckBadge(),
-          ),
-        ],
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _down = true),
+      onTapUp: (_) => setState(() => _down = false),
+      onTapCancel: () => setState(() => _down = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _down ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 80),
+        child: widget.child,
       ),
     );
   }
 }
 
-class _CheckBadge extends StatelessWidget {
-  const _CheckBadge();
+/// The spec's "Next" arrow SVG: M5 12h14 M13 6l6 6-6 6, stroke 2.2.
+class _ArrowPainter extends CustomPainter {
+  final bool ur;
+  const _ArrowPainter({required this.ur});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 54,
-      height: 54,
-      decoration: BoxDecoration(
-        color: FdColors.primary,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 4),
-        boxShadow: [
-          BoxShadow(
-            color: FdColors.primary.withValues(alpha: 0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: const Icon(Icons.check, color: Colors.white, size: 30),
+  void paint(Canvas canvas, Size size) {
+    final s = size.width / 24;
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 2.2 * s
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke;
+    canvas.save();
+    if (ur) {
+      // Mirror the arrow for RTL.
+      canvas.translate(size.width, 0);
+      canvas.scale(-1, 1);
+    }
+    canvas.drawLine(Offset(5 * s, 12 * s), Offset(19 * s, 12 * s), paint);
+    canvas.drawPath(
+      Path()
+        ..moveTo(13 * s, 6 * s)
+        ..lineTo(19 * s, 12 * s)
+        ..lineTo(13 * s, 18 * s),
+      paint,
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// The spec's onboarding illustration, drawn from the SVG in the design:
+/// mint disc, tilted card behind, front doctor card (avatar, name bars,
+/// stars, rating pill), and the teal verified-check badge.
+/// The SVG is 300x240 shown at 320x260 with meet-fit (uniform scale, centered).
+class _OnboardingArtPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Meet-fit: uniform scale so 300x240 fits 320x260, centered.
+    final s = size.width / 300; // 1.0667
+    canvas.translate(0, (size.height - 240 * s) / 2);
+    canvas.scale(s);
+
+    const mint = Color(0xFFDDF0EA);
+    const teal = Color(0xFF0B6B5C);
+    const hairline = Color(0xFFC9D3CF);
+    const peachBg = Color(0xFFFFE6D2);
+    const peachInk = Color(0xFF8A3F00);
+    const ink = Color(0xFF0F2A2E);
+    const star = Color(0xFFF5B400);
+    const starOff = Color(0xFFE1E7E4);
+    const pillBg = Color(0xFFE4F3EF);
+
+    // Mint disc.
+    canvas.drawCircle(
+      const Offset(150, 120),
+      112,
+      Paint()..color = mint,
+    );
+
+    // Back card, rotated -7 deg about (144, 108).
+    canvas.save();
+    canvas.translate(144, 108);
+    canvas.rotate(-7 * 3.141592653589793 / 180);
+    canvas.translate(-144, -108);
+    canvas.drawRRect(
+      RRect.fromLTRBR(58, 48, 58 + 172, 48 + 120, const Radius.circular(16)),
+      Paint()..color = Colors.white,
+    );
+    canvas.drawRRect(
+      RRect.fromLTRBR(58, 48, 58 + 172, 48 + 120, const Radius.circular(16)),
+      Paint()
+        ..color = hairline
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+    canvas.restore();
+
+    // Front card.
+    final card = RRect.fromLTRBR(76, 68, 76 + 172, 68 + 124,
+        const Radius.circular(16));
+    canvas.drawRRect(card, Paint()..color = Colors.white);
+    canvas.drawRRect(
+      card,
+      Paint()
+        ..color = teal
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+
+    // Avatar.
+    canvas.drawCircle(
+      const Offset(110, 104),
+      21,
+      Paint()..color = peachBg,
+    );
+    // Face: eye dot + smile, #8A3F00.
+    canvas.drawCircle(const Offset(110, 98), 6, Paint()..color = peachInk);
+    canvas.drawPath(
+      Path()
+        ..moveTo(98, 118)
+        ..cubicTo(100, 110, 120, 110, 122, 118),
+      Paint()
+        ..color = peachInk
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Name + sub bars.
+    canvas.drawRRect(
+      RRect.fromLTRBR(142, 92, 142 + 76, 92 + 9, const Radius.circular(4.5)),
+      Paint()..color = ink,
+    );
+    canvas.drawRRect(
+      RRect.fromLTRBR(142, 110, 142 + 52, 110 + 7, const Radius.circular(3.5)),
+      Paint()..color = hairline,
+    );
+
+    // Stars: 4 gold, last off.
+    for (var i = 0; i < 5; i++) {
+      canvas.drawCircle(
+        Offset(98 + 16.0 * i, 156),
+        5.5,
+        Paint()..color = i < 4 ? star : starOff,
+      );
+    }
+
+    // Rating pill.
+    canvas.drawRRect(
+      RRect.fromLTRBR(182, 148, 182 + 50, 148 + 16, const Radius.circular(8)),
+      Paint()..color = pillBg,
+    );
+
+    // Verified badge.
+    canvas.drawCircle(
+      const Offset(244, 74),
+      18,
+      Paint()..color = teal,
+    );
+    canvas.drawPath(
+      Path()
+        ..moveTo(236, 74.5)
+        ..lineTo(241.5, 80)
+        ..lineTo(252, 69),
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
     );
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Doctor dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#F5F7F6}
+button{font-family:inherit}
+a{text-decoration:none;color:inherit}
+.noscroll{scrollbar-width:none}
+.noscroll::-webkit-scrollbar{display:none}
+.press{transition:transform .08s ease-out;-webkit-tap-highlight-color:transparent}
+.press:active{transform:scale(.97)}
+.press:focus-visible{outline:2px solid #0B6B5C;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F5F7F6;color:#0F2A2E;font-family:'Albert Sans',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden">
+
+  <div style="flex:none;display:flex;align-items:center;gap:4px;padding:48px 10px 8px 10px">
+    <a href="Profile.dc.html" class="press" aria-label="Back to profile" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#0F2A2E">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <span style="display:flex;flex-direction:column">
+      <span style="font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.15">My dashboard</span>
+      <span style="font-size:13px;font-weight:500;color:#566B68">Dr. Zarmina Gul  ·  only you can see this</span>
+    </span>
+  </div>
+
+  <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto;padding:6px 20px 24px">
+
+    <div style="padding:18px;border-radius:20px;background:#0B6B5C;color:#fff">
+      <span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85">This week</span>
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-top:6px">
+        <span style="font-size:52px;line-height:1;font-weight:800;letter-spacing:-.03em">43</span>
+        <span style="font-size:15px;font-weight:600;padding-bottom:6px;opacity:.95">profile views</span>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <div style="flex:1;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.14)"><span style="display:block;font-size:22px;font-weight:800">12</span><span style="font-size:12px;font-weight:600;opacity:.92">WhatsApp clicks</span></div>
+        <div style="flex:1;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.14)"><span style="display:block;font-size:22px;font-weight:800">9</span><span style="font-size:12px;font-weight:600;opacity:.92">Calls</span></div>
+        <div style="flex:1;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.14)"><span style="display:block;font-size:22px;font-weight:800">17</span><span style="font-size:12px;font-weight:600;opacity:.92">Map opens</span></div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;padding:16px;border-radius:18px;background:#fff;border:1px solid #E1E7E4">
+      <div style="display:flex;align-items:baseline;justify-content:space-between">
+        <span style="font-size:16px;font-weight:800">Views by day</span>
+        <span style="font-size:12px;font-weight:600;color:#566B68">Mon to Sun</span>
+      </div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:8px;height:128px;margin-top:12px" role="img" aria-label="Profile views by day: Monday 4, Tuesday 8, Wednesday 6, Thursday 9, Friday 5, Saturday 7, Sunday 4">
+        <sc-for list="{{bars}}" as="b" hint-placeholder-count="7">
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:128px">
+            <span style="font-size:12px;font-weight:700;color:#2E4744">{{b.v}}</span>
+            <span style="display:block;width:100%;height:{{b.h}}px;border-radius:6px 6px 3px 3px;background:{{b.bg}}"></span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px">
+        <sc-for list="{{bars}}" as="b" hint-placeholder-count="7"><span style="flex:1;text-align:center;font-size:12px;font-weight:600;color:#566B68">{{b.d}}</span></sc-for>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;padding:16px;border-radius:18px;background:#fff;border:1px solid #E1E7E4">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <span style="display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:16px;font-weight:800">Leave mode</span>
+          <span style="font-size:13px;font-weight:500;line-height:1.4;color:#566B68">Tell patients you are away so nobody makes a wasted trip.</span>
+        </span>
+        <button class="press" role="switch" aria-checked="{{leave}}" aria-label="Leave mode" onClick="{{toggle}}" style="flex:none;position:relative;width:52px;height:32px;border:0;border-radius:16px;background:{{trackBg}};padding:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{knob}}px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)"></span></button>
+      </div>
+
+      <sc-if value="{{leave}}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;height:50px;padding:0 14px;border-radius:12px;border:1px solid #D5DEDA;background:#F5F7F6">
+          <span style="font-size:13px;font-weight:600;color:#566B68">On leave until</span>
+          <span style="font-size:15px;font-weight:800">20 Oct 2026</span>
+        </div>
+      </sc-if>
+
+      <div style="margin-top:12px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#566B68">How patients see it</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px;padding:12px 14px;border-radius:12px;background:{{prevBg}}">
+        <span style="flex:none;width:10px;height:10px;border-radius:50%;background:{{prevDot}}"></span>
+        <span style="flex:1;font-size:14px;font-weight:700;color:{{prevFg}}">{{prevText}}</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <div style="flex:1;padding:14px;border-radius:16px;background:#fff;border:1px solid #E1E7E4;display:flex;flex-direction:column;gap:2px">
+        <span style="font-size:12px;font-weight:600;color:#566B68">Rating</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:22px;font-weight:800"><svg width="18" height="18" viewBox="0 0 24 24" fill="#F5B400" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"></path></svg>4.7</span>
+        <span style="font-size:12px;font-weight:500;color:#566B68">98 reviews</span>
+      </div>
+      <a href="Register.dc.html" class="press" style="flex:1;padding:14px;border-radius:16px;background:#fff;border:1.5px solid #0B6B5C;color:#0B6B5C;display:flex;flex-direction:column;justify-content:center;gap:4px;font-size:15px;font-weight:800">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"></path></svg>
+        Edit my profile
+      </a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { leave: false };
+  }
+  renderVals() {
+    const leave = this.state.leave;
+    const data = [['Mon', 4], ['Tue', 8], ['Wed', 6], ['Thu', 9], ['Fri', 5], ['Sat', 7], ['Sun', 4]];
+    return {
+      bars: data.map((d) => ({ d: d[0], v: d[1], h: Math.round(d[1] / 9 * 84), bg: d[1] === 9 ? '#0B6B5C' : '#8CCBBB' })),
+      leave: leave,
+      trackBg: leave ? '#0B6B5C' : '#B7C4C0',
+      knob: leave ? 23 : 3,
+      toggle: () => this.setState({ leave: !this.state.leave }),
+      prevText: leave ? 'On leave till 20 Oct' : 'Currently: Open  ·  until 6 PM',
+      prevBg: leave ? '#FFF0DC' : '#E4F3EF',
+      prevFg: leave ? '#8A4B00' : '#0B5446',
+      prevDot: leave ? '#FF7A1A' : '#1FA463'
+    };
+  }
+}
+</script>
+</body>
+</html>
