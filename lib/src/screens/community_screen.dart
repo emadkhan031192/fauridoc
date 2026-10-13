@@ -719,16 +719,30 @@ class _AskSheetState extends ConsumerState<_AskSheet> {
                         style: FdType.title(ur,
                             size: 20, w: FontWeight.w800)),
                   ),
-                  _FdPress(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      margin:
-                          const EdgeInsets.only(right: -10),
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.close,
-                          size: 22, color: FdColors.ink),
+                  // The 44px close button overhangs 10px into the sheet's
+                  // right padding. Negative margins assert in debug builds,
+                  // so the overhang uses a 34px layout slot with the button
+                  // overflowing 10px to the right — layout- and paint-
+                  // identical to the old `margin: EdgeInsets.only(right: -10)`.
+                  SizedBox(
+                    width: 34,
+                    height: 44,
+                    child: OverflowBox(
+                      minWidth: 44,
+                      maxWidth: 44,
+                      minHeight: 44,
+                      maxHeight: 44,
+                      alignment: Alignment.centerLeft,
+                      child: _FdPress(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.close,
+                              size: 22, color: FdColors.ink),
+                        ),
+                      ),
                     ),
                   ),
                 ],

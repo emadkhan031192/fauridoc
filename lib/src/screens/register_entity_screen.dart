@@ -336,7 +336,7 @@ class _Header extends StatelessWidget {
               title,
               style: TextStyle(
                 fontFamily: FdType.family(ur),
-                fontSize: 20,
+                fontSize: ur ? (20) * 0.9 : (20),
                 fontWeight: FontWeight.w800,
                 letterSpacing: ur ? 0 : -0.2,
                 color: FdColors.ink,
@@ -546,7 +546,7 @@ class _Caps extends StatelessWidget {
     return Text(label.toUpperCase(),
         style: TextStyle(
           fontFamily: FdType.family(ur),
-          fontSize: 12,
+          fontSize: ur ? (12) * 0.9 : (12),
           fontWeight: FontWeight.w700,
           letterSpacing: ur ? 0 : 0.72,
           color: FdColors.muted,
@@ -607,7 +607,7 @@ class _TypeTabs extends StatelessWidget {
                         labels[i],
                         style: TextStyle(
                           fontFamily: FdType.family(ur),
-                          fontSize: 14,
+                          fontSize: ur ? (14) * 0.9 : (14),
                           fontWeight: tab == i
                               ? FontWeight.w800
                               : FontWeight.w600,
@@ -663,7 +663,7 @@ class _PhotoRow extends StatelessWidget {
                         Text(tr(ref, 'add.yourPhoto'),
                             style: TextStyle(
                               fontFamily: FdType.family(ur),
-                              fontSize: 12,
+                              fontSize: ur ? (12) * 0.9 : (12),
                               fontWeight: FontWeight.w700,
                               color: FdColors.primary,
                               height: FdType.height(ur, 1.3),
@@ -703,7 +703,7 @@ class _PhotoRow extends StatelessWidget {
                                   {'n': '${i + 1}'}),
                               style: TextStyle(
                                 fontFamily: FdType.family(ur),
-                                fontSize: 12,
+                                fontSize: ur ? (12) * 0.9 : (12),
                                 fontWeight: FontWeight.w600,
                                 color: FdSpec.placeholder,
                                 height: FdType.height(ur, 1.3),

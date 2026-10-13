@@ -110,94 +110,113 @@ class _LabDetailScreenState extends ConsumerState<LabDetailScreen> {
               _header(context),
               Expanded(
                 child: ListView(
+                  // No horizontal page padding here: each child pads itself
+                  // so the category chips row can bleed edge-to-edge without
+                  // negative margins (which assert in debug builds).
                   padding:
-                      const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                      const EdgeInsets.fromLTRB(0, 16, 0, 24),
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            lab.name,
-                            style: FdType.title(ur,
-                                    size: 25, w: FontWeight.w800)
-                                .copyWith(
-                              letterSpacing: ur ? 0 : -0.5,
-                              height: ur ? null : 1.15,
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              lab.name,
+                              style: FdType.title(ur,
+                                      size: 25, w: FontWeight.w800)
+                                  .copyWith(
+                                letterSpacing: ur ? 0 : -0.5,
+                                height: ur ? null : 1.15,
+                              ),
                             ),
                           ),
-                        ),
-                        if (lab.verified) ...[
-                          const SizedBox(width: 7),
-                          const FdVerifiedBadge(size: 22),
+                          if (lab.verified) ...[
+                            const SizedBox(width: 7),
+                            const FdVerifiedBadge(size: 22),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      [
-                        tr(ref, 'lab.clinicalLab'),
-                        lab.city,
-                        if (dist != null)
-                          fill(tr(ref, 'lab.away'), {'d': dist}),
-                      ].join(' · '),
-                      style: FdType.body(ur,
-                          size: 14,
-                          w: FontWeight.w500,
-                          color: FdColors.muted),
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        [
+                          tr(ref, 'lab.clinicalLab'),
+                          lab.city,
+                          if (dist != null)
+                            fill(tr(ref, 'lab.away'), {'d': dist}),
+                        ].join(' · '),
+                        style: FdType.body(ur,
+                            size: 14,
+                            w: FontWeight.w500,
+                            color: FdColors.muted),
+                      ),
                     ),
                     const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Icon(Icons.star,
-                            color: FdColors.starGold, size: 16),
-                        const SizedBox(width: 8),
-                        Text(
-                          lab.rating.toStringAsFixed(1),
-                          style: FdType.body(ur,
-                              size: 14,
-                              w: FontWeight.w700,
-                              color: FdColors.ink),
-                        ),
-                        if (lab.reviewCount > 0)
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.star,
+                              color: FdColors.starGold, size: 16),
+                          const SizedBox(width: 8),
                           Text(
-                            ' (${fill(tr(ref, 'doc.reviewsCount'), {'n': '${lab.reviewCount}'})})',
+                            lab.rating.toStringAsFixed(1),
                             style: FdType.body(ur,
                                 size: 14,
-                                w: FontWeight.w500,
-                                color: FdColors.muted),
-                          )
-                        else ...[
-                          const SizedBox(width: 8),
-                          FdNewPill(
-                              label: tr(ref, 'doc.newReviews'),
-                              isUrdu: ur),
+                                w: FontWeight.w700,
+                                color: FdColors.ink),
+                          ),
+                          if (lab.reviewCount > 0)
+                            Text(
+                              ' (${fill(tr(ref, 'doc.reviewsCount'), {'n': '${lab.reviewCount}'})})',
+                              style: FdType.body(ur,
+                                  size: 14,
+                                  w: FontWeight.w500,
+                                  color: FdColors.muted),
+                            )
+                          else ...[
+                            const SizedBox(width: 8),
+                            FdNewPill(
+                                label: tr(ref, 'doc.newReviews'),
+                                isUrdu: ur),
+                          ],
+                          const SizedBox(width: 6),
+                          _openPill(ref, ur, status),
                         ],
-                        const SizedBox(width: 6),
-                        _openPill(ref, ur, status),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 14),
-                    _InfoCard(
-                      isUrdu: ur,
-                      rows: [
-                        if (lab.address.trim().isNotEmpty)
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 20),
+                      child: _InfoCard(
+                        isUrdu: ur,
+                        rows: [
+                          if (lab.address.trim().isNotEmpty)
+                            FdInfoRow(
+                                tr(ref, 'doc.address'), lab.address),
+                          if (lab.phone.trim().isNotEmpty)
+                            FdInfoRow(tr(ref, 'doc.phone'), lab.phone),
+                          FdInfoRow(tr(ref, 'doc.hours'),
+                              _hoursSummary(lab.hours)),
                           FdInfoRow(
-                              tr(ref, 'doc.address'), lab.address),
-                        if (lab.phone.trim().isNotEmpty)
-                          FdInfoRow(tr(ref, 'doc.phone'), lab.phone),
-                        FdInfoRow(tr(ref, 'doc.hours'),
-                            _hoursSummary(lab.hours)),
-                        FdInfoRow(
-                          tr(ref, 'doc.parking'),
-                          lab.hasParking
-                              ? tr(ref, 'doc.available')
-                              : tr(ref, 'doc.notAvailable'),
-                        ),
-                      ],
+                            tr(ref, 'doc.parking'),
+                            lab.hasParking
+                                ? tr(ref, 'doc.available')
+                                : tr(ref, 'doc.notAvailable'),
+                          ),
+                        ],
+                      ),
                     ),
                     Padding(
                       padding:
-                          const EdgeInsets.fromLTRB(0, 22, 0, 10),
+                          const EdgeInsets.fromLTRB(20, 22, 20, 10),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
@@ -222,18 +241,24 @@ class _LabDetailScreenState extends ConsumerState<LabDetailScreen> {
                         ],
                       ),
                     ),
-                    _SearchField(
-                      hint: tr(ref, 'lab.searchTest'),
-                      isUrdu: ur,
-                      onChanged: (v) => setState(() {
-                        _query = v;
-                        _resetExpansion();
-                      }),
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 20),
+                      child: _SearchField(
+                        hint: tr(ref, 'lab.searchTest'),
+                        isUrdu: ur,
+                        onChanged: (v) => setState(() {
+                          _query = v;
+                          _resetExpansion();
+                        }),
+                      ),
                     ),
                     if (categories.isNotEmpty)
+                      // Full-bleed row: the ListView carries no horizontal
+                      // page padding, so this already spans the viewport
+                      // width (the inner list keeps its 20px scroll padding).
                       Container(
-                        margin:
-                            const EdgeInsets.fromLTRB(-20, 10, -20, 0),
+                        margin: const EdgeInsets.only(top: 10),
                         height: 34,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
@@ -286,8 +311,8 @@ class _LabDetailScreenState extends ConsumerState<LabDetailScreen> {
                     const SizedBox(height: 10),
                     if (tests.isEmpty)
                       Padding(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 24),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 24),
                         child: Center(
                           child: Text(tr(ref, 'lab.noTests'),
                               style: FdType.body(ur,
@@ -295,49 +320,57 @@ class _LabDetailScreenState extends ConsumerState<LabDetailScreen> {
                         ),
                       )
                     else ...[
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: FdColors.line),
-                        ),
+                      Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14),
-                        child: Column(
-                          children: [
-                            for (var i = 0;
-                                i < visible.length;
-                                i++) ...[
-                              _testRow(ur, visible[i]),
-                              if (i < visible.length - 1)
-                                const Divider(
-                                    color: _hairline, height: 1),
+                            horizontal: 20),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: FdColors.line),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14),
+                          child: Column(
+                            children: [
+                              for (var i = 0;
+                                  i < visible.length;
+                                  i++) ...[
+                                _testRow(ur, visible[i]),
+                                if (i < visible.length - 1)
+                                  const Divider(
+                                      color: _hairline, height: 1),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
                       if (tests.length > _collapsedCount)
-                        _Press(
-                          onTap: () => setState(
-                              () => _showAll = !_showAll),
-                          child: Container(
-                            height: 44,
-                            margin: const EdgeInsets.only(top: 6),
-                            alignment: Alignment.center,
-                            // Spec copy: "Show all {n} tests".
-                            child: Text(
-                              fill(tr(ref, 'lab.showAllTests'),
-                                  {'n': '${tests.length}'}),
-                              style: FdType.body(ur,
-                                  size: 14,
-                                  w: FontWeight.w700,
-                                  color: FdColors.primary),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20),
+                          child: _Press(
+                            onTap: () => setState(
+                                () => _showAll = !_showAll),
+                            child: Container(
+                              height: 44,
+                              margin: const EdgeInsets.only(top: 6),
+                              alignment: Alignment.center,
+                              // Spec copy: "Show all {n} tests".
+                              child: Text(
+                                fill(tr(ref, 'lab.showAllTests'),
+                                    {'n': '${tests.length}'}),
+                                style: FdType.body(ur,
+                                    size: 14,
+                                    w: FontWeight.w700,
+                                    color: FdColors.primary),
+                              ),
                             ),
                           ),
                         ),
                       Padding(
                         padding:
-                            const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                            const EdgeInsets.fromLTRB(20, 10, 20, 0),
                         child: Text(
                           tr(ref, 'lab.priceDisclaimer'),
                           style: FdType.body(ur,

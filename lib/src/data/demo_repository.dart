@@ -388,6 +388,15 @@ class DemoRepository implements FauridocRepository {
       );
 
   @override
+  Stream<List<Review>> watchReviewsByUser(String uid) => _watch(
+        () => _reviews.values
+            .expand((list) => list)
+            .where((r) => r.userId == uid)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
+      );
+
+  @override
   Future<void> addReview(Review review) async {
     final existing = _reviews[review.doctorId] ?? const [];
     if (existing.any((r) => r.userId == review.userId)) {

@@ -434,7 +434,7 @@ class _Header extends StatelessWidget {
               title,
               style: TextStyle(
                 fontFamily: FdType.family(ur),
-                fontSize: 20,
+                fontSize: ur ? (20) * 0.9 : (20),
                 fontWeight: FontWeight.w800,
                 letterSpacing: ur ? 0 : -0.2,
                 color: FdColors.ink,
@@ -568,7 +568,7 @@ class _Cap extends StatelessWidget {
       child: Text(label.toUpperCase(),
           style: TextStyle(
             fontFamily: FdType.family(ur),
-            fontSize: 12,
+            fontSize: ur ? (12) * 0.9 : (12),
             fontWeight: FontWeight.w700,
             letterSpacing: ur ? 0 : 0.72,
             color: FdColors.muted,

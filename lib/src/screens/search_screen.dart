@@ -309,7 +309,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 style: TextStyle(
                   fontFamily: FdType.family(ur),
                   // EN: 28/800 ls -0.02em. UR mirrors HomeUrdu scale.
-                  fontSize: ur ? 25 : 28,
+                  fontSize: ur ? (28) * 0.9 : (28),
                   fontWeight:
                       ur ? FontWeight.w700 : FontWeight.w800,
                   color: FdSpec.ink,
@@ -356,7 +356,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               onChanged: (v) => setState(() => _query = v.trim()),
               style: TextStyle(
                 fontFamily: FdType.family(ur),
-                fontSize: 15,
+                fontSize: ur ? (15) * 0.9 : (15),
                 fontWeight: FontWeight.w500,
                 color: FdSpec.ink,
               ),
@@ -364,7 +364,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 hintText: trB(ref, 'search.hint'),
                 hintStyle: TextStyle(
                   fontFamily: FdType.family(ur),
-                  fontSize: 15,
+                  fontSize: ur ? (15) * 0.9 : (15),
                   fontWeight: FontWeight.w500,
                   color: FdSpec.muted,
                 ),
@@ -428,7 +428,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: 14,
+                      fontSize: ur ? (14) * 0.9 : (14),
                       fontWeight: _tab == i
                           ? FontWeight.w800
                           : FontWeight.w600,
@@ -446,12 +446,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   // -- filter chips ------------------------------------------------------------
 
-  /// Spec: full-bleed row (margin 12/-20/0, padding 0 20, gap 8); chips
-  /// h38, padding 0 12, radius 19, 1px border, 13/600 ink, gap 6.
+  /// Spec: full-bleed row (margin-top 12, inner scroll padding 0 20,
+  /// gap 8); chips h38, padding 0 12, radius 19, 1px border, 13/600 ink,
+  /// gap 6. Full-bleed works because the parent Column carries no
+  /// horizontal page padding (each sibling pads itself).
   Widget _filterChips(String city, String locale, bool ur) {
     final specsAsync = ref.watch(_searchSpecialtiesProvider);
     return Container(
-      margin: const EdgeInsets.only(top: 12, left: -20, right: -20),
+      margin: const EdgeInsets.only(top: 12),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -526,7 +528,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               label,
               style: TextStyle(
                 fontFamily: FdType.family(ur),
-                fontSize: 13,
+                fontSize: ur ? (13) * 0.9 : (13),
                 fontWeight: FontWeight.w600,
                 color: fg,
               ),
@@ -629,7 +631,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             countText,
             style: TextStyle(
               fontFamily: FdType.family(ur),
-              fontSize: 13,
+              fontSize: ur ? (13) * 0.9 : (13),
               fontWeight: FontWeight.w600,
               color: FdSpec.muted,
             ),
@@ -689,7 +691,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ur,
                 size: 56,
                 radius: 16,
-                fontSize: ur ? 22 : 19,
+                fontSize: ur ? (19) * 0.9 : (19),
                 weight: ur ? FontWeight.w700 : FontWeight.w800,
                 color: FdSpec.ink,
                 textHeight: ur ? 1 : null,
@@ -708,7 +710,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontFamily: FdType.family(ur),
-                              fontSize: ur ? 15 : 16,
+                              fontSize: ur ? (16) * 0.9 : (16),
                               fontWeight: ur
                                   ? FontWeight.w700
                                   : FontWeight.w800,
@@ -727,7 +729,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: FdType.family(ur),
-                        fontSize: ur ? 12.5 : 13,
+                        fontSize: ur ? (13) * 0.9 : (13),
                         fontWeight:
                             ur ? FontWeight.w500 : FontWeight.w600,
                         color: FdSpec.secondary,
@@ -780,7 +782,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     _openText(d, ref),
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: ur ? 12 : 13,
+                      fontSize: ur ? (13) * 0.9 : (13),
                       fontWeight:
                           ur ? FontWeight.w600 : FontWeight.w700,
                       color: FdSpec.ink,
@@ -806,7 +808,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: 12.5,
+                      fontSize: ur ? (12.5) * 0.9 : (12.5),
                       fontWeight: FontWeight.w600,
                       color: FdSpec.secondary,
                       height: ur ? 1.7 : 1.35,
@@ -828,7 +830,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     bg: Colors.white,
                     fg: FdSpec.ink,
                     height: 46,
-                    fontSize: ur ? 13 : 14,
+                    fontSize: ur ? (14) * 0.9 : (14),
                     weight:
                         ur ? FontWeight.w600 : FontWeight.w700,
                     textHeight: ur ? 1 : null,
@@ -846,7 +848,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       bg: FdSpec.ink,
                       fg: Colors.white,
                       height: 46,
-                      fontSize: ur ? 13 : 14,
+                      fontSize: ur ? (14) * 0.9 : (14),
                       weight:
                           ur ? FontWeight.w600 : FontWeight.w700,
                       textHeight: ur ? 1 : null,
@@ -904,7 +906,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontFamily: FdType.family(ur),
-                            fontSize: ur ? 15 : 16,
+                            fontSize: ur ? (16) * 0.9 : (16),
                             fontWeight:
                                 ur ? FontWeight.w700 : FontWeight.w800,
                             color: FdSpec.ink,
@@ -925,7 +927,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: ur ? 12.5 : 13,
+                      fontSize: ur ? (13) * 0.9 : (13),
                       fontWeight:
                           ur ? FontWeight.w500 : FontWeight.w600,
                       color: FdSpec.secondary,
@@ -952,7 +954,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontFamily: FdType.family(ur),
-                              fontSize: ur ? 12.5 : 13,
+                              fontSize: ur ? (13) * 0.9 : (13),
                               fontWeight: FontWeight.w700,
                               color: FdSpec.primary,
                               height: ur ? 1.8 : null,
@@ -1008,7 +1010,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontFamily: FdType.family(ur),
-                            fontSize: ur ? 15 : 16,
+                            fontSize: ur ? (16) * 0.9 : (16),
                             fontWeight:
                                 ur ? FontWeight.w700 : FontWeight.w800,
                             color: FdSpec.ink,
@@ -1029,7 +1031,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: ur ? 12.5 : 13,
+                      fontSize: ur ? (13) * 0.9 : (13),
                       fontWeight:
                           ur ? FontWeight.w500 : FontWeight.w600,
                       color: FdSpec.secondary,
@@ -1060,7 +1062,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontFamily: FdType.family(ur),
-                                fontSize: ur ? 12 : 12.5,
+                                fontSize: ur ? (12.5) * 0.9 : (12.5),
                                 fontWeight: FontWeight.w700,
                                 color: FdColors.redInk,
                               ),
@@ -1078,7 +1080,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: FdType.family(ur),
-                        fontSize: ur ? 12 : 12.5,
+                        fontSize: ur ? (12.5) * 0.9 : (12.5),
                         fontWeight: FontWeight.w600,
                         color: FdSpec.muted,
                         height: ur ? 1.7 : null,
@@ -1127,7 +1129,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         initials.isEmpty ? '•' : initials,
         style: TextStyle(
           fontFamily: FdType.family(ur),
-          fontSize: fontSize,
+          fontSize: ur ? (fontSize) * 0.9 : (fontSize),
           fontWeight: weight,
           color: color,
           height: textHeight,
@@ -1220,7 +1222,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: FdType.family(ur),
-                  fontSize: fontSize,
+                  fontSize: ur ? (fontSize) * 0.9 : (fontSize),
                   fontWeight: weight,
                   color: fg,
                   height: textHeight,
@@ -1242,7 +1244,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             label,
             style: TextStyle(
               fontFamily: FdType.family(ur),
-              fontSize: 11,
+              fontSize: ur ? (11) * 0.9 : (11),
               fontWeight: ur ? FontWeight.w400 : FontWeight.w600,
               color: FdSpec.muted,
             ),
@@ -1254,7 +1256,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               // UR review counts stay in Albert Sans per spec.
               fontFamily:
                   latinDigits ? FdSpec.latinFont : FdType.family(ur),
-              fontSize: ur ? 13 : 14,
+              fontSize: ur ? (14) * 0.9 : (14),
               fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
               color: FdSpec.ink,
               height: ur ? 1.7 : null,

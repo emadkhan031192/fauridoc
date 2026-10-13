@@ -55,6 +55,10 @@ abstract class FauridocRepository {
 
   // ---------- reviews ----------
   Stream<List<Review>> watchReviews(String doctorId);
+
+  /// All reviews written by [uid] across doctors, newest first.
+  Stream<List<Review>> watchReviewsByUser(String uid);
+
   /// Throws [DuplicateReviewException] when this user already reviewed the doctor.
   Future<void> addReview(Review review);
   Future<void> deleteReview(String doctorId, String reviewId);

@@ -386,6 +386,26 @@ class FirestoreRepository implements FauridocRepository {
   }
 
   @override
+  Stream<List<Review>> watchReviewsByUser(String uid) {
+    // Reviews live in per-doctor subcollections; the collection group query
+    // finds all of them, and the parent doctor id is taken from the doc path.
+    return _db
+        .collectionGroup('reviews')
+        .where('userId', isEqualTo: uid)
+        .snapshots()
+        .map((snap) {
+      final list = snap.docs.map((d) {
+        final json = _jsonFromData(d);
+        json['doctorId'] = d.reference.parent.parent?.id ?? '';
+        return Review.fromJson(json);
+      }).toList();
+      // createdAt is an ISO-8601 string, so sort client-side.
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
+    });
+  }
+
+  @override
   Future<void> addReview(Review review) async {
     final col = _doctors.doc(review.doctorId).collection('reviews');
     final existing = await col

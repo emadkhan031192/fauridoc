@@ -161,7 +161,7 @@ String _ago(WidgetRef ref, DateTime dt) {
 /// Spec section titles: 17/800 ink.
 TextStyle _sectionTitle(bool ur) => TextStyle(
       fontFamily: FdType.family(ur),
-      fontSize: 17,
+      fontSize: ur ? (17) * 0.9 : (17),
       fontWeight: FontWeight.w800,
       color: FdColors.ink,
       height: FdType.height(ur, 1.3),
@@ -324,7 +324,7 @@ class _Header extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontFamily: FdType.family(ur),
-                    fontSize: 20,
+                    fontSize: ur ? (20) * 0.9 : (20),
                     fontWeight: FontWeight.w800,
                     letterSpacing: ur ? 0 : -0.2,
                     color: FdColors.ink,
@@ -457,7 +457,7 @@ class _PendingSection extends ConsumerWidget {
                       child: Text(tr(ref, 'admin.pendingApproval'),
                           style: TextStyle(
                             fontFamily: FdType.family(ur),
-                            fontSize: 17,
+                            fontSize: ur ? (17) * 0.9 : (17),
                             fontWeight: FontWeight.w800,
                             color: FdColors.ink,
                             height: FdType.height(ur, 1.3),
@@ -611,7 +611,7 @@ class _PendingCard extends ConsumerWidget {
                     Text(item.name,
                         style: TextStyle(
                           fontFamily: FdType.family(ur),
-                          fontSize: 15,
+                          fontSize: ur ? (15) * 0.9 : (15),
                           fontWeight: FontWeight.w700,
                           color: FdColors.ink,
                           height: FdType.height(ur, 1.3),
@@ -735,7 +735,7 @@ class _ActionButton extends StatelessWidget {
         label,
         style: TextStyle(
           fontFamily: FdType.family(ur),
-          fontSize: 14,
+          fontSize: ur ? (14) * 0.9 : (14),
           fontWeight: FontWeight.w700,
           color: primary ? Colors.white : _rejectRed,
           height: FdType.height(ur, 1.3),

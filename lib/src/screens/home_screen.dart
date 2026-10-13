@@ -310,37 +310,63 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final emergency = _nearestEmergency(hospitals);
 
     // Spec scroll padding: 52 20 16 (EN) / 48 20 16 (UR).
+    // The horizontal page padding lives on the individual children (not the
+    // scroll view) so the specialty chips row can bleed edge-to-edge without
+    // negative margins, which assert in debug builds.
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(20, ur ? 48 : 52, 20, 16),
+      padding: EdgeInsets.only(top: ur ? 48 : 52, bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _topRow(city, ur),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _topRow(city, ur),
+          ),
           SizedBox(height: ur ? 10 : 18),
-          Text(
-            trB(ref, 'home.title'),
-            style: TextStyle(
-              fontFamily: FdType.family(ur),
-              // EN: 28/800, lh 1.12, ls -0.02em. UR: 25/700, lh 1.75.
-              fontSize: ur ? 25 : 28,
-              fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
-              color: FdSpec.ink,
-              height: ur ? 1.75 : 1.12,
-              letterSpacing: ur ? 0 : -0.56,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              trB(ref, 'home.title'),
+              style: TextStyle(
+                fontFamily: FdType.family(ur),
+                // EN: 28/800, lh 1.12, ls -0.02em. UR: 25/700, lh 1.75.
+                fontSize: ur ? (28) * 0.9 : (28),
+                fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
+                color: FdSpec.ink,
+                height: ur ? 1.75 : 1.12,
+                letterSpacing: ur ? 0 : -0.56,
+              ),
             ),
           ),
-          if (emergency != null) _emergencyBanner(emergency, ur),
-          _searchBox(ur),
+          if (emergency != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _emergencyBanner(emergency, ur),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _searchBox(ur),
+          ),
+          // Full-bleed: no horizontal page padding here, so the chips row
+          // scrolls edge-to-edge (it carries its own 20px scroll padding).
           _specialtyChips(locale, ur),
-          if (featured != null) _featuredCard(featured, locale, ur),
-          _sectionHeader(
-            title: fill(trB(ref, 'home.moreDoctorsIn'), {'city': city}),
-            action: trB(ref, 'home.topRated'),
-            ur: ur,
+          if (featured != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _featuredCard(featured, locale, ur),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _sectionHeader(
+              title: fill(trB(ref, 'home.moreDoctorsIn'), {'city': city}),
+              action: trB(ref, 'home.topRated'),
+              ur: ur,
+            ),
           ),
           if (rest.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 20, vertical: 24),
               child: Text(
                 fill(trB(ref, 'home.noDoctors'), {'city': city}),
                 style: FdType.body(ur, color: FdColors.muted),
@@ -349,7 +375,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           else
             // Spec: list margin-top 12 (EN) / 4 (UR), gap 12.
             Padding(
-              padding: EdgeInsets.only(top: ur ? 4 : 12),
+              padding: EdgeInsets.fromLTRB(20, ur ? 4 : 12, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -393,7 +419,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   city,
                   style: TextStyle(
                     fontFamily: FdType.family(ur),
-                    fontSize: 14,
+                    fontSize: ur ? (14) * 0.9 : (14),
                     fontWeight: ur ? FontWeight.w600 : FontWeight.w700,
                     color: FdSpec.ink,
                     height: ur ? 1.4 : null,
@@ -496,7 +522,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     trB(ref, 'home.nearestEmergency'),
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: 16,
+                      fontSize: ur ? (16) * 0.9 : (16),
                       fontWeight:
                           ur ? FontWeight.w700 : FontWeight.w800,
                       color: Colors.white,
@@ -509,7 +535,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: ur ? 11.5 : 12,
+                      fontSize: ur ? (12) * 0.9 : (12),
                       fontWeight:
                           ur ? FontWeight.w400 : FontWeight.w500,
                       color: Colors.white
@@ -556,7 +582,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: FdType.family(ur),
-                  fontSize: ur ? 14 : 15,
+                  fontSize: ur ? (15) * 0.9 : (15),
                   fontWeight: ur ? FontWeight.w400 : FontWeight.w500,
                   color: FdSpec.muted,
                 ),
@@ -568,13 +594,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Spec: full-bleed row (margin 14/-20/0 EN, 12/-20/0 UR, padding 0 20,
-  /// gap 8); chips h40 (EN) / h42 (UR), padding 0 16, 14/600 (EN) /
-  /// 13/500 (UR); selected = teal fill.
+  /// Spec: full-bleed row (margin-top 14 EN / 12 UR, inner scroll padding
+  /// 0 20, gap 8); chips h40 (EN) / h42 (UR), padding 0 16, 14/600 (EN) /
+  /// 13/500 (UR); selected = teal fill. Full-bleed works because the scroll
+  /// view carries no horizontal page padding (each sibling pads itself).
   Widget _specialtyChips(String locale, bool ur) {
     final specsAsync = ref.watch(_homeSpecialtiesProvider);
     return Container(
-      margin: EdgeInsets.only(top: ur ? 12 : 14, left: -20, right: -20),
+      margin: EdgeInsets.only(top: ur ? 12 : 14),
       child: specsAsync.when(
         loading: () => const SizedBox(height: 40),
         error: (_, _) => const SizedBox.shrink(),
@@ -627,7 +654,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           label,
           style: TextStyle(
             fontFamily: FdType.family(ur),
-            fontSize: ur ? 13 : 14,
+            fontSize: ur ? (14) * 0.9 : (14),
             fontWeight: ur ? FontWeight.w500 : FontWeight.w600,
             color: selected ? Colors.white : FdSpec.ink,
             height: ur ? 1 : null,
@@ -655,7 +682,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final nameStyle = TextStyle(
       fontFamily: FdType.family(ur),
-      fontSize: ur ? 18 : 20,
+      fontSize: ur ? (20) * 0.9 : (20),
       fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
       color: FdSpec.ink,
       height: ur ? 1.8 : 1.15,
@@ -663,7 +690,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
     final statusStyle = TextStyle(
       fontFamily: FdType.family(ur),
-      fontSize: ur ? 12.5 : 13,
+      fontSize: ur ? (13) * 0.9 : (13),
       fontWeight: ur ? FontWeight.w600 : FontWeight.w700,
       color: FdSpec.ink,
       height: ur ? 1.8 : null,
@@ -693,7 +720,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: FdType.family(ur),
-                  fontSize: 12.5,
+                  fontSize: ur ? (12.5) * 0.9 : (12.5),
                   fontWeight: FontWeight.w600,
                   color: ur ? FdSpec.limeInk : FdSpec.secondary,
                   height: ur ? 1.7 : 1.35,
@@ -726,7 +753,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       : trB(ref, 'home.topRatedNearYou').toUpperCase(),
                   style: TextStyle(
                     fontFamily: FdType.family(ur),
-                    fontSize: ur ? 13 : 12,
+                    fontSize: ur ? (12) * 0.9 : (12),
                     fontWeight:
                         ur ? FontWeight.w600 : FontWeight.w800,
                     letterSpacing: ur ? 0 : 0.96,
@@ -749,7 +776,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ur,
                   size: ur ? 64 : 68,
                   radius: 20,
-                  fontSize: ur ? 26 : 24,
+                  fontSize: ur ? (24) * 0.9 : (24),
                   weight: ur ? FontWeight.w700 : FontWeight.w800,
                   color: FdSpec.darkGreen,
                   textHeight: ur ? 1 : null,
@@ -779,7 +806,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: FdType.family(ur),
-                          fontSize: ur ? 13 : 14,
+                          fontSize: ur ? (14) * 0.9 : (14),
                           fontWeight:
                               ur ? FontWeight.w500 : FontWeight.w600,
                           color: FdSpec.limeInk,
@@ -832,7 +859,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     bg: Colors.white,
                     fg: FdSpec.ink,
                     height: 50,
-                    fontSize: ur ? 14 : 15,
+                    fontSize: ur ? (15) * 0.9 : (15),
                     weight:
                         ur ? FontWeight.w600 : FontWeight.w700,
                     textHeight: ur ? 1 : null,
@@ -849,7 +876,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       bg: FdSpec.ink,
                       fg: Colors.white,
                       height: 50,
-                      fontSize: ur ? 14 : 15,
+                      fontSize: ur ? (15) * 0.9 : (15),
                       weight:
                           ur ? FontWeight.w600 : FontWeight.w700,
                       textHeight: ur ? 1 : null,
@@ -882,7 +909,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontFamily: FdType.family(ur),
-          fontSize: ur ? 12.5 : 13,
+          fontSize: ur ? (13) * 0.9 : (13),
           fontWeight: ur ? FontWeight.w500 : FontWeight.w700,
           color: FdSpec.ink,
           height: ur ? 1 : null,
@@ -918,7 +945,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ur,
                 size: 56,
                 radius: 16,
-                fontSize: ur ? 22 : 19,
+                fontSize: ur ? (19) * 0.9 : (19),
                 weight: ur ? FontWeight.w700 : FontWeight.w800,
                 color: FdSpec.ink,
                 textHeight: ur ? 1 : null,
@@ -937,7 +964,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontFamily: FdType.family(ur),
-                              fontSize: ur ? 15 : 16,
+                              fontSize: ur ? (16) * 0.9 : (16),
                               fontWeight: ur
                                   ? FontWeight.w700
                                   : FontWeight.w800,
@@ -956,7 +983,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: FdType.family(ur),
-                        fontSize: ur ? 12.5 : 13,
+                        fontSize: ur ? (13) * 0.9 : (13),
                         fontWeight:
                             ur ? FontWeight.w500 : FontWeight.w600,
                         color: FdSpec.secondary,
@@ -1010,7 +1037,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     _openText(d, ref),
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: ur ? 12 : 13,
+                      fontSize: ur ? (13) * 0.9 : (13),
                       fontWeight:
                           ur ? FontWeight.w600 : FontWeight.w700,
                       color: FdSpec.ink,
@@ -1037,7 +1064,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: 12.5,
+                      fontSize: ur ? (12.5) * 0.9 : (12.5),
                       fontWeight: FontWeight.w600,
                       color: FdSpec.secondary,
                       height: ur ? 1.7 : 1.35,
@@ -1061,7 +1088,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     bg: Colors.white,
                     fg: FdSpec.ink,
                     height: 46,
-                    fontSize: ur ? 13 : 14,
+                    fontSize: ur ? (14) * 0.9 : (14),
                     weight:
                         ur ? FontWeight.w600 : FontWeight.w700,
                     textHeight: ur ? 1 : null,
@@ -1079,7 +1106,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       bg: FdSpec.ink,
                       fg: Colors.white,
                       height: 46,
-                      fontSize: ur ? 13 : 14,
+                      fontSize: ur ? (14) * 0.9 : (14),
                       weight:
                           ur ? FontWeight.w600 : FontWeight.w700,
                       textHeight: ur ? 1 : null,
@@ -1112,7 +1139,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               title,
               style: TextStyle(
                 fontFamily: FdType.family(ur),
-                fontSize: ur ? 17 : 18,
+                fontSize: ur ? (18) * 0.9 : (18),
                 fontWeight:
                     ur ? FontWeight.w700 : FontWeight.w800,
                 letterSpacing: ur ? 0 : -0.18,
@@ -1126,7 +1153,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               action,
               style: TextStyle(
                 fontFamily: FdType.family(ur),
-                fontSize: ur ? 12.5 : 13,
+                fontSize: ur ? (13) * 0.9 : (13),
                 fontWeight:
                     ur ? FontWeight.w500 : FontWeight.w600,
                 color: FdSpec.primary,
@@ -1171,7 +1198,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         initials.isEmpty ? '•' : initials,
         style: TextStyle(
           fontFamily: FdType.family(ur),
-          fontSize: fontSize,
+          ur ? (fontSize) * 0.9 : (fontSize): fontSize,
           fontWeight: weight,
           color: color,
           height: textHeight,
@@ -1290,7 +1317,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: FdType.family(ur),
-                  fontSize: fontSize,
+                  ur ? (fontSize) * 0.9 : (fontSize): fontSize,
                   fontWeight: weight,
                   color: fg,
                   height: textHeight,
@@ -1312,7 +1339,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             label,
             style: TextStyle(
               fontFamily: FdType.family(ur),
-              fontSize: 11,
+              fontSize: ur ? (11) * 0.9 : (11),
               fontWeight: ur ? FontWeight.w400 : FontWeight.w600,
               color: FdSpec.muted,
             ),
@@ -1324,7 +1351,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // UR review counts stay in Albert Sans per spec.
               fontFamily:
                   latinDigits ? FdSpec.latinFont : FdType.family(ur),
-              fontSize: ur ? 13 : 14,
+              fontSize: ur ? (14) * 0.9 : (14),
               fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
               color: FdSpec.ink,
               height: ur ? 1.7 : null,

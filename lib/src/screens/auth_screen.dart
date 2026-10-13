@@ -15,7 +15,11 @@ class AuthScreen extends ConsumerStatefulWidget {
   /// (used by the Profile guest card's inline "Send code" button).
   final String? initialPhone;
 
-  const AuthScreen({super.key, this.initialPhone});
+  /// When true, the phone form starts expanded on open
+  /// (used by the Profile welcome screen's "Continue with phone" button).
+  final bool startWithPhone;
+
+  const AuthScreen({super.key, this.initialPhone, this.startWithPhone = false});
 
   @override
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
@@ -36,6 +40,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     final p = widget.initialPhone;
     if (p != null && p.isNotEmpty) {
       _phoneCtrl.text = p;
+      _showPhone = true;
+    } else if (widget.startWithPhone) {
       _showPhone = true;
     }
   }

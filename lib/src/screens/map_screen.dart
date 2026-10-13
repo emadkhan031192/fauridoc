@@ -86,7 +86,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 final hospitals = _filtered(
                     hSnap.data ?? <Hospital>[], _PinType.hospitals);
                 _ensureSelection(doctors, labs, hospitals);
+                // StackFit.expand: the stack fills the whole tab area so the
+                // Positioned.fill map layer covers it. (With the default
+                // loose fit the stack would shrink to the small non-positioned
+                // header children and the map would only paint a short strip
+                // at the top, leaving the rest of the tab blank white.)
                 return Stack(
+                  fit: StackFit.expand,
                   children: [
                     Positioned.fill(
                       child: mapsConfigured
@@ -700,11 +706,18 @@ class _MapPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // LayoutBuilder is used ONLY to learn the painted size so pin positions
+    // agree between painting and hit-testing. The CustomPaint itself takes
+    // its size from the tight Positioned.fill constraints via SizedBox.expand
+    // (no explicit size), so it reliably fills the tab area.
     return LayoutBuilder(
       builder: (context, constraints) {
-        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        final size = constraints.biggest;
         final pins = _pinLayout(size);
         return GestureDetector(
+          // Opaque: a childless CustomPaint never reports a hit on its own,
+          // so without this pin taps would fall straight through.
+          behavior: HitTestBehavior.opaque,
           onTapDown: (d) {
             var best = -1;
             var bestDist = 48.0;
@@ -717,9 +730,10 @@ class _MapPlaceholder extends StatelessWidget {
             }
             if (best >= 0) onPinTap(pins[best].kind);
           },
-          child: CustomPaint(
-            size: size,
-            painter: _PlaceholderPainter(pins, selectedKind),
+          child: SizedBox.expand(
+            child: CustomPaint(
+              painter: _PlaceholderPainter(pins, selectedKind),
+            ),
           ),
         );
       },
@@ -891,8 +905,20 @@ class _PlaceholderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _PlaceholderPainter old) =>
-      old.pins.length != pins.length || old.selectedKind != selectedKind;
+  bool shouldRepaint(covariant _PlaceholderPainter old) {
+    // Pin offsets derive from the painted size, so compare them too:
+    // otherwise a size change (e.g. rotation) would keep painting pins at
+    // their old positions while hit-testing used the new ones.
+    if (old.selectedKind != selectedKind) return true;
+    if (old.pins.length != pins.length) return true;
+    for (var i = 0; i < pins.length; i++) {
+      if (old.pins[i].kind != pins[i].kind ||
+          old.pins[i].offset != pins[i].offset) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 /// Spec `.press`: scale to 0.97 in 80 ms on press.

@@ -153,7 +153,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         Text(tr(ref, 'dash.editProfile'),
                             style: TextStyle(
                               fontFamily: FdType.family(ur),
-                              fontSize: 15,
+                              fontSize: ur ? (15) * 0.9 : (15),
                               fontWeight: FontWeight.w800,
                               color: FdColors.primary,
                               height: FdType.height(ur, 1.3),
@@ -205,7 +205,7 @@ class _StatsCard extends StatelessWidget {
             Text(tr(ref, 'dash.thisWeek').toUpperCase(),
                 style: TextStyle(
                   fontFamily: FdType.family(ur),
-                  fontSize: 12,
+                  fontSize: ur ? (12) * 0.9 : (12),
                   fontWeight: FontWeight.w700,
                   letterSpacing: ur ? 0 : 0.96,
                   color: Colors.white.withValues(alpha: 0.85),
@@ -338,7 +338,7 @@ class _ViewsCard extends StatelessWidget {
                     child: Text(tr(ref, 'dash.viewsByDay'),
                         style: TextStyle(
                           fontFamily: FdType.family(ur),
-                          fontSize: 16,
+                          fontSize: ur ? (16) * 0.9 : (16),
                           fontWeight: FontWeight.w800,
                           color: FdColors.ink,
                           height: FdType.height(ur, 1.3),
@@ -476,7 +476,7 @@ class _LeaveCard extends StatelessWidget {
                         Text(tr(ref, 'dash.leaveMode'),
                             style: TextStyle(
                               fontFamily: FdType.family(ur),
-                              fontSize: 16,
+                              fontSize: ur ? (16) * 0.9 : (16),
                               fontWeight: FontWeight.w800,
                               color: FdColors.ink,
                               height: FdType.height(ur, 1.3),
@@ -507,7 +507,7 @@ class _LeaveCard extends StatelessWidget {
               Text(tr(ref, 'dash.howPatientsSee').toUpperCase(),
                   style: TextStyle(
                     fontFamily: FdType.family(ur),
-                    fontSize: 12,
+                    fontSize: ur ? (12) * 0.9 : (12),
                     fontWeight: FontWeight.w700,
                     letterSpacing: ur ? 0 : 0.72,
                     color: FdColors.muted,
@@ -535,7 +535,7 @@ class _LeaveCard extends StatelessWidget {
                       child: Text(preview,
                           style: TextStyle(
                             fontFamily: FdType.family(ur),
-                            fontSize: 14,
+                            fontSize: ur ? (14) * 0.9 : (14),
                             fontWeight: FontWeight.w700,
                             color: previewFg,
                             height: FdType.height(ur, 1.35),
@@ -655,7 +655,7 @@ class _Header extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontFamily: FdType.family(ur),
-                    fontSize: 20,
+                    fontSize: ur ? (20) * 0.9 : (20),
                     fontWeight: FontWeight.w800,
                     letterSpacing: ur ? 0 : -0.2,
                     color: FdColors.ink,

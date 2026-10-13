@@ -210,4 +210,51 @@ const Map<String, String> enStrings = {
   'weekdays_short_fri': 'Fri',
   'weekdays_short_sat': 'Sat',
   'weekdays_short_sun': 'Sun',
+  // my reviews
+  'myrev.title': 'My reviews',
+  'myrev.signInPrompt': 'Sign in to see your reviews.',
+  'myrev.signIn': 'Sign in',
+  'myrev.empty': "You haven't written any reviews yet.",
+  'myrev.edit': 'Edit',
+  'myrev.delete': 'Delete',
+  'myrev.cancel': 'Cancel',
+  'myrev.confirmDelete': 'Delete this review?',
+  'myrev.deleted': 'Review deleted.',
+  'myrev.updated': 'Review updated.',
+  'myrev.already': 'You have already reviewed this doctor.',
+  'myrev.pickStars': 'Please pick a star rating first.',
+  // my questions
+  'myq.title': 'My questions',
+  'myq.empty': "You haven't asked any questions yet.",
+  // welcome (guest profile)
+  'welcome.guest': 'Continue as Guest',
+  'welcome.signIn': 'Sign in',
+  'myrev.updateTitle': 'Edit review',
+  'myrev.update': 'Update review',
+  'myrev.unknownDoctor': 'Unknown doctor',
+  // help & feedback
+  'help.title': 'Help and feedback',
+  'help.sectionFinding': 'Finding doctors',
+  'help.sectionFindingBody':
+      'Search by name or specialty, filter by city, and set your city to see nearby doctors.',
+  'help.sectionLabs': 'Comparing lab prices',
+  'help.sectionLabsBody':
+      'Search any test by name to compare prices across nearby labs before you book.',
+  'help.sectionEmergency': 'Emergency / nearest hospital',
+  'help.sectionEmergencyBody':
+      'Tap the Emergency tab to find the nearest hospital with 24/7 emergency care.',
+  'help.sectionListing': 'Adding your clinic, lab, or hospital',
+  'help.sectionListingBody':
+      'Open the Profile tab and tap Add new to register your listing. Our team reviews it before it goes live.',
+  'help.faqTitle': 'Frequently asked questions',
+  'help.faqFreeQ': 'Is Fauridoc free?',
+  'help.faqFreeA':
+      'Yes. Finding doctors, labs, and hospitals is completely free.',
+  'help.faqDataQ': 'Do you sell my data?',
+  'help.faqDataA': 'No. Your data is never sold to anyone.',
+  'help.faqLangQ': 'Which languages does the app support?',
+  'help.faqLangA': 'English and اردو. Switch anytime from the Profile tab.',
+  'help.sendFeedback': 'Send feedback',
+  'help.feedbackSubject': 'Fauridoc feedback',
+  'help.feedbackFailed': 'Could not open the email app.',
 };

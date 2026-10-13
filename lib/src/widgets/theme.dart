@@ -48,7 +48,8 @@ class FdColors {
   static Color tintForIndex(int i) => cardTints[i % cardTints.length];
 }
 
-/// Central type scale. [isUrdu] swaps the family to Nastaliq.
+/// Central type scale. [isUrdu] swaps the family to Nastaliq and scales
+/// the size down by 10% (Nastaliq renders large).
 class FdType {
   static const latin = 'AlbertSans';
   static const urdu = 'NotoNastaliqUrdu';
@@ -62,7 +63,7 @@ class FdType {
           {double size = 34, FontWeight w = FontWeight.w700}) =>
       TextStyle(
         fontFamily: family(ur),
-        fontSize: size,
+        fontSize: ur ? size * 0.9 : size,
         fontWeight: ur ? FontWeight.w700 : w,
         color: FdColors.ink,
         height: height(ur, 1.18),
@@ -73,7 +74,7 @@ class FdType {
           {double size = 22, FontWeight w = FontWeight.w700}) =>
       TextStyle(
         fontFamily: family(ur),
-        fontSize: size,
+        fontSize: ur ? size * 0.9 : size,
         fontWeight: ur ? FontWeight.w700 : w,
         color: FdColors.ink,
         height: height(ur, 1.25),
@@ -85,7 +86,7 @@ class FdType {
           Color color = FdColors.inkSoft}) =>
       TextStyle(
         fontFamily: family(ur),
-        fontSize: size,
+        fontSize: ur ? size * 0.9 : size,
         fontWeight: w,
         color: color,
         height: height(ur, 1.45),
@@ -97,7 +98,7 @@ class FdType {
           Color color = FdColors.muted}) =>
       TextStyle(
         fontFamily: family(ur),
-        fontSize: size,
+        fontSize: ur ? size * 0.9 : size,
         fontWeight: w,
         color: color,
         height: height(ur, 1.3),
@@ -108,7 +109,7 @@ class FdType {
           {double size = 17, Color color = Colors.white}) =>
       TextStyle(
         fontFamily: family(ur),
-        fontSize: size,
+        fontSize: ur ? size * 0.9 : size,
         fontWeight: FontWeight.w600,
         color: color,
         height: height(ur, 1.2),

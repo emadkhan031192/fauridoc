@@ -13,8 +13,11 @@ import 'admin_panel_screen.dart';
 import 'auth_screen.dart';
 import 'dashboard_screen.dart';
 import 'doctor_detail_screen.dart';
+import 'help_feedback_screen.dart';
 import 'hospital_detail_screen.dart';
 import 'lab_detail_screen.dart';
+import 'my_questions_screen.dart';
+import 'my_reviews_screen.dart';
 import 'register_entity_screen.dart';
 
 /// Profile tab (page-13): user card, my listings, language, menu.
@@ -29,6 +32,10 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  /// Guest pressed "Continue as Guest": hide the welcome, show guest content.
+  /// Reset the moment a user signs in so the flow always starts fresh.
+  bool _guestDismissed = false;
+
   void _snack(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
@@ -115,15 +122,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final ur = fdIsUrdu(ref.watch(localeProvider));
     final user = ref.watch(authProvider);
 
+    if (user != null && _guestDismissed) {
+      // Signed in: the welcome flow is behind us — start fresh next time.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _guestDismissed = false);
+      });
+    }
+
     return Scaffold(
       body: SafeArea(
         child: user == null
-            ? _LoggedOutBody(
-                ur: ur,
-                onSendCode: (phone) =>
-                    _go(AuthScreen(initialPhone: phone)),
-                onSoon: () => _snack(tr(ref, 'prof.soon')),
-              )
+            ? (_guestDismissed
+                ? _GuestDismissedBody(
+                    ur: ur,
+                    onSignIn: () =>
+                        setState(() => _guestDismissed = false),
+                    onSaved: () => _go(const _SavedDoctorsScreen()),
+                    onHelp: () => _go(const HelpFeedbackScreen()),
+                  )
+                : _WelcomeBody(
+                    onGuest: () =>
+                        setState(() => _guestDismissed = true),
+                    onPhone: () =>
+                        _go(const AuthScreen(startWithPhone: true)),
+                  ))
             : _LoggedInBody(
                 ur: ur,
                 user: user,
@@ -131,8 +153,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onAddNew: () => _go(const RegisterEntityScreen()),
                 onOpenAdmin: () => _go(const AdminPanelScreen()),
                 onSignOut: _signOut,
-                onSoon: () => _snack(tr(ref, 'prof.soon')),
                 onSaved: () => _go(const _SavedDoctorsScreen()),
+                onReviews: () => _go(const MyReviewsScreen()),
+                onQuestions: () => _go(const MyQuestionsScreen()),
+                onHelp: () => _go(const HelpFeedbackScreen()),
                 onTapDoctor: (d) {
                   if (user.isDoctor && user.doctorId == d.id) {
                     _go(DashboardScreen(doctorId: d.id));
@@ -217,7 +241,7 @@ Widget _screenTitle(bool ur, String text) => Text(
       text,
       style: TextStyle(
         fontFamily: FdType.family(ur),
-        fontSize: 28,
+        fontSize: ur ? (28) * 0.9 : (28),
         fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
         letterSpacing: ur ? 0 : -0.56,
         color: FdColors.ink,
@@ -233,7 +257,7 @@ Widget _capsRow(bool ur, String label) => Row(
           label.toUpperCase(),
           style: TextStyle(
             fontFamily: FdType.family(ur),
-            fontSize: 12,
+            fontSize: ur ? (12) * 0.9 : (12),
             fontWeight: FontWeight.w700,
             letterSpacing: ur ? 0 : 0.96,
             color: FdColors.muted,
@@ -255,155 +279,178 @@ Widget _footer(WidgetRef ref, bool ur) => Center(
       ),
     );
 
-/// Logged-out (guest) state: "browsing as a guest" card with inline
-/// phone field + Send code (spec §13 guest state).
-class _LoggedOutBody extends ConsumerStatefulWidget {
-  final bool ur;
-  final ValueChanged<String> onSendCode;
-  final VoidCallback onSoon;
+/// Guest welcome screen: logo, welcome copy, Google sign-in, phone, guest.
+/// No phone form is embedded here — phone auth lives on AuthScreen.
+class _WelcomeBody extends ConsumerStatefulWidget {
+  final VoidCallback onGuest;
+  final VoidCallback onPhone;
 
-  const _LoggedOutBody({
-    required this.ur,
-    required this.onSendCode,
-    required this.onSoon,
-  });
+  const _WelcomeBody({required this.onGuest, required this.onPhone});
 
   @override
-  ConsumerState<_LoggedOutBody> createState() => _LoggedOutBodyState();
+  ConsumerState<_WelcomeBody> createState() => _WelcomeBodyState();
 }
 
-class _LoggedOutBodyState extends ConsumerState<_LoggedOutBody> {
-  final _phoneCtrl = TextEditingController();
+class _WelcomeBodyState extends ConsumerState<_WelcomeBody> {
+  bool _busy = false;
 
-  @override
-  void dispose() {
-    _phoneCtrl.dispose();
-    super.dispose();
+  Future<void> _google() async {
+    setState(() => _busy = true);
+    try {
+      await ref.read(authProvider.notifier).signInWithGoogle();
+      // Success: the auth state change rebuilds the tab to the logged-in
+      // view — no Navigator.pop needed, this is embedded in the tab.
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr(ref, 'auth.signedIn'))));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e is UnsupportedError
+              ? tr(ref, 'auth.googleNeedsFirebase')
+              : e.toString())));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final ur = widget.ur;
-    final ref = this.ref;
+    final ur = fdIsUrdu(ref.watch(localeProvider));
+    return Center(
+      child: SingleChildScrollView(
+        padding:
+            const EdgeInsets.fromLTRB(FdDim.page, 28, FdDim.page, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Center(child: FdLogo(size: 84)),
+            const SizedBox(height: 22),
+            Text(
+              tr(ref, 'auth.welcome'),
+              style: FdType.display(ur, size: 30),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              tr(ref, 'auth.subtitle'),
+              style: FdType.body(ur, size: 15, color: FdColors.muted),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              height: FdDim.buttonHeight,
+              child: Material(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(FdDim.pillRadius),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(FdDim.pillRadius),
+                  onTap: _busy ? null : _google,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          BorderRadius.circular(FdDim.pillRadius),
+                      border: Border.all(
+                          color: FdColors.line, width: 1.6),
+                    ),
+                    alignment: Alignment.center,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20),
+                    child: _busy
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.5))
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('G',
+                                  style: TextStyle(
+                                      fontFamily: FdType.latin,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF4285F4))),
+                              const SizedBox(width: 12),
+                              Flexible(
+                                child: Text(tr(ref, 'auth.google'),
+                                    style: FdType.button(ur,
+                                        color: FdColors.ink),
+                                    overflow:
+                                        TextOverflow.ellipsis),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Expanded(child: Divider(color: FdColors.line)),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14),
+                  child: Text(tr(ref, 'auth.or'),
+                      style: FdType.body(ur, size: 14)),
+                ),
+                const Expanded(child: Divider(color: FdColors.line)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            FdButton(
+              label: tr(ref, 'auth.phone'),
+              style: FdButtonStyle.outline,
+              icon: Icons.phone_outlined,
+              isUrdu: ur,
+              onTap: _busy ? null : widget.onPhone,
+            ),
+            const SizedBox(height: 14),
+            Center(
+              child: GestureDetector(
+                onTap: _busy ? null : widget.onGuest,
+                child: Text(
+                  tr(ref, 'welcome.guest'),
+                  style: FdType.body(ur,
+                      size: 15,
+                      w: FontWeight.w700,
+                      color: FdColors.primary),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Guest dismissed state: language, saved doctors, help, a sign-in button
+/// that brings the welcome back — no phone form.
+class _GuestDismissedBody extends ConsumerWidget {
+  final bool ur;
+  final VoidCallback onSignIn;
+  final VoidCallback onSaved;
+  final VoidCallback onHelp;
+
+  const _GuestDismissedBody({
+    required this.ur,
+    required this.onSignIn,
+    required this.onSaved,
+    required this.onHelp,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     return ListView(
       padding:
           const EdgeInsets.fromLTRB(FdDim.page, 14, FdDim.page, 16),
       children: [
         _screenTitle(ur, tr(ref, 'prof.title')),
-        Container(
-          margin: const EdgeInsets.only(top: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: FdColors.line),
-          ),
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                tr(ref, 'prof.browsingAsGuest'),
-                style: TextStyle(
-                  fontFamily: FdType.family(ur),
-                  fontSize: 19,
-                  fontWeight:
-                      ur ? FontWeight.w700 : FontWeight.w800,
-                  letterSpacing: ur ? 0 : -0.19,
-                  color: FdColors.ink,
-                  height: FdType.height(ur, 1.25),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                tr(ref, 'prof.guestSub'),
-                style: FdType.body(ur,
-                        size: 14,
-                        w: FontWeight.w500,
-                        color: FdColors.muted)
-                    .copyWith(height: FdType.height(ur, 1.5)),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                tr(ref, 'prof.mobileNumber').toUpperCase(),
-                style: TextStyle(
-                  fontFamily: FdType.family(ur),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: ur ? 0 : 0.72,
-                  color: FdColors.muted,
-                ),
-              ),
-              const SizedBox(height: 6),
-              SizedBox(
-                height: 50,
-                child: TextField(
-                  controller: _phoneCtrl,
-                  keyboardType: TextInputType.phone,
-                  style: FdType.body(ur,
-                      size: 16,
-                      w: FontWeight.w600,
-                      color: FdColors.ink),
-                  decoration: InputDecoration(
-                    hintText: '03XX XXXXXXX',
-                    hintStyle: FdType.body(ur,
-                        size: 16, color: FdColors.muted),
-                    filled: true,
-                    fillColor: FdColors.bg,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                          color: Color(0xFFD5DEDA)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                          color: Color(0xFFD5DEDA)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                          color: FdColors.primary, width: 1.6),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              _Press(
-                onTap: () {
-                  final phone = _phoneCtrl.text.trim();
-                  if (phone.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text(
-                                tr(ref, 'auth.fillNamePhone'))));
-                    return;
-                  }
-                  widget.onSendCode(phone);
-                },
-                child: Container(
-                  height: 52,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: FdColors.primary,
-                    borderRadius: BorderRadius.circular(26),
-                  ),
-                  child: Text(
-                    tr(ref, 'auth.sendSms'),
-                    style: TextStyle(
-                      fontFamily: FdType.family(ur),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 20),
         _capsRow(ur, tr(ref, 'prof.language')),
         const SizedBox(height: 4),
         _LanguageSegment(ur: ur),
@@ -411,12 +458,21 @@ class _LoggedOutBodyState extends ConsumerState<_LoggedOutBody> {
         _MenuCard(
           ur: ur,
           rows: [
-            // Spec: logged-out menu shows only non-login rows.
+            _MenuRow(
+                icon: Icons.bookmark_outline,
+                label: tr(ref, 'prof.savedDoctors'),
+                onTap: onSaved),
             _MenuRow(
                 icon: Icons.help_outline,
                 label: tr(ref, 'prof.help'),
-                onTap: widget.onSoon),
+                onTap: onHelp),
           ],
+        ),
+        const SizedBox(height: 16),
+        FdButton(
+          label: tr(ref, 'welcome.signIn'),
+          isUrdu: ur,
+          onTap: onSignIn,
         ),
         const SizedBox(height: 14),
         _footer(ref, ur),
@@ -433,8 +489,10 @@ class _LoggedInBody extends ConsumerWidget {
   final VoidCallback onAddNew;
   final VoidCallback onOpenAdmin;
   final VoidCallback onSignOut;
-  final VoidCallback onSoon;
+  final VoidCallback onQuestions;
   final VoidCallback onSaved;
+  final VoidCallback onReviews;
+  final VoidCallback onHelp;
   final ValueChanged<Doctor> onTapDoctor;
   final ValueChanged<Lab> onTapLab;
   final ValueChanged<Hospital> onTapHospital;
@@ -446,8 +504,10 @@ class _LoggedInBody extends ConsumerWidget {
     required this.onAddNew,
     required this.onOpenAdmin,
     required this.onSignOut,
-    required this.onSoon,
+    required this.onQuestions,
     required this.onSaved,
+    required this.onReviews,
+    required this.onHelp,
     required this.onTapDoctor,
     required this.onTapLab,
     required this.onTapHospital,
@@ -460,7 +520,7 @@ class _LoggedInBody extends ConsumerWidget {
       _MenuRow(
           icon: Icons.star_outline,
           label: tr(ref, 'prof.myReviews'),
-          onTap: onSoon),
+          onTap: onReviews),
       _MenuRow(
           icon: Icons.bookmark_outline,
           label: tr(ref, 'prof.savedDoctors'),
@@ -468,11 +528,11 @@ class _LoggedInBody extends ConsumerWidget {
       _MenuRow(
           icon: Icons.forum_outlined,
           label: tr(ref, 'prof.myQuestions'),
-          onTap: onSoon),
+          onTap: onQuestions),
       _MenuRow(
           icon: Icons.help_outline,
           label: tr(ref, 'prof.help'),
-          onTap: onSoon),
+          onTap: onHelp),
       if (user.isAdmin)
         _MenuRow(
           icon: Icons.admin_panel_settings_outlined,

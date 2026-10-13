@@ -210,4 +210,51 @@ const Map<String, String> urStrings = {
   'weekdays_short_fri': 'جمعہ',
   'weekdays_short_sat': 'ہفتہ',
   'weekdays_short_sun': 'اتوار',
+  // my reviews
+  'myrev.title': 'میرے ریویوز',
+  'myrev.signInPrompt': 'اپنے ریویوز دیکھنے کے لیے سائن ان کریں۔',
+  'myrev.signIn': 'سائن ان',
+  'myrev.empty': 'آپ نے ابھی تک کوئی ریویو نہیں لکھا۔',
+  'myrev.edit': 'ترمیم کریں',
+  'myrev.delete': 'ڈیلیٹ کریں',
+  'myrev.cancel': 'منسوخ',
+  'myrev.confirmDelete': 'کیا یہ ریویو ڈیلیٹ کرنا ہے؟',
+  'myrev.deleted': 'ریویو ڈیلیٹ کر دیا گیا۔',
+  'myrev.updated': 'ریویو اپ ڈیٹ کر دیا گیا۔',
+  'myrev.already': 'آپ اس ڈاکٹر کا ریویو پہلے ہی دے چکے ہیں۔',
+  'myrev.pickStars': 'پہلے اسٹار ریٹنگ منتخب کریں۔',
+  // my questions
+  'myq.title': 'میرے سوالات',
+  'myq.empty': 'آپ نے ابھی تک کوئی سوال نہیں پوچھا۔',
+  // welcome (guest profile)
+  'welcome.guest': 'مہمان کے طور پر جاری رکھیں',
+  'welcome.signIn': 'سائن ان',
+  'myrev.updateTitle': 'ریویو میں ترمیم',
+  'myrev.update': 'ریویو اپ ڈیٹ کریں',
+  'myrev.unknownDoctor': 'نامعلوم ڈاکٹر',
+  // help & feedback
+  'help.title': 'مدد اور رائے',
+  'help.sectionFinding': 'ڈاکٹر تلاش کرنا',
+  'help.sectionFindingBody':
+      'نام یا اسپیشلٹی سے تلاش کریں، شہر کے حساب سے فلٹر کریں، اور قریبی ڈاکٹر دیکھنے کے لیے اپنا شہر منتخب کریں۔',
+  'help.sectionLabs': 'لیب کی قیمتوں کا موازنہ',
+  'help.sectionLabsBody':
+      'بکنگ سے پہلے کسی بھی ٹیسٹ کو نام سے تلاش کریں اور قریبی لیبز کی قیمتوں کا موازنہ کریں۔',
+  'help.sectionEmergency': 'ایمرجنسی / قریبی اسپتال',
+  'help.sectionEmergencyBody':
+      '24/7 ایمرجنسی سہولت والا قریبی اسپتال تلاش کرنے کے لیے ایمرجنسی ٹیب دبائیں۔',
+  'help.sectionListing': 'اپنے کلینک، لیب یا اسپتال کی لسٹنگ',
+  'help.sectionListingBody':
+      'اپنی لسٹنگ رجسٹر کرنے کے لیے پروفائل ٹیب کھولیں اور ایڈ نیو دبائیں۔ لائیو ہونے سے پہلے ہماری ٹیم اس کا جائزہ لیتی ہے۔',
+  'help.faqTitle': 'اکثر پوچھے جانے والے سوالات',
+  'help.faqFreeQ': 'کیا Fauridoc مفت ہے؟',
+  'help.faqFreeA':
+      'جی ہاں۔ ڈاکٹر، لیب اور اسپتال تلاش کرنا بالکل مفت ہے۔',
+  'help.faqDataQ': 'کیا آپ میرا ڈیٹا بیچتے ہیں؟',
+  'help.faqDataA': 'نہیں۔ آپ کا ڈیٹا کبھی کسی کو فروخت نہیں کیا جاتا۔',
+  'help.faqLangQ': 'ایپ کن زبانوں میں دستیاب ہے؟',
+  'help.faqLangA': 'انگریزی اور اردو۔ پروفائل ٹیب سے کسی بھی وقت تبدیل کریں۔',
+  'help.sendFeedback': 'رائے بھیجیں',
+  'help.feedbackSubject': 'Fauridoc رائے',
+  'help.feedbackFailed': 'ای میل ایپ نہیں کھل سکی۔',
 };

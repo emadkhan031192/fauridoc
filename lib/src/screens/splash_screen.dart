@@ -88,7 +88,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: FdType.family(ur),
-                  fontSize: 16,
+                  fontSize: ur ? (16) * 0.9 : (16),
                   fontWeight: FontWeight.w500,
                   color: Colors.white.withValues(alpha: 0.92),
                 ),
@@ -101,7 +101,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 textDirection: TextDirection.rtl,
                 style: TextStyle(
                   fontFamily: FdType.urdu,
-                  fontSize: 17,
+                  fontSize: 17 * 0.9,
                   fontWeight: FontWeight.w500,
                   height: 2.0,
                   color: Colors.white.withValues(alpha: 0.95),
@@ -130,7 +130,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: FdType.family(ur),
-                    fontSize: 12,
+                    fontSize: ur ? (12) * 0.9 : (12),
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.72, // 0.06em
                     color: Colors.white.withValues(alpha: 0.8),
@@ -142,7 +142,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: FdType.family(ur),
-                    fontSize: 12,
+                    fontSize: ur ? (12) * 0.9 : (12),
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.72, // 0.06em
                     color: Colors.white.withValues(alpha: 0.8),
