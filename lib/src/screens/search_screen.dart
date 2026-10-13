@@ -112,7 +112,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   bool _passes5km(double? lat, double? lng) {
     if (!_within5km) return true;
     final d = _distanceKm(lat, lng);
-    if (d == null) return false;
+    // When the distance can't be measured (no coordinates or no position),
+    // keep the entity visible — don't hide what we can't measure.
+    if (d == null) return true;
     return d <= 5;
   }
 
@@ -486,9 +488,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               icon: Icons.location_on_outlined,
               selected: _within5km,
               ur: ur,
+              // Only turn the filter on when a position was actually
+              // obtained; otherwise _ensurePosition already showed the
+              // locationNeeded snackbar and the filter stays off.
               onTap: () async {
-                if (!_within5km) await _ensurePosition();
-                setState(() => _within5km = !_within5km);
+                if (_within5km) {
+                  setState(() => _within5km = false);
+                } else {
+                  await _ensurePosition();
+                  if (mounted && _pos != null) {
+                    setState(() => _within5km = true);
+                  }
+                }
               },
             ),
           ],
@@ -687,7 +698,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Row(
             children: [
               _avatar(
-                d.name,
+                d.displayName(ur),
                 ur,
                 size: 56,
                 radius: 16,
@@ -705,8 +716,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       children: [
                         Flexible(
                           child: Text(
-                            d.name,
-                            maxLines: 1,
+                            d.displayName(ur),
+                            maxLines: 2,
+                            softWrap: true,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontFamily: FdType.family(ur),
@@ -901,8 +913,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          l.name,
-                          maxLines: 1,
+                          l.displayName(ur),
+                          maxLines: 2,
+                          softWrap: true,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontFamily: FdType.family(ur),
@@ -1005,7 +1018,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          h.name,
+                          h.displayName(ur),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -1020,6 +1033,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       ),
                       const SizedBox(width: 5),
                       if (h.verified) const FdVerifiedBadge(size: 16),
+                      if (h.type == 'private') ...[
+                        const SizedBox(width: 6),
+                        _typePill(
+                          trB(ref, 'search.private'),
+                          FdColors.lavenderInk,
+                          FdColors.lavender,
+                          ur,
+                        ),
+                      ] else if (h.type == 'government') ...[
+                        const SizedBox(width: 6),
+                        _typePill(
+                          trB(ref, 'search.govt'),
+                          FdColors.primary,
+                          FdColors.mint,
+                          ur,
+                        ),
+                      ],
                     ],
                   ),
                   Text(
@@ -1164,6 +1194,30 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Hospital type pill: 10/700, pill radius, colored per type
+  /// (private = lavender ink on lavender; government = primary on mint).
+  Widget _typePill(String label, Color fg, Color bg, bool ur) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontFamily: FdType.family(ur),
+          fontSize: ur ? (10) * 0.9 : (10),
+          fontWeight: FontWeight.w700,
+          color: fg,
+          height: ur ? 1.5 : null,
+        ),
       ),
     );
   }

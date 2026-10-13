@@ -777,6 +777,10 @@ class _PlaceholderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Guard: under loose/unbounded layout (or before layout) the painter can
+    // be handed zero or infinite dimensions; painting fractional rects/lines
+    // with those produces broken white bars, so paint nothing instead.
+    if (!size.isFinite || size.width <= 0 || size.height <= 0) return;
     // background
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, size.height),

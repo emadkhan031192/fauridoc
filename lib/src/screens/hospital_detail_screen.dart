@@ -31,13 +31,20 @@ class HospitalDetailScreen extends ConsumerStatefulWidget {
 
 class _HospitalDetailScreenState
     extends ConsumerState<HospitalDetailScreen> {
-  late final Future<Hospital?> _hospitalFuture;
+  late Future<Hospital?> _hospitalFuture;
 
   @override
   void initState() {
     super.initState();
     _hospitalFuture =
         ref.read(repositoryProvider).getHospital(widget.hospitalId);
+  }
+
+  void _retry() {
+    setState(() {
+      _hospitalFuture =
+          ref.read(repositoryProvider).getHospital(widget.hospitalId);
+    });
   }
 
   @override
@@ -56,7 +63,24 @@ class _HospitalDetailScreenState
           }
           final h = snap.data;
           if (h == null) {
-            return Center(child: Text(tr(ref, 'error')));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(tr(ref, 'error'),
+                        style: FdType.body(ur, size: 15),
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 14),
+                    FdButton(
+                        label: tr(ref, 'retry'),
+                        isUrdu: ur,
+                        onTap: _retry),
+                  ],
+                ),
+              ),
+            );
           }
           final dist = distanceText(pos, h.lat, h.lng);
           final emergencyNo = h.emergencyPhone.trim().isNotEmpty

@@ -2,6 +2,7 @@
   {
     "id": "l001",
     "name": "Chughtai Lab",
+    "nameUr": "چغتائی لیب",
     "city": "Peshawar",
     "address": "Khattak Medical Center, Dabgari Garden; Abaseen Hospital, Dabgari Garden; Near Children Medical Center, Opp Mission Hospital, Dabgari Garden; Opp Hayatabad Medical Complex, Doctor Plaza; Opp Gyne & Emergency Block, Lady Reading Hospital; Akbar Medical Center, Ramdas Chowk; Pak Medical Center, Khyber Bazaar; Shop 05, Opp KTH Doctor Hostel, University Town",
     "phone": "0912218560",
@@ -57,6 +58,7 @@
   {
     "id": "l002",
     "name": "Chughtai Lab",
+    "nameUr": "چغتائی لیب",
     "city": "Mardan",
     "address": "Shop 23, Bismillah Plaza, Jail Road, Opp Aga Khan Lab; Near Bicket Gunj Gate, Shamsi Road",
     "phone": "03444479540",
@@ -112,6 +114,7 @@
   {
     "id": "l003",
     "name": "Chughtai Lab",
+    "nameUr": "چغتائی لیب",
     "city": "Abbottabad",
     "address": "Aamir Plaza, Opp Ayub Medical Complex, Phool Gulab Road; Shafiq Medical Plaza, Near Mid City CNG, Mandian; Opp WCH, Zarbat Plaza, Gami Adda",
     "phone": "03458448299",
@@ -167,6 +170,7 @@
   {
     "id": "l004",
     "name": "Chughtai Lab",
+    "nameUr": "چغتائی لیب",
     "city": "Nowshera",
     "address": "Tahir Khan Plaza, Umarz Colony, Kabul River, Nowshera Kalan",
     "phone": "03111456789",
@@ -222,6 +226,7 @@
   {
     "id": "l005",
     "name": "Chughtai Lab",
+    "nameUr": "چغتائی لیب",
     "city": "Kohat",
     "address": "Poly Clinic, KDA Hospital; Shop 06, Committee Plaza, Opp TMA Office; Shop 06, Cantt Shopping Plaza, Hangu Road",
     "phone": "0922512658",
@@ -277,6 +282,7 @@
   {
     "id": "l006",
     "name": "Chughtai Lab",
+    "nameUr": "چغتائی لیب",
     "city": "Swabi",
     "address": "DHQ Hospital Swabi",
     "phone": "03111456789",
@@ -332,6 +338,7 @@
   {
     "id": "l007",
     "name": "Islamabad Diagnostic Centre (IDC)",
+    "nameUr": "اسلام آباد ڈائیگنوسٹک سینٹر (آئی ڈی سی)",
     "city": "Peshawar",
     "address": "Ground Floor, Mall Tower, Mall Road, Near State Life Building, Peshawar Cantt; Ground Floor, Mubarak Plaza, Hakeem Ullah Jan Rd, Hashtnagri (Opp LRH)",
     "phone": "051111000432",
@@ -346,6 +353,7 @@
   {
     "id": "l008",
     "name": "Dr. Essa Laboratory & Diagnostic Centre",
+    "nameUr": "ڈاکٹر عیسیٰ لیبارٹری اینڈ ڈائیگنوسٹک سینٹر",
     "city": "Peshawar",
     "address": "LRH OPD Gate; Main University Road; Warsak Road, Putwar Payan; Hayatabad Phase 5; Hussainabad, Gulbahar No.1; Iqbal Colony, Dalazak Road",
     "phone": "021111786986",
@@ -411,6 +419,7 @@
   {
     "id": "l009",
     "name": "Excel Labs",
+    "nameUr": "ایکسل لیبز",
     "city": "Peshawar",
     "address": "The Mall Tower, 35 Mall Road, Peshawar Cantt (adjacent Shaheen Chemist); Shop 1, Peshawar Medical Tower, Opp Emergency Gate, Lady Reading Hospital, PTCL Colony; Opp Hayatabad Medical Complex, Doctor Plaza, Shulaman Market, Hayatabad",
     "phone": "0915261066",
@@ -461,6 +470,7 @@
   {
     "id": "l010",
     "name": "Aga Khan University Hospital — Laboratory",
+    "nameUr": "آغا خان یونیورسٹی ہسپتال — لیبارٹری",
     "city": "Mardan",
     "address": "Shamsi Road, Opposite Bicket Gunj Bazar; Jail Road, Opposite Mardan Medical Complex Emergency Gate",
     "phone": "0937875110",
@@ -475,6 +485,7 @@
   {
     "id": "l011",
     "name": "Shaukat Khanum Laboratory",
+    "nameUr": "شوکت خانم لیبارٹری",
     "city": "Mardan",
     "address": "Umer Medical Centre, Shamsi Road, Mardan",
     "phone": "0937876099",
@@ -489,6 +500,7 @@
   {
     "id": "l012",
     "name": "Nayab Labs & Diagnostic Center",
+    "nameUr": "نایاب لیبز اینڈ ڈائیگنوسٹک سینٹر",
     "city": "Mardan",
     "address": "Shamsi Road, Mardan",
     "phone": "0937867360",
@@ -503,6 +515,7 @@
   {
     "id": "l013",
     "name": "Citi Lab",
+    "nameUr": "سٹی لیب",
     "city": "Kohat",
     "address": "Pir Habib Shah Complex, Near Hangu Phatak, Hangu Road, Kohat",
     "phone": "0922860397",
@@ -517,6 +530,7 @@
   {
     "id": "l014",
     "name": "Government / MTI Hospital Laboratories",
+    "nameUr": "گورنمنٹ / ایم ٹی آئی ہسپتال لیبارٹریز",
     "city": "Multiple",
     "address": "Lady Reading Hospital Peshawar; Hayatabad Medical Complex; Khyber Teaching Hospital; Mardan Medical Complex; Ayub Teaching Hospital Abbottabad; DHQ hospitals (Swabi, Kohat, Bannu, D.I. Khan, Nowshera, Charsadda); Saidu Group of Teaching Hospitals, Swat",
     "phone": "",

@@ -5,6 +5,7 @@ import 'model_utils.dart';
 class Doctor {
   final String id;
   final String name;
+  final String nameUr;
   final String specialty;
   final String city;
   final String qualification;
@@ -32,6 +33,7 @@ class Doctor {
   Doctor({
     required this.id,
     required this.name,
+    this.nameUr = '',
     required this.specialty,
     required this.city,
     this.qualification = '',
@@ -61,6 +63,7 @@ class Doctor {
   factory Doctor.fromJson(Map<String, dynamic> json) => Doctor(
         id: json['id'] as String,
         name: (json['name'] as String?) ?? '',
+        nameUr: (json['nameUr'] as String?) ?? '',
         specialty: (json['specialty'] as String?) ?? '',
         city: (json['city'] as String?) ?? '',
         qualification: (json['qualification'] as String?) ?? '',
@@ -90,6 +93,7 @@ class Doctor {
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        'nameUr': nameUr,
         'specialty': specialty,
         'city': city,
         'qualification': qualification,
@@ -114,6 +118,10 @@ class Doctor {
         'ownerUid': ownerUid,
         'createdAt': createdAt.toIso8601String(),
       };
+
+  /// Display name in the requested language, falling back to English
+  /// when the Urdu name is absent.
+  String displayName(bool ur) => ur && nameUr.isNotEmpty ? nameUr : name;
 
   Doctor copyWith({
     String? name,

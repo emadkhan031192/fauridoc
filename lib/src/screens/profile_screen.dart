@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -548,7 +549,9 @@ class _LoggedInBody extends ConsumerWidget {
         _screenTitle(ur, tr(ref, 'prof.title')),
         const SizedBox(height: 16),
         _UserCard(ur: ur, user: user, onEdit: onEdit),
-        const SizedBox(height: 20),
+        const SizedBox(height: 8),
+        _UidRow(ur: ur, uid: user.uid),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -697,6 +700,43 @@ class _UserCard extends StatelessWidget {
         name.trim().split(' ').where((w) => w.isNotEmpty).take(2).toList();
     if (parts.isEmpty) return '•';
     return parts.map((w) => w[0]).join().toUpperCase();
+  }
+}
+
+/// Tappable UID row under the user card: shows the first 12 characters,
+/// copies the full UID to the clipboard on tap.
+class _UidRow extends ConsumerWidget {
+  final bool ur;
+  final String uid;
+  const _UidRow({required this.ur, required this.uid});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final short =
+        uid.length <= 12 ? uid : '${uid.substring(0, 12)}…';
+    return _Press(
+      onTap: () {
+        Clipboard.setData(ClipboardData(text: uid));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(tr(ref, 'prof.copied'))));
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('${tr(ref, 'prof.uid')}: $short',
+                style: FdType.body(ur,
+                    size: 12,
+                    w: FontWeight.w600,
+                    color: FdColors.muted)),
+            const SizedBox(width: 6),
+            const Icon(Icons.copy_outlined,
+                size: 14, color: FdColors.muted),
+          ],
+        ),
+      ),
+    );
   }
 }
 

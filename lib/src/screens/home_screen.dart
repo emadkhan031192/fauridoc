@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../design/tokens.dart';
 import '../l10n/strings.dart';
 import '../l10n/strings_b.dart';
+import '../data/seed_loader.dart';
 import '../models/day_hours.dart';
 import '../models/doctor.dart';
 import '../models/hospital.dart';
@@ -16,6 +17,7 @@ import '../widgets/theme.dart';
 import 'doctor_detail_screen.dart';
 import 'emergency_screen.dart';
 import 'search_screen.dart';
+import 'settings_screen.dart';
 
 /// Home tab (design pages 03/04): city + language row, title, emergency
 /// banner, search, specialty chips, top-rated lime card, doctor list.
@@ -177,8 +179,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _showCitySheet() async {
-    final cities =
+    var cities =
         await ref.read(_homeCitiesProvider.future).catchError((_) => <String>[]);
+    // The sheet must always offer a usable list: fall back to the bundled
+    // seed config cities, then to a hardcoded KP shortlist.
+    if (cities.isEmpty) {
+      final bundle = await loadSeedBundle();
+      cities = bundle.cities.isNotEmpty
+          ? bundle.cities
+          : const [
+              'Mardan',
+              'Peshawar',
+              'Abbottabad',
+              'Swabi',
+              'Nowshera',
+              'Swat',
+              'Kohat',
+            ];
+    }
     if (!mounted) return;
     final current = ref.read(cityProvider);
     final ur = fdIsUrdu(ref.read(localeProvider));
@@ -477,6 +495,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
         ),
+        const SizedBox(width: 8),
+        // Settings: 44px tap target, matches the language circle styling.
+        _FdPress(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const SettingsScreen()),
+          ),
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: FdSpec.border),
+            ),
+            alignment: Alignment.center,
+            child: const Icon(Icons.settings_outlined,
+                color: FdSpec.ink, size: 22),
+          ),
+        ),
       ],
     );
   }
@@ -487,7 +524,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _emergencyBanner(Hospital h, bool ur) {
     final dist = _distanceKm(h.lat, h.lng);
     final sub = [
-      h.name,
+      h.displayName(ur),
       if (dist != null) formatDistance(dist),
       if (h.emergency247) trB(ref, 'home.open247'),
     ].join(' · ');
@@ -772,7 +809,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Row(
               children: [
                 _avatar(
-                  d.name,
+                  d.displayName(ur),
                   ur,
                   size: ur ? 64 : 68,
                   radius: 20,
@@ -789,8 +826,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Row(
                         children: [
                           Flexible(
-                            child: Text(d.name,
-                                maxLines: 1,
+                            // Spec: wrap onto line 2 instead of clipping
+                            // mid-word on line 1.
+                            child: Text(d.displayName(ur),
+                                maxLines: 2,
+                                softWrap: true,
                                 overflow: TextOverflow.ellipsis,
                                 style: nameStyle),
                           ),
@@ -941,7 +981,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Row(
             children: [
               _avatar(
-                d.name,
+                d.displayName(ur),
                 ur,
                 size: 56,
                 radius: 16,
@@ -959,7 +999,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         Flexible(
                           child: Text(
-                            d.name,
+                            d.displayName(ur),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(

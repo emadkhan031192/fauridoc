@@ -4,10 +4,12 @@ import 'model_utils.dart';
 class Hospital {
   final String id;
   final String name;
+  final String nameUr;
   final String city;
   final String address;
   final String phone;
   final String emergencyPhone;
+  final String type; // "government" / "private" / "" (unknown)
   final double? lat;
   final double? lng;
   final List<String> departments;
@@ -26,10 +28,12 @@ class Hospital {
   Hospital({
     required this.id,
     required this.name,
+    this.nameUr = '',
     required this.city,
     this.address = '',
     this.phone = '',
     this.emergencyPhone = '',
+    this.type = '',
     this.lat,
     this.lng,
     this.departments = const [],
@@ -49,10 +53,12 @@ class Hospital {
   factory Hospital.fromJson(Map<String, dynamic> json) => Hospital(
         id: json['id'] as String,
         name: (json['name'] as String?) ?? '',
+        nameUr: (json['nameUr'] as String?) ?? '',
         city: (json['city'] as String?) ?? '',
         address: (json['address'] as String?) ?? '',
         phone: (json['phone'] as String?) ?? '',
         emergencyPhone: (json['emergencyPhone'] as String?) ?? '',
+        type: (json['type'] as String?) ?? '',
         lat: (json['lat'] as num?)?.toDouble(),
         lng: (json['lng'] as num?)?.toDouble(),
         departments:
@@ -73,10 +79,12 @@ class Hospital {
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        'nameUr': nameUr,
         'city': city,
         'address': address,
         'phone': phone,
         'emergencyPhone': emergencyPhone,
+        'type': type,
         'lat': lat,
         'lng': lng,
         'departments': departments,
@@ -92,6 +100,10 @@ class Hospital {
         'ownerUid': ownerUid,
         'createdAt': createdAt.toIso8601String(),
       };
+
+  /// Display name in the requested language, falling back to English
+  /// when the Urdu name is absent.
+  String displayName(bool ur) => ur && nameUr.isNotEmpty ? nameUr : name;
 
   Hospital copyWith({
     String? name,

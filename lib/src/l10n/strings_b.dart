@@ -60,6 +60,8 @@ const Map<String, String> enB = {
   'search.noResults': 'No results found',
   'search.testsFrom': '{count} tests · from Rs {price}',
   'search.emergency247': 'Emergency 24/7',
+  'search.private': 'Private',
+  'search.govt': 'Govt',
   'search.locationNeeded':
       'Location permission is needed to measure distance',
 
@@ -131,6 +133,8 @@ const Map<String, String> urB = {
   'search.noResults': 'کوئی نتیجہ نہیں ملا',
   'search.testsFrom': '{count} ٹیسٹ · Rs {price} سے',
   'search.emergency247': 'ایمرجنسی 24/7',
+  'search.private': 'نجی',
+  'search.govt': 'سرکاری',
   'search.locationNeeded': 'فاصلے کے لیے لوکیشن کی اجازت درکار ہے',
 
   'emg.title': 'قریبی ایمرجنسی',

@@ -198,8 +198,12 @@ class FirestoreRepository implements FauridocRepository {
 
   @override
   Future<Doctor?> getDoctor(String id) async {
-    final doc = await _doctors.doc(id).get();
-    if (doc.exists) return Doctor.fromJson(_json(doc));
+    try {
+      final doc = await _doctors.doc(id).get();
+      if (doc.exists) return Doctor.fromJson(_json(doc));
+    } catch (_) {
+      // Firestore read failed (offline, permissions): fall back to seeds.
+    }
     final bundle = await _seedBundle();
     try {
       return bundle.doctors.firstWhere((d) => d.id == id);
@@ -268,8 +272,12 @@ class FirestoreRepository implements FauridocRepository {
 
   @override
   Future<Lab?> getLab(String id) async {
-    final doc = await _labs.doc(id).get();
-    if (doc.exists) return Lab.fromJson(_json(doc));
+    try {
+      final doc = await _labs.doc(id).get();
+      if (doc.exists) return Lab.fromJson(_json(doc));
+    } catch (_) {
+      // Firestore read failed (offline, permissions): fall back to seeds.
+    }
     final bundle = await _seedBundle();
     try {
       return bundle.labs.firstWhere((l) => l.id == id);
@@ -333,8 +341,12 @@ class FirestoreRepository implements FauridocRepository {
 
   @override
   Future<Hospital?> getHospital(String id) async {
-    final doc = await _hospitals.doc(id).get();
-    if (doc.exists) return Hospital.fromJson(_json(doc));
+    try {
+      final doc = await _hospitals.doc(id).get();
+      if (doc.exists) return Hospital.fromJson(_json(doc));
+    } catch (_) {
+      // Firestore read failed (offline, permissions): fall back to seeds.
+    }
     final bundle = await _seedBundle();
     try {
       return bundle.hospitals.firstWhere((h) => h.id == id);
@@ -577,20 +589,25 @@ class FirestoreRepository implements FauridocRepository {
     return '$y-$m-$d';
   }
 
+  /// Stats are best-effort: errors are swallowed so callers never throw.
   Future<void> _recordStat(String doctorId, String field) async {
-    final ref = _db.collection('doctor_stats').doc(doctorId);
-    final snap = await ref.get();
-    final data = snap.data();
-    final monday = _currentMonday();
-    final stale = data == null || (data['week'] as String?) != monday;
-    final updates = <String, dynamic>{};
-    if (stale) {
-      updates['views'] = 0;
-      updates['whatsapp'] = 0;
-      updates['week'] = monday;
+    try {
+      final ref = _db.collection('doctor_stats').doc(doctorId);
+      final snap = await ref.get();
+      final data = snap.data();
+      final monday = _currentMonday();
+      final stale = data == null || (data['week'] as String?) != monday;
+      final updates = <String, dynamic>{};
+      if (stale) {
+        updates['views'] = 0;
+        updates['whatsapp'] = 0;
+        updates['week'] = monday;
+      }
+      updates[field] = FieldValue.increment(1);
+      await ref.set(updates, SetOptions(merge: true));
+    } catch (_) {
+      // Best-effort: never throw to callers.
     }
-    updates[field] = FieldValue.increment(1);
-    await ref.set(updates, SetOptions(merge: true));
   }
 
   @override
@@ -625,20 +642,39 @@ class FirestoreRepository implements FauridocRepository {
     return fallback;
   }
 
-  Stream<List<String>> _watchConfigList(String field, List<String> fallback) {
-    return _configDoc.snapshots().map((snap) => _stringList(snap.data()?[field], fallback));
+  /// Fallback chain: config doc list -> seed bundle list -> short hardcoded
+  /// list. Seed bundle lookups are async, so the config snapshot stream is
+  /// expanded to await the bundle when the config value is missing or empty.
+  Stream<List<String>> _watchConfigList(String field, List<String> fallback,
+      List<String> Function(SeedBundle bundle) seedList) {
+    return _configDoc.snapshots().asyncExpand((snap) async* {
+      final configList = _stringList(snap.data()?[field], const []);
+      if (configList.isNotEmpty) {
+        yield configList;
+        return;
+      }
+      try {
+        final bundle = await _seedBundle();
+        final seed = seedList(bundle);
+        yield seed.isNotEmpty ? seed : fallback;
+      } catch (_) {
+        yield fallback;
+      }
+    });
   }
 
   @override
-  Stream<List<String>> watchCities() => _watchConfigList('cities', _fallbackCities);
+  Stream<List<String>> watchCities() =>
+      _watchConfigList('cities', _fallbackCities, (b) => b.cities);
 
   @override
   Stream<List<String>> watchSpecialties() =>
-      _watchConfigList('specialties', _fallbackSpecialties);
+      _watchConfigList('specialties', _fallbackSpecialties, (b) => b.specialties);
 
   @override
   Stream<List<String>> watchTestCategories() =>
-      _watchConfigList('testCategories', _fallbackTestCategories);
+      _watchConfigList('testCategories', _fallbackTestCategories,
+          (b) => b.testCategories);
 
   @override
   Future<void> setCities(List<String> cities) async {

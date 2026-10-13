@@ -22,6 +22,7 @@ class LabTestPrice {
 class Lab {
   final String id;
   final String name;
+  final String nameUr;
   final String city;
   final String address;
   final String phone;
@@ -42,6 +43,7 @@ class Lab {
   Lab({
     required this.id,
     required this.name,
+    this.nameUr = '',
     required this.city,
     this.address = '',
     this.phone = '',
@@ -73,6 +75,7 @@ class Lab {
   factory Lab.fromJson(Map<String, dynamic> json) => Lab(
         id: json['id'] as String,
         name: (json['name'] as String?) ?? '',
+        nameUr: (json['nameUr'] as String?) ?? '',
         city: (json['city'] as String?) ?? '',
         address: (json['address'] as String?) ?? '',
         phone: (json['phone'] as String?) ?? '',
@@ -97,6 +100,7 @@ class Lab {
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        'nameUr': nameUr,
         'city': city,
         'address': address,
         'phone': phone,
@@ -114,6 +118,10 @@ class Lab {
         'ownerUid': ownerUid,
         'createdAt': createdAt.toIso8601String(),
       };
+
+  /// Display name in the requested language, falling back to English
+  /// when the Urdu name is absent.
+  String displayName(bool ur) => ur && nameUr.isNotEmpty ? nameUr : name;
 
   Lab copyWith({
     String? name,

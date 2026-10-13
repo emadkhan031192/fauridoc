@@ -56,7 +56,7 @@ class _LabDetailScreenState extends ConsumerState<LabDetailScreen> {
   String _query = '';
   String _category = 'All';
   bool _showAll = false;
-  late final Future<Lab?> _labFuture;
+  late Future<Lab?> _labFuture;
 
   /// Rows visible in the collapsed state (spec shows six).
   static const _collapsedCount = 6;
@@ -65,6 +65,12 @@ class _LabDetailScreenState extends ConsumerState<LabDetailScreen> {
   void initState() {
     super.initState();
     _labFuture = ref.read(repositoryProvider).getLab(widget.labId);
+  }
+
+  void _retry() {
+    setState(() {
+      _labFuture = ref.read(repositoryProvider).getLab(widget.labId);
+    });
   }
 
   void _resetExpansion() => _showAll = false;
@@ -85,7 +91,24 @@ class _LabDetailScreenState extends ConsumerState<LabDetailScreen> {
           }
           final lab = snap.data;
           if (lab == null) {
-            return Center(child: Text(tr(ref, 'error')));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(tr(ref, 'error'),
+                        style: FdType.body(ur, size: 15),
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 14),
+                    FdButton(
+                        label: tr(ref, 'retry'),
+                        isUrdu: ur,
+                        onTap: _retry),
+                  ],
+                ),
+              ),
+            );
           }
           final status = computeOpenStatus(lab.hours, DateTime.now());
           final dist = distanceText(pos, lab.lat, lab.lng);

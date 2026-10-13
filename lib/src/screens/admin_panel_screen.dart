@@ -68,6 +68,8 @@ class AdminPanelScreen extends ConsumerWidget {
                       name: d.name, size: 54, bg: FdColors.peach),
                   onEdit: (d) => _goManage(context, doctor: d),
                   onDelete: (d) => repo.deleteDoctor(d.id),
+                  onAdd: () => _goManage(context),
+                  addLabel: tr(ref, 'admin.addDoctor'),
                 ),
                 const SizedBox(height: 26),
                 _SearchSection<Lab>(
@@ -82,6 +84,8 @@ class AdminPanelScreen extends ConsumerWidget {
                 iconColor: FdColors.lavenderInk),
                   onEdit: (l) => _goManage(context, lab: l),
                   onDelete: (l) => repo.deleteLab(l.id),
+                  onAdd: () => _goManage(context),
+                  addLabel: tr(ref, 'admin.addLab'),
                 ),
                 const SizedBox(height: 26),
                 _SearchSection<Hospital>(
@@ -96,6 +100,8 @@ class AdminPanelScreen extends ConsumerWidget {
                 iconColor: FdColors.redInk),
                   onEdit: (h) => _goManage(context, hospital: h),
                   onDelete: (h) => repo.deleteHospital(h.id),
+                  onAdd: () => _goManage(context),
+                  addLabel: tr(ref, 'admin.addHospital'),
                 ),
                 const SizedBox(height: 24),
                 Text(tr(ref, 'admin.manageLists'),
@@ -781,6 +787,11 @@ class _SearchSection<T> extends ConsumerStatefulWidget {
   final void Function(T) onEdit;
   final Future<void> Function(T) onDelete;
 
+  /// Optional "+ Add" pill in the header (create mode: called with no
+  /// entity). Null hides the button.
+  final VoidCallback? onAdd;
+  final String? addLabel;
+
   const _SearchSection({
     required this.ur,
     required this.title,
@@ -790,6 +801,8 @@ class _SearchSection<T> extends ConsumerStatefulWidget {
     required this.tileOf,
     required this.onEdit,
     required this.onDelete,
+    this.onAdd,
+    this.addLabel,
   });
 
   @override
@@ -813,7 +826,32 @@ class _SearchSectionState<T>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(widget.title, style: _sectionTitle(widget.ur)),
+        Row(
+          children: [
+            Expanded(
+                child:
+                    Text(widget.title, style: _sectionTitle(widget.ur))),
+            if (widget.onAdd != null)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: widget.onAdd,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: FdColors.primary,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                      widget.addLabel ?? tr(ref, 'admin.add'),
+                      style: FdType.body(widget.ur,
+                          size: 13,
+                          w: FontWeight.w700,
+                          color: Colors.white)),
+                ),
+              ),
+          ],
+        ),
         const SizedBox(height: 10),
         FdSearchField(
           hint: tr(ref, 'admin.searchHint'),

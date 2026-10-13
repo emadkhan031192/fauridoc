@@ -2,6 +2,8 @@
   {
     "id": "h001",
     "name": "Lady Reading Hospital",
+    "nameUr": "لیڈی ریڈنگ ہسپتال",
+    "type": "government",
     "city": "Peshawar",
     "address": "Soekarno Road, Pipal Mandi, Peshawar 25000 (Opp. Bala Hisar Fort)",
     "phone": "0919211430",
@@ -44,6 +46,8 @@
   {
     "id": "h002",
     "name": "Khyber Teaching Hospital",
+    "nameUr": "خیبر ٹیچنگ ہسپتال",
+    "type": "government",
     "city": "Peshawar",
     "address": "University Road, Rahat Abad, Peshawar (Opp. University of Peshawar), 25000",
     "phone": "92919224400",
@@ -73,6 +77,8 @@
   {
     "id": "h003",
     "name": "Hayatabad Medical Complex",
+    "nameUr": "حیات آباد میڈیکل کمپلیکس",
+    "type": "government",
     "city": "Peshawar",
     "address": "Phase 4, Hayatabad, Peshawar",
     "phone": "0919217140",
@@ -106,6 +112,8 @@
   {
     "id": "h004",
     "name": "Mardan Medical Complex",
+    "nameUr": "مردان میڈیکل کمپلیکس",
+    "type": "government",
     "city": "Mardan",
     "address": "Sheikh Maltoon Town, Mardan 23200",
     "phone": "09379230051",
@@ -130,6 +138,8 @@
   {
     "id": "h005",
     "name": "Bacha Khan Medical Complex",
+    "nameUr": "باچا خان میڈیکل کمپلیکس",
+    "type": "government",
     "city": "Swabi",
     "address": "Shah Mansoor Township, Swabi–Jahangira Road, Swabi",
     "phone": "0938280214",
@@ -146,6 +156,8 @@
   {
     "id": "h006",
     "name": "Ayub Teaching Hospital",
+    "nameUr": "ایوب ٹیچنگ ہسپتال",
+    "type": "government",
     "city": "Abbottabad",
     "address": "Main Mansehra Road, Mandian, Abbottabad-22010",
     "phone": "09929311155",
@@ -173,6 +185,8 @@
   {
     "id": "h007",
     "name": "Saidu Teaching Hospital (Saidu Group of Teaching Hospitals)",
+    "nameUr": "سیدو ٹیچنگ ہسپتال (سیدو گروپ آف ٹیچنگ ہسپتالز)",
+    "type": "government",
     "city": "Swat",
     "address": "Saidu Sharif Road, Saidu Sharif, Mingora, Swat (two wings ~1.5 km apart)",
     "phone": "09469240126",
@@ -195,6 +209,8 @@
   {
     "id": "h008",
     "name": "Qazi Hussain Ahmed Medical Complex",
+    "nameUr": "قاضی حسین احمد میڈیکل کمپلیکس",
+    "type": "government",
     "city": "Nowshera",
     "address": "Main Mardan Road, near River Kabul (WAPDA Colony), Nowshera",
     "phone": "09239220414",
@@ -229,6 +245,8 @@
   {
     "id": "h009",
     "name": "DHQ Hospital",
+    "nameUr": "ڈی ایچ کیو ہسپتال",
+    "type": "government",
     "city": "Charsadda",
     "address": "Peshawar Road, Charsadda (near Farooq-e-Azam Chowk)",
     "phone": "0919220157",
@@ -245,6 +263,8 @@
   {
     "id": "h010",
     "name": "DHQ Teaching Hospital",
+    "nameUr": "ڈی ایچ کیو ٹیچنگ ہسپتال",
+    "type": "government",
     "city": "Kohat",
     "address": "Double Road, KDA Phase 2, Kohat",
     "phone": "0922514564",
@@ -273,6 +293,8 @@
   {
     "id": "h011",
     "name": "DHQ Teaching Hospital",
+    "nameUr": "ڈی ایچ کیو ٹیچنگ ہسپتال",
+    "type": "government",
     "city": "Bannu",
     "address": "Main D.I. Khan Road, Bannu (near PESCO office, Nasir Abad)",
     "phone": "09289270280",
@@ -289,6 +311,8 @@
   {
     "id": "h012",
     "name": "DHQ Teaching Hospital (MTI)",
+    "nameUr": "ڈی ایچ کیو ٹیچنگ ہسپتال (ایم ٹی آئی)",
+    "type": "government",
     "city": "D.I. Khan",
     "address": "South Circular Road, D.I. Khan City 32200",
     "phone": "09669280315",
@@ -305,6 +329,8 @@
   {
     "id": "h013",
     "name": "Northwest General Hospital & Research Centre",
+    "nameUr": "نارتھ ویسٹ جنرل ہسپتال اینڈ ریسرچ سینٹر",
+    "type": "private",
     "city": "Peshawar",
     "address": "Passport Office Road, Sector A-3, Phase V, Hayatabad, Peshawar",
     "phone": "091111583880",
@@ -328,6 +354,8 @@
   {
     "id": "h014",
     "name": "Rehman Medical Institute (RMI)",
+    "nameUr": "رحمان میڈیکل انسٹیٹیوٹ (آر ایم آئی)",
+    "type": "private",
     "city": "Peshawar",
     "address": "5-B/2, Phase V, Hayatabad, Peshawar",
     "phone": "111734626",
@@ -357,6 +385,8 @@
   {
     "id": "h015",
     "name": "Prime Teaching Hospital",
+    "nameUr": "پرائم ٹیچنگ ہسپتال",
+    "type": "private",
     "city": "Peshawar",
     "address": "Warsak Road, Tahkal Payan, Peshawar 25160",
     "phone": "0915200663",
@@ -393,6 +423,8 @@
   {
     "id": "h016",
     "name": "Health Net Hospital",
+    "nameUr": "ہیلتھ نیٹ ہسپتال",
+    "type": "private",
     "city": "Peshawar",
     "address": "A-2 / Plot 6A, Sector A2, Phase 5, Hayatabad, Peshawar",
     "phone": "",
@@ -422,6 +454,8 @@
   {
     "id": "h017",
     "name": "Al-Khidmat Hospital (PIMA Al-Khidmat Hospital)",
+    "nameUr": "الخدمت ہسپتال (پیما الخدمت ہسپتال)",
+    "type": "private",
     "city": "Peshawar",
     "address": "1A-1 Nishtarabad (Sikandar Pura, Nishtarabad), Peshawar",
     "phone": "92912215945",
@@ -450,6 +484,8 @@
   {
     "id": "h018",
     "name": "Kuwait Teaching Hospital",
+    "nameUr": "کویت ٹیچنگ ہسپتال",
+    "type": "private",
     "city": "Peshawar",
     "address": "Abdara Chowk, Jamrud Road, Peshawar",
     "phone": "0915853486",
@@ -479,6 +515,8 @@
   {
     "id": "h019",
     "name": "Mercy Teaching Hospital",
+    "nameUr": "مرسی ٹیچنگ ہسپتال",
+    "type": "private",
     "city": "Peshawar",
     "address": "Opposite KFC, University Road, Tahkal (Tehkal Payan), Peshawar",
     "phone": "0915843917",
@@ -512,6 +550,8 @@
   {
     "id": "h020",
     "name": "Mardan Surgical Centre (Pvt) Ltd.",
+    "nameUr": "مردان سرجیکل سینٹر (پرائیویٹ) لمیٹڈ",
+    "type": "private",
     "city": "Mardan",
     "address": "D-6, Sheikhmaltoon Town, Mardan (also listed as Opp: Railway Station, Mardan-Nowshera Road)",
     "phone": "0937770236",
@@ -528,6 +568,8 @@
   {
     "id": "h021",
     "name": "Hira General Hospital",
+    "nameUr": "ہیرا جنرل ہسپتال",
+    "type": "private",
     "city": "Abbottabad",
     "address": "Link Road, The Mall, Abbottabad",
     "phone": "0992334403",

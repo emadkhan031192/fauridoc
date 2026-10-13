@@ -2,6 +2,7 @@
   {
     "id": "d001",
     "name": "Dr. Mir Wais",
+    "nameUr": "ڈاکٹر میر ویس",
     "specialty": "General Surgeon",
     "city": "Peshawar",
     "qualification": "MBBS (KMU), MCPS, FCPS (General Surgery)",
@@ -21,6 +22,7 @@
   {
     "id": "d002",
     "name": "Prof. Dr. Jamshed Khattak",
+    "nameUr": "پروفیسر ڈاکٹر جمشید خٹک",
     "specialty": "General Surgeon",
     "city": "Peshawar",
     "qualification": "MBBS (Univ. of Peshawar), FCPS (General Surgery); 21+ yrs",
@@ -40,6 +42,7 @@
   {
     "id": "d003",
     "name": "Dr. Imran Ullah",
+    "nameUr": "ڈاکٹر عمران اللہ",
     "specialty": "Medical Specialist (Internal Medicine)",
     "city": "Peshawar",
     "qualification": "MBBS (KMC 2006), FCPS (CPSP 2016), MRCPI",
@@ -59,6 +62,7 @@
   {
     "id": "d004",
     "name": "Dr. Fawad Ahmad",
+    "nameUr": "ڈاکٹر فواد احمد",
     "specialty": "Medical Specialist (Internal Medicine)",
     "city": "Peshawar",
     "qualification": "MBBS (Riphah), FCPS (Medicine)",
@@ -78,6 +82,7 @@
   {
     "id": "d005",
     "name": "Dr. Muhammad Daud",
+    "nameUr": "ڈاکٹر محمد داؤد",
     "specialty": "Gastroenterologist",
     "city": "Peshawar",
     "qualification": "MBBS (KMC 2007), FCPS (CPSP 2014), MRCP",
@@ -97,6 +102,7 @@
   {
     "id": "d006",
     "name": "Dr. Najamul Hassan Shah",
+    "nameUr": "ڈاکٹر نجم الحسن شاہ",
     "specialty": "Gastroenterologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Medicine), FCPS (Gastroenterology)",
@@ -116,6 +122,7 @@
   {
     "id": "d007",
     "name": "Prof. Dr. Karamat Ali Shah",
+    "nameUr": "پروفیسر ڈاکٹر کرامت علی شاہ",
     "specialty": "Cardiologist",
     "city": "Peshawar",
     "qualification": "MBBS, MRCP (Medicine)",
@@ -135,6 +142,7 @@
   {
     "id": "d008",
     "name": "Dr. Nasir Farooq Khan",
+    "nameUr": "ڈاکٹر ناصر فاروق خان",
     "specialty": "Cardiologist",
     "city": "Peshawar",
     "qualification": "MBBS (KMU 2014), FCPS (Cardiology 2021)",
@@ -154,6 +162,7 @@
   {
     "id": "d009",
     "name": "Dr. Khadim Ullah Kaka Khel",
+    "nameUr": "ڈاکٹر خادم اللہ کاکا خیل",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "MBBS, FRCP (Glasgow), DDV, FVMA",
@@ -173,6 +182,7 @@
   {
     "id": "d010",
     "name": "Asst. Prof. Dr. Irfanullah",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر عرفان اللہ",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "MBBS (2003), FCPS (Dermatology); also Cosmetologist",
@@ -192,6 +202,7 @@
   {
     "id": "d011",
     "name": "Dr. Sana Zahid",
+    "nameUr": "ڈاکٹر ثناء زاہد",
     "specialty": "Gynecologist / Obstetrician",
     "city": "Peshawar",
     "qualification": "MBBS (KMU), FCPS (Obstetrics & Gynecology)",
@@ -211,6 +222,7 @@
   {
     "id": "d012",
     "name": "Dr. Laila Nazir",
+    "nameUr": "ڈاکٹر لیلا نذیر",
     "specialty": "Gynecologist / Obstetrician",
     "city": "Peshawar",
     "qualification": "MBBS (KMC), FCPS (Obs & Gynae), ACOG member",
@@ -230,6 +242,7 @@
   {
     "id": "d013",
     "name": "Dr. Anwar Ullah",
+    "nameUr": "ڈاکٹر انور اللہ",
     "specialty": "Pediatrician (Child Specialist)",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Pediatrics), FCPS (Haematology & Oncology)",
@@ -249,6 +262,7 @@
   {
     "id": "d014",
     "name": "Dr. Muhammad Kamran",
+    "nameUr": "ڈاکٹر محمد کامران",
     "specialty": "Pediatrician (Child Specialist)",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Pediatrics)",
@@ -268,6 +282,7 @@
   {
     "id": "d015",
     "name": "Dr. Tahir Mehmood Khattak",
+    "nameUr": "ڈاکٹر طاہر محمود خٹک",
     "specialty": "Orthopedic Surgeon",
     "city": "Peshawar",
     "qualification": "MBBS (KMU), FCPS Orthopaedics, Fellowship in Orthopaedic Oncology & Reconstruction (Malaysia)",
@@ -289,6 +304,7 @@
   {
     "id": "d016",
     "name": "Dr. Muhammad Sohail",
+    "nameUr": "ڈاکٹر محمد سہیل",
     "specialty": "Gastroenterologist",
     "city": "Mardan",
     "qualification": "MBBS (NUST Rawalpindi), FCPS (Gastroenterology)",
@@ -308,6 +324,7 @@
   {
     "id": "d017",
     "name": "Dr. Liaqat Ali",
+    "nameUr": "ڈاکٹر لیاقت علی",
     "specialty": "Gastroenterologist",
     "city": "Mardan",
     "qualification": "MBBS (KMU Peshawar), FCPS (Gastroenterology), MCPS (Medicine)",
@@ -327,6 +344,7 @@
   {
     "id": "d018",
     "name": "Dr. Mohammad Ismail",
+    "nameUr": "ڈاکٹر محمد اسماعیل",
     "specialty": "General Surgeon",
     "city": "Mardan",
     "qualification": "MBBS, FCPS (Surgery); 24 yrs",
@@ -346,6 +364,7 @@
   {
     "id": "d019",
     "name": "Asst. Prof. Dr. Shafiq Alam",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر شفیق عالم",
     "specialty": "Interventional Cardiologist",
     "city": "Mardan",
     "qualification": "MBBS (Ayub Medical College, Abbottabad), FCPS (Cardiology); 13 yrs",
@@ -365,6 +384,7 @@
   {
     "id": "d020",
     "name": "Dr. Hakeem Ullah",
+    "nameUr": "ڈاکٹر حکیم اللہ",
     "specialty": "General Surgeon",
     "city": "Mardan",
     "qualification": "MBBS, FCPS (General Surgery); 5 yrs",
@@ -384,6 +404,7 @@
   {
     "id": "d021",
     "name": "Dr. Shifa Bibi",
+    "nameUr": "ڈاکٹر شفا بی بی",
     "specialty": "Dermatologist",
     "city": "Mardan",
     "qualification": "MBBS, FCPS (Dermatology), Diploma in Aesthetic Medicine (American Board); 8 yrs",
@@ -403,6 +424,7 @@
   {
     "id": "d022",
     "name": "Dr. Khurram Shahzad",
+    "nameUr": "ڈاکٹر خرم شہزاد",
     "specialty": "Orthopedic Surgeon",
     "city": "Mardan",
     "qualification": "MBBS, MS (Orthopedics & Traumatology); 10 yrs",
@@ -422,6 +444,7 @@
   {
     "id": "d023",
     "name": "Asst. Prof. Dr. Murad Ali",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر مراد علی",
     "specialty": "Endocrinologist / Diabetologist",
     "city": "Mardan",
     "qualification": "MBBS (KMC Peshawar), FCPS (Medicine), MRCP-2 (UK), Certified Diabetologist (IDF England); Asst. Prof. of Medicine, Bacha Khan Medical College",
@@ -441,6 +464,7 @@
   {
     "id": "d024",
     "name": "Asst. Prof. Dr. Adil Afridi",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر عادل آفریدی",
     "specialty": "Psychiatrist",
     "city": "Mardan",
     "qualification": "MBBS, DCP, FCPS (Psychiatry), CBT; 16 yrs",
@@ -460,6 +484,7 @@
   {
     "id": "d025",
     "name": "Dr. Uzma Wahid",
+    "nameUr": "ڈاکٹر عظمیٰ وحید",
     "specialty": "Gynecologist / Obstetrician",
     "city": "Nowshera",
     "qualification": "MBBS (KMU Peshawar), FCPS (Obstetrics & Gynaecology); 5 yrs",
@@ -479,6 +504,7 @@
   {
     "id": "d026",
     "name": "Assoc. Prof. Mubashir Rehman",
+    "nameUr": "ایسوسی ایٹ پروفیسر مبشر رحمان",
     "specialty": "Eye Specialist (Ophthalmologist)",
     "city": "Nowshera",
     "qualification": "MBBS, FCPS, Vitreoretinal fellowship; 15 yrs",
@@ -498,6 +524,7 @@
   {
     "id": "d027",
     "name": "Dr. Ibrahim Khan",
+    "nameUr": "ڈاکٹر ابراہیم خان",
     "specialty": "Pediatrician (Child Specialist)",
     "city": "Swabi",
     "qualification": "MBBS, FCPS Paediatrics",
@@ -517,6 +544,7 @@
   {
     "id": "d028",
     "name": "Dr. Inayat Ullah",
+    "nameUr": "ڈاکٹر عنایت اللہ",
     "specialty": "Pediatrician (Child Specialist)",
     "city": "Swabi",
     "qualification": "MBBS, FCPS (Pediatrics), FCPS (Neonatology)",
@@ -536,6 +564,7 @@
   {
     "id": "d029",
     "name": "Dr. Waqar Muhammad",
+    "nameUr": "ڈاکٹر وقار محمد",
     "specialty": "Dentist",
     "city": "Swabi",
     "qualification": "BDS, M.Phil, CHPE; 10+ yrs",
@@ -555,6 +584,7 @@
   {
     "id": "d030",
     "name": "Dr. Kamran Ullah",
+    "nameUr": "ڈاکٹر کامران اللہ",
     "specialty": "Dentist",
     "city": "Swabi",
     "qualification": "BDS; 4 yrs",
@@ -574,6 +604,7 @@
   {
     "id": "d031",
     "name": "Dr. Sahibzada Fakhre Alam",
+    "nameUr": "ڈاکٹر صاحبزادہ فخرِ عالم",
     "specialty": "ENT Specialist",
     "city": "Charsadda",
     "qualification": "",
@@ -593,6 +624,7 @@
   {
     "id": "d032",
     "name": "Dr. Waqar Zafar",
+    "nameUr": "ڈاکٹر وقار ظفر",
     "specialty": "Medical Specialist (Internal Medicine)",
     "city": "Abbottabad",
     "qualification": "MBBS (Ayub Medical College), FCPS",
@@ -612,6 +644,7 @@
   {
     "id": "d033",
     "name": "Asst. Prof. Dr. Tauqir Ahmad",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر توقیر احمد",
     "specialty": "Medical Specialist (Internal Medicine)",
     "city": "Abbottabad",
     "qualification": "MBBS (Ayub Medical College), FCPS",
@@ -631,6 +664,7 @@
   {
     "id": "d034",
     "name": "Dr. Muhammad Orakzai",
+    "nameUr": "ڈاکٹر محمد اورکزئی",
     "specialty": "Medical Specialist (Internal Medicine)",
     "city": "Abbottabad",
     "qualification": "MBBS (KMU), FCPS",
@@ -650,6 +684,7 @@
   {
     "id": "d035",
     "name": "Dr. Muhammad Younas Orakzai",
+    "nameUr": "ڈاکٹر محمد یونس اورکزئی",
     "specialty": "Gastroenterologist",
     "city": "Kohat",
     "qualification": "MBBS (King Edward Medical College Lahore), FCPS Internal Medicine, FCPS Gastroenterology & Hepatology",
@@ -669,6 +704,7 @@
   {
     "id": "d036",
     "name": "Prof. Dr. Imtiaz Ahmed Khattak",
+    "nameUr": "پروفیسر ڈاکٹر امتیاز احمد خٹک",
     "specialty": "General Surgeon",
     "city": "Kohat",
     "qualification": "MBBS, FCPS (Surgery), ATLS, CHPE",
@@ -688,6 +724,7 @@
   {
     "id": "d037",
     "name": "Dr. Syed Muhammad Abuzar",
+    "nameUr": "ڈاکٹر سید محمد ابوذر",
     "specialty": "Gastroenterologist",
     "city": "Kohat",
     "qualification": "MBBS, FCPS (Gastroenterology)",
@@ -711,6 +748,7 @@
   {
     "id": "d038",
     "name": "Dr. Mujtaba Gul",
+    "nameUr": "ڈاکٹر مجتبیٰ گل",
     "specialty": "Pediatrician (Child Specialist)",
     "city": "Kohat",
     "qualification": "MBBS, FCPS (Pediatric)",
@@ -730,6 +768,7 @@
   {
     "id": "d039",
     "name": "Prof. Dr. Zamir Iqbal",
+    "nameUr": "پروفیسر ڈاکٹر ضمیر اقبال",
     "specialty": "Vitreoretinal Surgeon",
     "city": "Kohat",
     "qualification": "MBBS, MCPS (Ophthalmology), FCPS (Ophthalmology), FCPS (Vitreo Retinal Ophthalmology); TI(M) 2017",
@@ -749,6 +788,7 @@
   {
     "id": "d040",
     "name": "Dr. Muheb Ullah",
+    "nameUr": "ڈاکٹر محب اللہ",
     "specialty": "Medical Specialist (Internal Medicine)",
     "city": "D.I. Khan",
     "qualification": "MBBS (KMU), FCPS-2",
@@ -768,6 +808,7 @@
   {
     "id": "d041",
     "name": "Dr. Ihsan Ullah",
+    "nameUr": "ڈاکٹر احسان اللہ",
     "specialty": "Medical Specialist (Internal Medicine)",
     "city": "D.I. Khan",
     "qualification": "MBBS, FCPS (Medicine)",
@@ -787,6 +828,7 @@
   {
     "id": "d042",
     "name": "Asst. Prof. Dr. Aasif Imran",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر آصف عمران",
     "specialty": "General Surgeon",
     "city": "Bannu",
     "qualification": "MBBS (KMU), FCPS (Surgery), MRCS (UK)",
@@ -806,6 +848,7 @@
   {
     "id": "d043",
     "name": "Dr. Beenish Samreen Hamid",
+    "nameUr": "ڈاکٹر بینش ثمرین حامد",
     "specialty": "Gynecologist / Obstetrician",
     "city": "Bannu",
     "qualification": "Assistant Professor, Dept. of Obs & Gynae, Bannu Medical College",
@@ -825,6 +868,7 @@
   {
     "id": "d044",
     "name": "Dr. Ziaullah Khan",
+    "nameUr": "ڈاکٹر ضیاء اللہ خان",
     "specialty": "Dermatologist",
     "city": "Swat",
     "qualification": "FCPS (Dermatology), PMDC Reg. No. 26844-N, Senior Registrar Dermatology (Swat Medical College)",
@@ -844,6 +888,7 @@
   {
     "id": "d045",
     "name": "Dr. Salman Ahmad Khan",
+    "nameUr": "ڈاکٹر سلمان احمد خان",
     "specialty": "Interventional Cardiologist",
     "city": "Kohat",
     "qualification": "MBBS (Ayub Medical College 2002), MCPS, FCPS (Cardiology 2019), Fellowship in cardiac Electrophysiology & Pacing; 15 yrs",
@@ -863,6 +908,7 @@
   {
     "id": "d046",
     "name": "Dr. Seema Nazir Khattak",
+    "nameUr": "ڈاکٹر سیما نذیر خٹک",
     "specialty": "Cardiologist",
     "city": "Kohat",
     "qualification": "MBBS, FCPS (Cardiology); 9 yrs",
@@ -882,6 +928,7 @@
   {
     "id": "d047",
     "name": "Dr. Ijaz Hussain Siddiqui",
+    "nameUr": "ڈاکٹر اعجاز حسین صدیقی",
     "specialty": "Eye Specialist (Ophthalmologist)",
     "city": "Kohat",
     "qualification": "MBBS, DOMS (Ophthalmic Medicine & Surgery); 35 yrs",
@@ -901,6 +948,7 @@
   {
     "id": "d048",
     "name": "Dr. Anjum Hassan",
+    "nameUr": "ڈاکٹر انجم حسن",
     "specialty": "Dermatologist",
     "city": "Kohat",
     "qualification": "MBBS, FCPS (Dermatology); 12 yrs",
@@ -920,6 +968,7 @@
   {
     "id": "d049",
     "name": "Dr. Maria Zubair",
+    "nameUr": "ڈاکٹر ماریہ زبیر",
     "specialty": "Gynecologist / Obstetrician",
     "city": "Kohat",
     "qualification": "",
@@ -939,6 +988,7 @@
   {
     "id": "d050",
     "name": "Dr. Najam Sultan",
+    "nameUr": "ڈاکٹر نجم سلطان",
     "specialty": "Gynecologist / Obstetrician",
     "city": "Kohat",
     "qualification": "",
@@ -958,6 +1008,7 @@
   {
     "id": "d051",
     "name": "Dr. Arshad Khan",
+    "nameUr": "ڈاکٹر ارشد خان",
     "specialty": "Neurosurgeon",
     "city": "Bannu",
     "qualification": "MBBS, FCPS (Neurosurgery), MPH",
@@ -979,6 +1030,7 @@
   {
     "id": "d052",
     "name": "Prof. Dr. Rehman Ghani",
+    "nameUr": "پروفیسر ڈاکٹر رحمان غنی",
     "specialty": "ENT Specialist",
     "city": "Abbottabad",
     "qualification": "MBBS, FRCS (Ire), FRCS (Glasg), FRCS (Eng); 36 yrs; Professor, Ayub Medical College",
@@ -998,6 +1050,7 @@
   {
     "id": "d053",
     "name": "Dr. Ehsan Qureshi",
+    "nameUr": "ڈاکٹر احسان قریشی",
     "specialty": "ENT Specialist",
     "city": "Abbottabad",
     "qualification": "",
@@ -1017,6 +1070,7 @@
   {
     "id": "d054",
     "name": "Dr. Mohammad Imran Shah",
+    "nameUr": "ڈاکٹر محمد عمران شاہ",
     "specialty": "ENT Specialist",
     "city": "Abbottabad",
     "qualification": "MBBS, FCPS",
@@ -1036,6 +1090,7 @@
   {
     "id": "d055",
     "name": "Asst. Prof. Dr. Tahir Haroon",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر طاہر ہارون",
     "specialty": "ENT Specialist",
     "city": "Abbottabad",
     "qualification": "",
@@ -1055,6 +1110,7 @@
   {
     "id": "d056",
     "name": "Prof. Dr. Muhammad Asif",
+    "nameUr": "پروفیسر ڈاکٹر محمد آصف",
     "specialty": "ENT Specialist",
     "city": "Abbottabad",
     "qualification": "FCPS & MCPS",
@@ -1074,6 +1130,7 @@
   {
     "id": "d057",
     "name": "Dr. Kanza Hamid",
+    "nameUr": "ڈاکٹر کنزہ حامد",
     "specialty": "Psychiatrist",
     "city": "Abbottabad",
     "qualification": "MBBS, FCPS (Psychiatry); 9 yrs",
@@ -1095,6 +1152,7 @@
   {
     "id": "d058",
     "name": "Dr. Osama Rashid Qazi",
+    "nameUr": "ڈاکٹر اسامہ رشید قاضی",
     "specialty": "Psychiatrist",
     "city": "Abbottabad",
     "qualification": "MBBS, FRSPH, Diploma in CBT, Diploma in Hypnotherapy, MCPS; 8 yrs",
@@ -1114,6 +1172,7 @@
   {
     "id": "d059",
     "name": "Dr. Qazi Rashid Hamid",
+    "nameUr": "ڈاکٹر قاضی رشید حامد",
     "specialty": "Psychiatrist",
     "city": "Abbottabad",
     "qualification": "MBBS, DPM, Fellowship in Psychiatry; 35 yrs",
@@ -1133,6 +1192,7 @@
   {
     "id": "d060",
     "name": "Dr. Areeba Ayub",
+    "nameUr": "ڈاکٹر اریبہ ایوب",
     "specialty": "Gynecologist / Obstetrician",
     "city": "Abbottabad",
     "qualification": "MBBS, FCPS (Gynecology & Obstetrics); 7 yrs",
@@ -1152,6 +1212,7 @@
   {
     "id": "d061",
     "name": "Dr. Noriya Nisar",
+    "nameUr": "ڈاکٹر نوریہ نثار",
     "specialty": "Dentist",
     "city": "Abbottabad",
     "qualification": "",
@@ -1171,6 +1232,7 @@
   {
     "id": "d062",
     "name": "Dr. Syed Imran Ahmed Kazmi",
+    "nameUr": "ڈاکٹر سید عمران احمد کاظمی",
     "specialty": "Cardiologist",
     "city": "Abbottabad",
     "qualification": "MBBS (KMU 2012), FCPS Cardiology (2019); District Cardiologist BBSTH (DHQ Abbottabad); Asst. Prof. Cardiology, Women Medical College",
@@ -1190,6 +1252,7 @@
   {
     "id": "d063",
     "name": "Assist. Prof. Dr. Muazzam Ali Shehzad",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر معظم علی شہزاد",
     "specialty": "Cardiologist",
     "city": "Abbottabad",
     "qualification": "",
@@ -1209,6 +1272,7 @@
   {
     "id": "d064",
     "name": "Dr. Shah Hussain",
+    "nameUr": "ڈاکٹر شاہ حسین",
     "specialty": "Pediatrician (Child Specialist)",
     "city": "Swat",
     "qualification": "",
@@ -1228,6 +1292,7 @@
   {
     "id": "d065",
     "name": "Dr. Alim Muhammad",
+    "nameUr": "ڈاکٹر علیم محمد",
     "specialty": "Pediatrician (Child Specialist)",
     "city": "Swat",
     "qualification": "",
@@ -1247,6 +1312,7 @@
   {
     "id": "d066",
     "name": "Dr. Sajjad Hussain",
+    "nameUr": "ڈاکٹر سجاد حسین",
     "specialty": "Pediatrician (Child Specialist)",
     "city": "Swat",
     "qualification": "MBBS, MD (Pediatrics); 10 yrs",
@@ -1266,6 +1332,7 @@
   {
     "id": "d067",
     "name": "Dr. Dilawar Khan",
+    "nameUr": "ڈاکٹر دلاور خان",
     "specialty": "Orthopedic Surgeon",
     "city": "Swat",
     "qualification": "MBBS, FCPS",
@@ -1285,6 +1352,7 @@
   {
     "id": "d068",
     "name": "Dr. Mian Mubashir Amin",
+    "nameUr": "ڈاکٹر میاں مبشر امین",
     "specialty": "General Physician",
     "city": "Nowshera",
     "qualification": "MBBS",
@@ -1304,6 +1372,7 @@
   {
     "id": "d069",
     "name": "Dr. Jawad Alam Khattak",
+    "nameUr": "ڈاکٹر جواد عالم خٹک",
     "specialty": "General Surgeon",
     "city": "Nowshera",
     "qualification": "MBBS, FCPS (General Surgery), Fellowship in Minimal Access Surgery; 7 yrs",
@@ -1323,6 +1392,7 @@
   {
     "id": "d070",
     "name": "Dr. Noor Alam",
+    "nameUr": "ڈاکٹر نور عالم",
     "specialty": "General Physician",
     "city": "Nowshera",
     "qualification": "MBBS",
@@ -1342,6 +1412,7 @@
   {
     "id": "d071",
     "name": "Dr. Muhammad Usama",
+    "nameUr": "ڈاکٹر محمد اسامہ",
     "specialty": "Dentist",
     "city": "Mansehra",
     "qualification": "BDS, RDS",
@@ -1361,6 +1432,7 @@
   {
     "id": "d072",
     "name": "Altamash Dental Clinic",
+    "nameUr": "الطامش ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Mansehra",
     "qualification": "",
@@ -1380,6 +1452,7 @@
   {
     "id": "d073",
     "name": "Dental Care Clinic",
+    "nameUr": "ڈینٹل کیئر کلینک",
     "specialty": "Dentist",
     "city": "Mansehra",
     "qualification": "",
@@ -1399,6 +1472,7 @@
   {
     "id": "d074",
     "name": "Dr. Riaz Ahmad",
+    "nameUr": "ڈاکٹر ریاض احمد",
     "specialty": "General Physician",
     "city": "Haripur",
     "qualification": "MBBS, MCPS, FCPS (Medicine); 20 yrs",
@@ -1418,6 +1492,7 @@
   {
     "id": "d075",
     "name": "Dr. Usman Asghar",
+    "nameUr": "ڈاکٹر عثمان اصغر",
     "specialty": "General Physician",
     "city": "Haripur",
     "qualification": "MBBS; 9 yrs",
@@ -1437,6 +1512,7 @@
   {
     "id": "d076",
     "name": "Dr. Shahzad Gul",
+    "nameUr": "ڈاکٹر شہزاد گل",
     "specialty": "Rheumatologist",
     "city": "Haripur",
     "qualification": "MBBS, FCPS (Medicine), FCPS (Rheumatology), SCE Rheumatology; 14 yrs",
@@ -1456,6 +1532,7 @@
   {
     "id": "d077",
     "name": "Dr. Osama Yaqub",
+    "nameUr": "ڈاکٹر اسامہ یعقوب",
     "specialty": "Dentist",
     "city": "Haripur",
     "qualification": "BDS, PMDC verified",
@@ -1475,6 +1552,7 @@
   {
     "id": "d078",
     "name": "Dr. Junaid Ahmad",
+    "nameUr": "ڈاکٹر جنید احمد",
     "specialty": "Dentist",
     "city": "Haripur",
     "qualification": "",
@@ -1494,6 +1572,7 @@
   {
     "id": "d079",
     "name": "Dr. Shehbaz Ali & Dr. Waleed Bilal",
+    "nameUr": "ڈاکٹر شہباز علی اور ڈاکٹر ولید بلال",
     "specialty": "Dentist",
     "city": "Haripur",
     "qualification": "",
@@ -1513,6 +1592,7 @@
   {
     "id": "d080",
     "name": "Dr. Salman Afaq",
+    "nameUr": "ڈاکٹر سلمان آفاق",
     "specialty": "Pediatrician (Child Specialist)",
     "city": "Charsadda",
     "qualification": "MBBS; 10 yrs",
@@ -1532,6 +1612,7 @@
   {
     "id": "d081",
     "name": "Dr. Irum Ibraheem",
+    "nameUr": "ڈاکٹر ارم ابراہیم",
     "specialty": "Gynecologist / Obstetrician",
     "city": "Charsadda",
     "qualification": "FCPS (Gynae); 2 yrs",
@@ -1551,6 +1632,7 @@
   {
     "id": "d082",
     "name": "Dr. Shumaila Aziz",
+    "nameUr": "ڈاکٹر شمائلہ عزیز",
     "specialty": "Dentist",
     "city": "Charsadda",
     "qualification": "",
@@ -1570,6 +1652,7 @@
   {
     "id": "d083",
     "name": "Dr. Shafi Ul Haq",
+    "nameUr": "ڈاکٹر شفیع الحق",
     "specialty": "Orthopedic Surgeon",
     "city": "Bannu",
     "qualification": "MBBS (KMU), FCPS (Orthopaedic Surgery); 9 yrs",
@@ -1589,6 +1672,7 @@
   {
     "id": "d084",
     "name": "Dr. Laiq Gul Nasir",
+    "nameUr": "ڈاکٹر لائق گل ناصر",
     "specialty": "Orthopedic Surgeon",
     "city": "Bannu",
     "qualification": "MBBS, MS (Ortho)",
@@ -1608,6 +1692,7 @@
   {
     "id": "d085",
     "name": "Dr. Mujeeb Ur Rahman",
+    "nameUr": "ڈاکٹر مجیب الرحمن",
     "specialty": "Orthopedic Surgeon",
     "city": "Bannu",
     "qualification": "MBBS (KMU), FCPS (Orthopedic Surgery); 10 yrs",
@@ -1627,6 +1712,7 @@
   {
     "id": "d086",
     "name": "Dr. Robina Babar",
+    "nameUr": "ڈاکٹر روبینہ بابر",
     "specialty": "Gynecologist / Obstetrician",
     "city": "D.I. Khan",
     "qualification": "MBBS, FCPS (Gynecology & Obstetrics); 13 yrs",
@@ -1646,6 +1732,7 @@
   {
     "id": "d087",
     "name": "Dr. Hikmatullah",
+    "nameUr": "ڈاکٹر حکمت اللہ",
     "specialty": "Eye Specialist (Ophthalmologist)",
     "city": "D.I. Khan",
     "qualification": "",
@@ -1665,6 +1752,7 @@
   {
     "id": "d088",
     "name": "Dr. Jahangir",
+    "nameUr": "ڈاکٹر جہانگیر",
     "specialty": "General Surgeon",
     "city": "Swabi",
     "qualification": "MBBS, FCPS",
@@ -1684,6 +1772,7 @@
   {
     "id": "d089",
     "name": "Dr. Khalid Ali",
+    "nameUr": "ڈاکٹر خالد علی",
     "specialty": "General Physician",
     "city": "Swabi",
     "qualification": "MBBS; 12 yrs",
@@ -1703,6 +1792,7 @@
   {
     "id": "d090",
     "name": "Dr. Mukarram Mustajab",
+    "nameUr": "ڈاکٹر مکرم مستجاب",
     "specialty": "General Surgeon",
     "city": "Swabi",
     "qualification": "MBBS, FCPS (General Surgery), PMDC verified; 9 yrs",
@@ -1722,6 +1812,7 @@
   {
     "id": "d091",
     "name": "Dr. Gul Badshah",
+    "nameUr": "ڈاکٹر گل بادشاہ",
     "specialty": "General Physician",
     "city": "Swabi",
     "qualification": "",
@@ -1741,6 +1832,7 @@
   {
     "id": "d092",
     "name": "Dr. Qaiser Khan",
+    "nameUr": "ڈاکٹر قیصر خان",
     "specialty": "ENT Specialist",
     "city": "Peshawar",
     "qualification": "12 yrs",
@@ -1760,6 +1852,7 @@
   {
     "id": "d093",
     "name": "Asst. Prof. Dr. Islam Gul",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر اسلام گل",
     "specialty": "ENT Specialist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS, 15 yrs",
@@ -1779,6 +1872,7 @@
   {
     "id": "d094",
     "name": "Dr. Shehreyar Khan",
+    "nameUr": "ڈاکٹر شہریار خان",
     "specialty": "ENT Specialist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (ENT), 5 yrs",
@@ -1798,6 +1892,7 @@
   {
     "id": "d095",
     "name": "Dr. Arifullah",
+    "nameUr": "ڈاکٹر عارف اللہ",
     "specialty": "ENT Specialist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS, 6 yrs",
@@ -1817,6 +1912,7 @@
   {
     "id": "d096",
     "name": "Asst. Prof. Dr. Tahir Muhammad",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر طاہر محمد",
     "specialty": "ENT Specialist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS, MRCPS, MRCS, Fellowship (AKU Karachi)",
@@ -1836,6 +1932,7 @@
   {
     "id": "d097",
     "name": "Asst. Prof. Dr. Muhammad Hafeez",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر محمد حفیظ",
     "specialty": "ENT Specialist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Oto-Rhino-Laryngology), 20 yrs",
@@ -1855,6 +1952,7 @@
   {
     "id": "d098",
     "name": "Prof. Dr. Amjad Khan",
+    "nameUr": "پروفیسر ڈاکٹر امجد خان",
     "specialty": "ENT Specialist",
     "city": "Peshawar",
     "qualification": "MBBS (Pesh), FCPS (Pak), FICS (USA)",
@@ -1874,6 +1972,7 @@
   {
     "id": "d099",
     "name": "Dr. Zafar Mehmood",
+    "nameUr": "ڈاکٹر ظفر محمود",
     "specialty": "Neurologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS",
@@ -1893,6 +1992,7 @@
   {
     "id": "d100",
     "name": "Dr. Saad Ali",
+    "nameUr": "ڈاکٹر سعد علی",
     "specialty": "Neurologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS",
@@ -1912,6 +2012,7 @@
   {
     "id": "d101",
     "name": "Dr. Sardar Muhammad Alam",
+    "nameUr": "ڈاکٹر سردار محمد عالم",
     "specialty": "Neurologist",
     "city": "Peshawar",
     "qualification": "MBBS, FRCP (Edin)",
@@ -1931,6 +2032,7 @@
   {
     "id": "d102",
     "name": "Asst. Prof. Dr. Bakht Jehan",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر بخت جہاں",
     "specialty": "Neurologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Neurology)",
@@ -1950,6 +2052,7 @@
   {
     "id": "d103",
     "name": "Prof. Dr. Taqi Toufeeq Khan",
+    "nameUr": "پروفیسر ڈاکٹر تقی توفیق خان",
     "specialty": "Urologist",
     "city": "Peshawar",
     "qualification": "MBBS, FRCS, ASTS",
@@ -1969,6 +2072,7 @@
   {
     "id": "d104",
     "name": "Dr. Naveed Haroon",
+    "nameUr": "ڈاکٹر نوید ہارون",
     "specialty": "Urologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS",
@@ -1988,6 +2092,7 @@
   {
     "id": "d105",
     "name": "Dr. Mian Naushad Ali Kakakhel",
+    "nameUr": "ڈاکٹر میاں نوشاد علی کاکاخیل",
     "specialty": "Urologist",
     "city": "Peshawar",
     "qualification": "MBBS, MCPS",
@@ -2007,6 +2112,7 @@
   {
     "id": "d106",
     "name": "Dr. Rizwan Ullah Kundi",
+    "nameUr": "ڈاکٹر رضوان اللہ کندی",
     "specialty": "Urologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Urology), 5 yrs",
@@ -2026,6 +2132,7 @@
   {
     "id": "d107",
     "name": "Dr. Ibrahim Ahmad Yousafzai",
+    "nameUr": "ڈاکٹر ابراہیم احمد یوسفزئی",
     "specialty": "Urologist",
     "city": "Peshawar",
     "qualification": "",
@@ -2045,6 +2152,7 @@
   {
     "id": "d108",
     "name": "Dr. Nazia Zaman",
+    "nameUr": "ڈاکٹر نازیہ زمان",
     "specialty": "Pulmonologist (Chest Specialist)",
     "city": "Peshawar",
     "qualification": "MBBS, MCPS (Pulmonology), 7 yrs",
@@ -2064,6 +2172,7 @@
   {
     "id": "d109",
     "name": "Dr. Syed Hamid Hussain Banoori",
+    "nameUr": "ڈاکٹر سید حامد حسین بنوری",
     "specialty": "Pulmonologist (Chest Specialist)",
     "city": "Peshawar",
     "qualification": "MBBS, PTCD, MCPS, 6 yrs",
@@ -2083,6 +2192,7 @@
   {
     "id": "d110",
     "name": "Prof. Dr. Fazli Maula",
+    "nameUr": "پروفیسر ڈاکٹر فضلی مولا",
     "specialty": "Pulmonologist (Chest Specialist)",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Chest Medicine), FCPS (Pulmonology)",
@@ -2102,6 +2212,7 @@
   {
     "id": "d111",
     "name": "Dr. Shahid Salam",
+    "nameUr": "ڈاکٹر شاہد سلام",
     "specialty": "Pulmonologist (Chest Specialist)",
     "city": "Peshawar",
     "qualification": "16+ yrs",
@@ -2121,6 +2232,7 @@
   {
     "id": "d112",
     "name": "Dr. Javed Ali Khan",
+    "nameUr": "ڈاکٹر جاوید علی خان",
     "specialty": "Pulmonologist (Chest Specialist)",
     "city": "Peshawar",
     "qualification": "21+ yrs",
@@ -2140,6 +2252,7 @@
   {
     "id": "d113",
     "name": "Dr. Saleh Saadat Afridi",
+    "nameUr": "ڈاکٹر صالح سعادت آفریدی",
     "specialty": "Pulmonologist (Chest Specialist)",
     "city": "Peshawar",
     "qualification": "",
@@ -2159,6 +2272,7 @@
   {
     "id": "d114",
     "name": "Dr. Jamal Umar",
+    "nameUr": "ڈاکٹر جمال عمر",
     "specialty": "Pulmonologist (Chest Specialist)",
     "city": "Peshawar",
     "qualification": "",
@@ -2178,6 +2292,7 @@
   {
     "id": "d115",
     "name": "Asst. Prof. Dr. Sher Ali Khan",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر شیر علی خان",
     "specialty": "Pulmonologist (Chest Specialist)",
     "city": "Peshawar",
     "qualification": "MBBS (Ayub Medical College 2008), FCPS (CPSP 2015), 10 yrs, Assistant Professor",
@@ -2197,6 +2312,7 @@
   {
     "id": "d116",
     "name": "Prof. Dr. Syed Munib",
+    "nameUr": "پروفیسر ڈاکٹر سید منیب",
     "specialty": "Nephrologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Medicine), Fellowship in Nephrology & Transplant (Singapore), FRCP, CHPE, 33 yrs",
@@ -2216,6 +2332,7 @@
   {
     "id": "d117",
     "name": "Assoc. Prof. Dr. Najm Ud Din",
+    "nameUr": "ایسوسی ایٹ پروفیسر ڈاکٹر نجم الدین",
     "specialty": "Nephrologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS, MCPS, 12 yrs",
@@ -2235,6 +2352,7 @@
   {
     "id": "d118",
     "name": "Asst. Prof. Dr. Shad Muhammad Khalil",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر شاد محمد خلیل",
     "specialty": "Nephrologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Nephrology), 16 yrs",
@@ -2254,6 +2372,7 @@
   {
     "id": "d119",
     "name": "Dr. Mazhar Ul Haq",
+    "nameUr": "ڈاکٹر مظہر الحق",
     "specialty": "Nephrologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS, 4 yrs",
@@ -2273,6 +2392,7 @@
   {
     "id": "d120",
     "name": "Asst. Prof. Dr. Shahid Rizwan",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر شاہد رضوان",
     "specialty": "Nephrologist",
     "city": "Peshawar",
     "qualification": "MBBS, MRCP (Ireland), 14 yrs",
@@ -2292,6 +2412,7 @@
   {
     "id": "d121",
     "name": "Dr. Nasir Ali Khan",
+    "nameUr": "ڈاکٹر ناصر علی خان",
     "specialty": "General Physician",
     "city": "Peshawar",
     "qualification": "MBBS (KMU), 9 yrs",
@@ -2311,6 +2432,7 @@
   {
     "id": "d122",
     "name": "Dr. Palwasha Farhan",
+    "nameUr": "ڈاکٹر پلوشہ فرحان",
     "specialty": "General Physician",
     "city": "Peshawar",
     "qualification": "MBBS (KMU), 8 yrs",
@@ -2330,6 +2452,7 @@
   {
     "id": "d123",
     "name": "Dr. Hafiz Sulaiman Dawood",
+    "nameUr": "ڈاکٹر حافظ سلیمان داؤد",
     "specialty": "General Physician",
     "city": "Peshawar",
     "qualification": "9 yrs",
@@ -2349,6 +2472,7 @@
   {
     "id": "d124",
     "name": "Dr. Abd Ul Rehman Afridi",
+    "nameUr": "ڈاکٹر عبد الرحمن آفریدی",
     "specialty": "General Physician",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS",
@@ -2368,6 +2492,7 @@
   {
     "id": "d125",
     "name": "Dr. Akhtar Nawaz",
+    "nameUr": "ڈاکٹر اختر نواز",
     "specialty": "General Physician",
     "city": "Peshawar",
     "qualification": "MD, 20 yrs",
@@ -2387,6 +2512,7 @@
   {
     "id": "d126",
     "name": "Dr. Rameez Khan",
+    "nameUr": "ڈاکٹر رمیز خان",
     "specialty": "General Physician",
     "city": "Peshawar",
     "qualification": "MBBS, MSc (Diabetes/Endocrinology), MRCP",
@@ -2406,6 +2532,7 @@
   {
     "id": "d127",
     "name": "Dr. Abdus Subhan",
+    "nameUr": "ڈاکٹر عبد السبحان",
     "specialty": "General Physician",
     "city": "Peshawar",
     "qualification": "MBBS, DTCD, 32 yrs",
@@ -2425,6 +2552,7 @@
   {
     "id": "d128",
     "name": "Dr. Sameed Khan",
+    "nameUr": "ڈاکٹر سمید خان",
     "specialty": "General Physician",
     "city": "Peshawar",
     "qualification": "MBBS",
@@ -2444,6 +2572,7 @@
   {
     "id": "d129",
     "name": "Dr. Imad Hameed",
+    "nameUr": "ڈاکٹر عماد حمید",
     "specialty": "ENT Specialist",
     "city": "Mardan",
     "qualification": "MBBS, FCPS",
@@ -2463,6 +2592,7 @@
   {
     "id": "d130",
     "name": "Dr. Syed Mudassir Shah",
+    "nameUr": "ڈاکٹر سید مدثر شاہ",
     "specialty": "ENT Specialist",
     "city": "Mardan",
     "qualification": "",
@@ -2482,6 +2612,7 @@
   {
     "id": "d131",
     "name": "Dr. Muhammad Said",
+    "nameUr": "ڈاکٹر محمد سعید",
     "specialty": "ENT Specialist",
     "city": "Mardan",
     "qualification": "",
@@ -2501,6 +2632,7 @@
   {
     "id": "d132",
     "name": "Asst. Prof. Dr. Syed Ashfaq Ali",
+    "nameUr": "اسسٹنٹ پروفیسر ڈاکٹر سید اشفاق علی",
     "specialty": "Psychiatrist",
     "city": "Mardan",
     "qualification": "MBBS, DPM, 38 yrs; Assistant Professor (ex-DHQ Hospital Mardan, Mental Hospital Peshawar)",
@@ -2520,6 +2652,7 @@
   {
     "id": "d133",
     "name": "Dr. Shafqat Ali Shah",
+    "nameUr": "ڈاکٹر شفقت علی شاہ",
     "specialty": "Eye Specialist (Ophthalmologist)",
     "city": "Mardan",
     "qualification": "MBBS, MCPS (Eye), FCPS (Eye), 14 yrs",
@@ -2539,6 +2672,7 @@
   {
     "id": "d134",
     "name": "Dr. Muhammad Anjum Khalid",
+    "nameUr": "ڈاکٹر محمد انجم خالد",
     "specialty": "Eye Specialist (Ophthalmologist)",
     "city": "Mardan",
     "qualification": "MBBS, MS (Ophthalmology); cataract/glaucoma",
@@ -2558,6 +2692,7 @@
   {
     "id": "d135",
     "name": "Dr. Shafqat Ali Khan",
+    "nameUr": "ڈاکٹر شفقت علی خان",
     "specialty": "Eye Specialist (Ophthalmologist)",
     "city": "Mardan",
     "qualification": "MBBS, FCPS",
@@ -2577,6 +2712,7 @@
   {
     "id": "d136",
     "name": "Dr. Tahir Gul",
+    "nameUr": "ڈاکٹر طاہر گل",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "",
@@ -2596,6 +2732,7 @@
   {
     "id": "d137",
     "name": "Dr. Jehangir Khan & Dr. Tooba Fayaz",
+    "nameUr": "ڈاکٹر جہانگیر خان اور ڈاکٹر طوبیٰ فیاض",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "",
@@ -2615,6 +2752,7 @@
   {
     "id": "d138",
     "name": "Dr. Ashfaq Ahmad",
+    "nameUr": "ڈاکٹر اشفاق احمد",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "",
@@ -2634,6 +2772,7 @@
   {
     "id": "d139",
     "name": "Dr. Syed Waheed Uzair",
+    "nameUr": "ڈاکٹر سید وحید عزیر",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "",
@@ -2653,6 +2792,7 @@
   {
     "id": "d140",
     "name": "Dr. Rozina Malik",
+    "nameUr": "ڈاکٹر روزینہ ملک",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "",
@@ -2672,6 +2812,7 @@
   {
     "id": "d141",
     "name": "Dr. Nafila",
+    "nameUr": "ڈاکٹر نفیلہ",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "",
@@ -2691,6 +2832,7 @@
   {
     "id": "d142",
     "name": "Mahrosh's Skin and Laser Clinic",
+    "nameUr": "ماہروش اسکن اینڈ لیزر کلینک",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "",
@@ -2710,6 +2852,7 @@
   {
     "id": "d143",
     "name": "Safi Skin Care Aesthetic & Boutique Clinic",
+    "nameUr": "صفی اسکن کیئر ایستھیٹک اینڈ بوتیک کلینک",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "",
@@ -2729,6 +2872,7 @@
   {
     "id": "d144",
     "name": "Aesthetic Skin And Laser Clinic",
+    "nameUr": "ایستھیٹک اسکن اینڈ لیزر کلینک",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "",
@@ -2748,6 +2892,7 @@
   {
     "id": "d145",
     "name": "Ansa Skin & Aesthetic Clinic",
+    "nameUr": "انسا اسکن اینڈ ایستھیٹک کلینک",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "",
@@ -2767,6 +2912,7 @@
   {
     "id": "d146",
     "name": "Dr. M. Salman Khan & Dr. Adil Hamayun",
+    "nameUr": "ڈاکٹر ایم سلمان خان اور ڈاکٹر عادل ہمایوں",
     "specialty": "Plastic Surgeon",
     "city": "Peshawar",
     "qualification": "",
@@ -2786,6 +2932,7 @@
   {
     "id": "d147",
     "name": "Dr. Yaseen Afridi",
+    "nameUr": "ڈاکٹر یاسین آفریدی",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "",
@@ -2805,6 +2952,7 @@
   {
     "id": "d148",
     "name": "Dr. Warda Nasir Mohib",
+    "nameUr": "ڈاکٹر وردہ ناصر محب",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "Aesthetic Physician (PMDC 757205-03-M)",
@@ -2824,6 +2972,7 @@
   {
     "id": "d149",
     "name": "Dr. Kalsoom Aslam",
+    "nameUr": "ڈاکٹر کلثوم اسلم",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Dermatology); 8 yrs",
@@ -2843,6 +2992,7 @@
   {
     "id": "d150",
     "name": "Dr. Rabeeka Bakhtiar",
+    "nameUr": "ڈاکٹر ربیکا بختیار",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Dermatology)",
@@ -2862,6 +3012,7 @@
   {
     "id": "d151",
     "name": "Dr. Abdul Wali",
+    "nameUr": "ڈاکٹر عبد الولی",
     "specialty": "Dermatologist",
     "city": "Peshawar",
     "qualification": "MBBS, MCPS (Dermatology); 12 yrs",
@@ -2881,6 +3032,7 @@
   {
     "id": "d152",
     "name": "Dr. Maleeha Ali",
+    "nameUr": "ڈاکٹر ملیحہ علی",
     "specialty": "Gynecologist / Obstetrician",
     "city": "Peshawar",
     "qualification": "MBBS, FCPS (Obs & Gynae); also serves at Lady Reading Hospital",
@@ -2900,6 +3052,7 @@
   {
     "id": "d153",
     "name": "Prof. Dr. Iqbal Begum",
+    "nameUr": "پروفیسر ڈاکٹر اقبال بیگم",
     "specialty": "Gynecologist / Obstetrician",
     "city": "Peshawar",
     "qualification": "",
@@ -2919,6 +3072,7 @@
   {
     "id": "d154",
     "name": "Dr. Haider Ali Khan",
+    "nameUr": "ڈاکٹر حیدر علی خان",
     "specialty": "Physiotherapist",
     "city": "Peshawar",
     "qualification": "Neuro, Spine, Sports Rehabilitation",
@@ -2938,6 +3092,7 @@
   {
     "id": "d155",
     "name": "Pain Care Physiotherapy Clinic",
+    "nameUr": "پین کیئر فزیوتھراپی کلینک",
     "specialty": "Physiotherapist",
     "city": "Peshawar",
     "qualification": "",
@@ -2957,6 +3112,7 @@
   {
     "id": "d156",
     "name": "Dr. Waleed Bukhari",
+    "nameUr": "ڈاکٹر ولید بخاری",
     "specialty": "Dermatologist",
     "city": "Mardan",
     "qualification": "",
@@ -2976,6 +3132,7 @@
   {
     "id": "d157",
     "name": "Naveed Ahmad Shah",
+    "nameUr": "نوید احمد شاہ",
     "specialty": "Eye Specialist (Ophthalmologist)",
     "city": "Mardan",
     "qualification": "",
@@ -2995,6 +3152,7 @@
   {
     "id": "d158",
     "name": "Darul Shifa Mardan Welfare Eye Clinic",
+    "nameUr": "دارالشفا مردان ویلفیئر آئی کلینک",
     "specialty": "Eye Specialist (Ophthalmologist)",
     "city": "Mardan",
     "qualification": "",
@@ -3014,6 +3172,7 @@
   {
     "id": "d159",
     "name": "Dr. Abdul Raziq",
+    "nameUr": "ڈاکٹر عبد الرازق",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "",
@@ -3033,6 +3192,7 @@
   {
     "id": "d160",
     "name": "The Dental Clinic",
+    "nameUr": "دی ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "",
@@ -3052,6 +3212,7 @@
   {
     "id": "d161",
     "name": "Usman Dental Clinic",
+    "nameUr": "عثمان ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "",
@@ -3071,6 +3232,7 @@
   {
     "id": "d162",
     "name": "Rehman Dental Clinic",
+    "nameUr": "رحمان ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "",
@@ -3090,6 +3252,7 @@
   {
     "id": "d163",
     "name": "Hamdard Dental Clinic",
+    "nameUr": "ہمدرد ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "",
@@ -3109,6 +3272,7 @@
   {
     "id": "d164",
     "name": "Dr. Sadique Ahmad Orakzai & Dr. Ayesha Naseem",
+    "nameUr": "ڈاکٹر صادق احمد اورکزئی اور ڈاکٹر عائشہ نسیم",
     "specialty": "Orthodontist",
     "city": "Mardan",
     "qualification": "",
@@ -3128,6 +3292,7 @@
   {
     "id": "d165",
     "name": "Prof. Dr. Farid Ullah",
+    "nameUr": "پروفیسر ڈاکٹر فرید اللہ",
     "specialty": "Dentist",
     "city": "Mardan",
     "qualification": "BDS, DCD, CHPE, PhD (Gold medalist), MDA (USA)",
@@ -3147,6 +3312,7 @@
   {
     "id": "d166",
     "name": "Dr. Ishtiaq Ahmad",
+    "nameUr": "ڈاکٹر اشتیاق احمد",
     "specialty": "Medical Specialist (Internal Medicine)",
     "city": "Mardan",
     "qualification": "MBBS, FCPS",
@@ -3166,6 +3332,7 @@
   {
     "id": "d167",
     "name": "Dr. Asghar Ali",
+    "nameUr": "ڈاکٹر اصغر علی",
     "specialty": "Neurosurgeon",
     "city": "Mardan",
     "qualification": "MBBS, FCPS",
@@ -3185,6 +3352,7 @@
   {
     "id": "d168",
     "name": "Dr. Muhammad Zarar Niazi",
+    "nameUr": "ڈاکٹر محمد ضرر نیازی",
     "specialty": "Plastic Surgeon",
     "city": "Mardan",
     "qualification": "MBBS, FCPS",
@@ -3204,6 +3372,7 @@
   {
     "id": "d169",
     "name": "Dr. Salman Malik",
+    "nameUr": "ڈاکٹر سلمان ملک",
     "specialty": "Anesthetist / Pain Specialist",
     "city": "Mardan",
     "qualification": "MBBS, FCPS",
@@ -3223,6 +3392,7 @@
   {
     "id": "d170",
     "name": "Royal Dental & Facial Aesthetics Clinic",
+    "nameUr": "رائل ڈینٹل اینڈ فیشل ایستھیٹکس کلینک",
     "specialty": "Dentist",
     "city": "Abbottabad",
     "qualification": "",
@@ -3242,6 +3412,7 @@
   {
     "id": "d171",
     "name": "Dr. Amjad",
+    "nameUr": "ڈاکٹر امجد",
     "specialty": "Dentist",
     "city": "Abbottabad",
     "qualification": "",
@@ -3261,6 +3432,7 @@
   {
     "id": "d172",
     "name": "City Dental Clinic (Hira General Hospital)",
+    "nameUr": "سٹی ڈینٹل کلینک (ہیرا جنرل ہسپتال)",
     "specialty": "Dentist",
     "city": "Abbottabad",
     "qualification": "",
@@ -3280,6 +3452,7 @@
   {
     "id": "d173",
     "name": "Javed Dental Clinic",
+    "nameUr": "جاوید ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Abbottabad",
     "qualification": "",
@@ -3299,6 +3472,7 @@
   {
     "id": "d174",
     "name": "AlNoor Dental Clinic",
+    "nameUr": "النور ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Abbottabad",
     "qualification": "",
@@ -3318,6 +3492,7 @@
   {
     "id": "d175",
     "name": "Ayub Dental Clinic",
+    "nameUr": "ایوب ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Abbottabad",
     "qualification": "",
@@ -3337,6 +3512,7 @@
   {
     "id": "d176",
     "name": "RIFAH Dental Clinic",
+    "nameUr": "رفاہ ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Abbottabad",
     "qualification": "",
@@ -3356,6 +3532,7 @@
   {
     "id": "d177",
     "name": "Dr. Tariq Mahmood Khan",
+    "nameUr": "ڈاکٹر طارق محمود خان",
     "specialty": "Dermatologist",
     "city": "Abbottabad",
     "qualification": "American board certified, Fellowship in Aesthetic Medicine; Associate Professor, Frontier Medical College Abbottabad",
@@ -3375,6 +3552,7 @@
   {
     "id": "d178",
     "name": "Dr. Qaisar Muhammad Siddiq",
+    "nameUr": "ڈاکٹر قیصر محمد صدیق",
     "specialty": "Dermatologist",
     "city": "Abbottabad",
     "qualification": "MBBS, MCPS (Dermatology); 7 yrs",
@@ -3394,6 +3572,7 @@
   {
     "id": "d179",
     "name": "Dr. Shah Abbas",
+    "nameUr": "ڈاکٹر شاہ عباس",
     "specialty": "General Surgeon",
     "city": "Swat",
     "qualification": "Bariatric / General Surgeon",
@@ -3413,6 +3592,7 @@
   {
     "id": "d180",
     "name": "Dr. Sohail Khan",
+    "nameUr": "ڈاکٹر سہیل خان",
     "specialty": "Dentist",
     "city": "Swat",
     "qualification": "",
@@ -3432,6 +3612,7 @@
   {
     "id": "d181",
     "name": "Hayat Dental Clinic",
+    "nameUr": "حیات ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Swat",
     "qualification": "",
@@ -3451,6 +3632,7 @@
   {
     "id": "d182",
     "name": "Dr. Taran Kumar & Dr. Imy Kumar",
+    "nameUr": "ڈاکٹر ترن کمار اور ڈاکٹر امی کمار",
     "specialty": "Dentist",
     "city": "Swat",
     "qualification": "",
@@ -3470,6 +3652,7 @@
   {
     "id": "d183",
     "name": "Dr. Hanif Ullah",
+    "nameUr": "ڈاکٹر حنیف اللہ",
     "specialty": "Dentist",
     "city": "Swat",
     "qualification": "BDS (KCD), FCPS (OMFS); 6 yrs",
@@ -3489,6 +3672,7 @@
   {
     "id": "d184",
     "name": "Dr. Muhammad Omar",
+    "nameUr": "ڈاکٹر محمد عمر",
     "specialty": "Family Physician",
     "city": "Kohat",
     "qualification": "",
@@ -3508,6 +3692,7 @@
   {
     "id": "d185",
     "name": "Al-Syed Dental Clinic",
+    "nameUr": "السید ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Nowshera",
     "qualification": "",
@@ -3527,6 +3712,7 @@
   {
     "id": "d186",
     "name": "Iqbal Dental Clinic",
+    "nameUr": "اقبال ڈینٹل کلینک",
     "specialty": "Dentist",
     "city": "Nowshera",
     "qualification": "",
@@ -3546,6 +3732,7 @@
   {
     "id": "d187",
     "name": "Dr. Murad Usman",
+    "nameUr": "ڈاکٹر مراد عثمان",
     "specialty": "Dentist",
     "city": "Nowshera",
     "qualification": "",
@@ -3565,6 +3752,7 @@
   {
     "id": "d188",
     "name": "Dr. Ibraheem Javaid",
+    "nameUr": "ڈاکٹر ابراہیم جاوید",
     "specialty": "Dentist",
     "city": "Nowshera",
     "qualification": "BDS (Gandhara University); 3 yrs",
@@ -3584,6 +3772,7 @@
   {
     "id": "d189",
     "name": "Dr. Naseemullah",
+    "nameUr": "ڈاکٹر نسیم اللہ",
     "specialty": "Dermatologist",
     "city": "Nowshera",
     "qualification": "Associate Professor",

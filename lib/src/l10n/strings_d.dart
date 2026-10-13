@@ -51,6 +51,18 @@ const Map<String, String> enD = {
   'prof.mobileNumber': 'Mobile number',
   'prof.footer': 'Fauridoc 1.0 · No ads, no data selling',
   'prof.adminBadge': 'Admin',
+  'prof.uid': 'UID',
+  'prof.copied': 'Copied',
+
+  // ---------- settings ----------
+  'set.title': 'Settings',
+  'set.aboutTitle': 'About Fauridoc',
+  'set.aboutBody':
+      'Fauridoc is a free directory of doctors, labs and hospitals in Khyber Pakhtunkhwa, with community questions and answers. Find the right care near you.',
+  'set.version': 'Version',
+  'set.language': 'Language',
+  'set.helpFeedback': 'Help & feedback',
+  'set.footer': 'Fauridoc 1.0 · No ads, no data selling',
 
   // ---------- auth ----------
   'auth.signInTitle': 'Sign in',
@@ -158,6 +170,9 @@ const Map<String, String> enD = {
   'admin.allDoctors': 'All doctors',
   'admin.allLabs': 'All labs',
   'admin.allHospitals': 'All hospitals',
+  'admin.addDoctor': '+ Add doctor',
+  'admin.addLab': '+ Add lab',
+  'admin.addHospital': '+ Add hospital',
   'admin.manageLists': 'Manage lists',
   'admin.cities': 'Cities',
   'admin.specialties': 'Specialties',
@@ -253,6 +268,18 @@ const Map<String, String> urD = {
   'prof.mobileNumber': 'موبائل نمبر',
   'prof.footer': 'فوری ڈاک 1.0 · کوئی اشتہار نہیں، کوئی ڈیٹا فروخت نہیں',
   'prof.adminBadge': 'ایڈمن',
+  'prof.uid': 'UID',
+  'prof.copied': 'کاپی ہو گیا',
+
+  // ---------- settings ----------
+  'set.title': 'سیٹنگز',
+  'set.aboutTitle': 'فوری ڈاک کے بارے میں',
+  'set.aboutBody':
+      'فوری ڈاک خیبر پختونخوا کے ڈاکٹروں، لیبز اور ہسپتالوں کی مفت ڈائریکٹری ہے، ساتھ ہی کمیونٹی کے سوالات اور جوابات۔ اپنے قریب درست علاج تلاش کریں۔',
+  'set.version': 'ورژن',
+  'set.language': 'زبان',
+  'set.helpFeedback': 'مدد اور رائے',
+  'set.footer': 'فوری ڈاک 1.0 · کوئی اشتہار نہیں، کوئی ڈیٹا فروخت نہیں',
 
   // ---------- auth ----------
   'auth.signInTitle': 'سائن ان',
@@ -359,6 +386,9 @@ const Map<String, String> urD = {
   'admin.allDoctors': 'تمام ڈاکٹرز',
   'admin.allLabs': 'تمام لیبز',
   'admin.allHospitals': 'تمام ہسپتال',
+  'admin.addDoctor': '＋ ڈاکٹر شامل کریں',
+  'admin.addLab': '＋ لیب شامل کریں',
+  'admin.addHospital': '＋ ہسپتال شامل کریں',
   'admin.manageLists': 'فہرستیں مینج کریں',
   'admin.cities': 'شہر',
   'admin.specialties': 'اسپیشلٹیز',

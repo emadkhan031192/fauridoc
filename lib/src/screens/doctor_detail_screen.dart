@@ -212,7 +212,7 @@ class DoctorDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _DoctorDetailScreenState extends ConsumerState<DoctorDetailScreen> {
-  late final Future<Doctor?> _doctorFuture;
+  late Future<Doctor?> _doctorFuture;
 
   @override
   void initState() {
@@ -220,6 +220,13 @@ class _DoctorDetailScreenState extends ConsumerState<DoctorDetailScreen> {
     final repo = ref.read(repositoryProvider);
     _doctorFuture = repo.getDoctor(widget.doctorId);
     repo.recordProfileView(widget.doctorId);
+  }
+
+  void _retry() {
+    setState(() {
+      _doctorFuture =
+          ref.read(repositoryProvider).getDoctor(widget.doctorId);
+    });
   }
 
   @override
@@ -238,7 +245,24 @@ class _DoctorDetailScreenState extends ConsumerState<DoctorDetailScreen> {
           }
           final d = snap.data;
           if (d == null) {
-            return Center(child: Text(tr(ref, 'error')));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(tr(ref, 'error'),
+                        style: FdType.body(ur, size: 15),
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 14),
+                    FdButton(
+                        label: tr(ref, 'retry'),
+                        isUrdu: ur,
+                        onTap: _retry),
+                  ],
+                ),
+              ),
+            );
           }
           final status = computeOpenStatus(d.hours, DateTime.now());
           final onLeave =
