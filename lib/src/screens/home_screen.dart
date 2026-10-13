@@ -10,6 +10,7 @@ import '../models/day_hours.dart';
 import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../utils/actions.dart';
 import '../utils/geo.dart';
 import '../utils/open_status.dart';
@@ -276,6 +277,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
     final city = ref.watch(cityProvider);
@@ -348,7 +350,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               style: TextStyle(
                 fontFamily: FdType.family(ur),
                 // EN: 28/800, lh 1.12, ls -0.02em. UR: 25/700, lh 1.75.
-                fontSize: ur ? (28) * 0.9 : (28),
+                fontSize: FdType.scaled(ur, 28),
                 fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
                 color: FdSpec.ink,
                 height: ur ? 1.75 : 1.12,
@@ -437,7 +439,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   city,
                   style: TextStyle(
                     fontFamily: FdType.family(ur),
-                    fontSize: ur ? (14) * 0.9 : (14),
+                    fontSize: FdType.scaled(ur, 14),
                     fontWeight: ur ? FontWeight.w600 : FontWeight.w700,
                     color: FdSpec.ink,
                     height: ur ? 1.4 : null,
@@ -559,7 +561,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     trB(ref, 'home.nearestEmergency'),
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: ur ? (16) * 0.9 : (16),
+                      fontSize: FdType.scaled(ur, 16),
                       fontWeight:
                           ur ? FontWeight.w700 : FontWeight.w800,
                       color: Colors.white,
@@ -572,7 +574,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: ur ? (12) * 0.9 : (12),
+                      fontSize: FdType.scaled(ur, 12),
                       fontWeight:
                           ur ? FontWeight.w400 : FontWeight.w500,
                       color: Colors.white
@@ -619,7 +621,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: FdType.family(ur),
-                  fontSize: ur ? (15) * 0.9 : (15),
+                  fontSize: FdType.scaled(ur, 15),
                   fontWeight: ur ? FontWeight.w400 : FontWeight.w500,
                   color: FdSpec.muted,
                 ),
@@ -691,7 +693,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           label,
           style: TextStyle(
             fontFamily: FdType.family(ur),
-            fontSize: ur ? (14) * 0.9 : (14),
+            fontSize: FdType.scaled(ur, 14),
             fontWeight: ur ? FontWeight.w500 : FontWeight.w600,
             color: selected ? Colors.white : FdSpec.ink,
             height: ur ? 1 : null,
@@ -719,7 +721,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final nameStyle = TextStyle(
       fontFamily: FdType.family(ur),
-      fontSize: ur ? (20) * 0.9 : (20),
+      fontSize: FdType.scaled(ur, 20),
       fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
       color: FdSpec.ink,
       height: ur ? 1.8 : 1.15,
@@ -727,7 +729,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
     final statusStyle = TextStyle(
       fontFamily: FdType.family(ur),
-      fontSize: ur ? (13) * 0.9 : (13),
+      fontSize: FdType.scaled(ur, 13),
       fontWeight: ur ? FontWeight.w600 : FontWeight.w700,
       color: FdSpec.ink,
       height: ur ? 1.8 : null,
@@ -757,7 +759,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: FdType.family(ur),
-                  fontSize: ur ? (12.5) * 0.9 : (12.5),
+                  fontSize: FdType.scaled(ur, 12.5),
                   fontWeight: FontWeight.w600,
                   color: ur ? FdSpec.limeInk : FdSpec.secondary,
                   height: ur ? 1.7 : 1.35,
@@ -790,7 +792,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       : trB(ref, 'home.topRatedNearYou').toUpperCase(),
                   style: TextStyle(
                     fontFamily: FdType.family(ur),
-                    fontSize: ur ? (12) * 0.9 : (12),
+                    fontSize: FdType.scaled(ur, 12),
                     fontWeight:
                         ur ? FontWeight.w600 : FontWeight.w800,
                     letterSpacing: ur ? 0 : 0.96,
@@ -813,7 +815,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ur,
                   size: ur ? 64 : 68,
                   radius: 20,
-                  fontSize: ur ? (24) * 0.9 : (24),
+                  fontSize: FdType.scaled(ur, 24),
                   weight: ur ? FontWeight.w700 : FontWeight.w800,
                   color: FdSpec.darkGreen,
                   textHeight: ur ? 1 : null,
@@ -846,7 +848,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: FdType.family(ur),
-                          fontSize: ur ? (14) * 0.9 : (14),
+                          fontSize: FdType.scaled(ur, 14),
                           fontWeight:
                               ur ? FontWeight.w500 : FontWeight.w600,
                           color: FdSpec.limeInk,
@@ -899,7 +901,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     bg: Colors.white,
                     fg: FdSpec.ink,
                     height: 50,
-                    fontSize: ur ? (15) * 0.9 : (15),
+                    fontSize: FdType.scaled(ur, 15),
                     weight:
                         ur ? FontWeight.w600 : FontWeight.w700,
                     textHeight: ur ? 1 : null,
@@ -916,7 +918,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       bg: FdSpec.ink,
                       fg: Colors.white,
                       height: 50,
-                      fontSize: ur ? (15) * 0.9 : (15),
+                      fontSize: FdType.scaled(ur, 15),
                       weight:
                           ur ? FontWeight.w600 : FontWeight.w700,
                       textHeight: ur ? 1 : null,
@@ -949,7 +951,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontFamily: FdType.family(ur),
-          fontSize: ur ? (13) * 0.9 : (13),
+          fontSize: FdType.scaled(ur, 13),
           fontWeight: ur ? FontWeight.w500 : FontWeight.w700,
           color: FdSpec.ink,
           height: ur ? 1 : null,
@@ -985,7 +987,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ur,
                 size: 56,
                 radius: 16,
-                fontSize: ur ? (19) * 0.9 : (19),
+                fontSize: FdType.scaled(ur, 19),
                 weight: ur ? FontWeight.w700 : FontWeight.w800,
                 color: FdSpec.ink,
                 textHeight: ur ? 1 : null,
@@ -1000,11 +1002,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         Flexible(
                           child: Text(
                             d.displayName(ur),
-                            maxLines: 1,
+                            maxLines: 2,
+                            softWrap: true,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontFamily: FdType.family(ur),
-                              fontSize: ur ? (16) * 0.9 : (16),
+                              fontSize: FdType.scaled(ur, 16),
                               fontWeight: ur
                                   ? FontWeight.w700
                                   : FontWeight.w800,
@@ -1023,7 +1026,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: FdType.family(ur),
-                        fontSize: ur ? (13) * 0.9 : (13),
+                        fontSize: FdType.scaled(ur, 13),
                         fontWeight:
                             ur ? FontWeight.w500 : FontWeight.w600,
                         color: FdSpec.secondary,
@@ -1077,7 +1080,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     _openText(d, ref),
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: ur ? (13) * 0.9 : (13),
+                      fontSize: FdType.scaled(ur, 13),
                       fontWeight:
                           ur ? FontWeight.w600 : FontWeight.w700,
                       color: FdSpec.ink,
@@ -1104,7 +1107,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: FdType.family(ur),
-                      fontSize: ur ? (12.5) * 0.9 : (12.5),
+                      fontSize: FdType.scaled(ur, 12.5),
                       fontWeight: FontWeight.w600,
                       color: FdSpec.secondary,
                       height: ur ? 1.7 : 1.35,
@@ -1128,7 +1131,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     bg: Colors.white,
                     fg: FdSpec.ink,
                     height: 46,
-                    fontSize: ur ? (14) * 0.9 : (14),
+                    fontSize: FdType.scaled(ur, 14),
                     weight:
                         ur ? FontWeight.w600 : FontWeight.w700,
                     textHeight: ur ? 1 : null,
@@ -1146,7 +1149,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       bg: FdSpec.ink,
                       fg: Colors.white,
                       height: 46,
-                      fontSize: ur ? (14) * 0.9 : (14),
+                      fontSize: FdType.scaled(ur, 14),
                       weight:
                           ur ? FontWeight.w600 : FontWeight.w700,
                       textHeight: ur ? 1 : null,
@@ -1179,7 +1182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               title,
               style: TextStyle(
                 fontFamily: FdType.family(ur),
-                fontSize: ur ? (18) * 0.9 : (18),
+                fontSize: FdType.scaled(ur, 18),
                 fontWeight:
                     ur ? FontWeight.w700 : FontWeight.w800,
                 letterSpacing: ur ? 0 : -0.18,
@@ -1193,7 +1196,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               action,
               style: TextStyle(
                 fontFamily: FdType.family(ur),
-                fontSize: ur ? (13) * 0.9 : (13),
+                fontSize: FdType.scaled(ur, 13),
                 fontWeight:
                     ur ? FontWeight.w500 : FontWeight.w600,
                 color: FdSpec.primary,
@@ -1379,7 +1382,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             label,
             style: TextStyle(
               fontFamily: FdType.family(ur),
-              fontSize: ur ? (11) * 0.9 : (11),
+              fontSize: FdType.scaled(ur, 11),
               fontWeight: ur ? FontWeight.w400 : FontWeight.w600,
               color: FdSpec.muted,
             ),
@@ -1391,7 +1394,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // UR review counts stay in Albert Sans per spec.
               fontFamily:
                   latinDigits ? FdSpec.latinFont : FdType.family(ur),
-              fontSize: ur ? (14) * 0.9 : (14),
+              fontSize: FdType.scaled(ur, 14),
               fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
               color: FdSpec.ink,
               height: ur ? 1.7 : null,

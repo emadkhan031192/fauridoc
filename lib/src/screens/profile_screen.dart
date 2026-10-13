@@ -9,6 +9,7 @@ import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/lab.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../widgets/theme.dart';
 import 'admin_panel_screen.dart';
 import 'auth_screen.dart';
@@ -120,6 +121,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final ur = fdIsUrdu(ref.watch(localeProvider));
     final user = ref.watch(authProvider);
 
@@ -242,7 +244,7 @@ Widget _screenTitle(bool ur, String text) => Text(
       text,
       style: TextStyle(
         fontFamily: FdType.family(ur),
-        fontSize: ur ? (28) * 0.9 : (28),
+        fontSize: FdType.scaled(ur, 28),
         fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
         letterSpacing: ur ? 0 : -0.56,
         color: FdColors.ink,
@@ -258,7 +260,7 @@ Widget _capsRow(bool ur, String label) => Row(
           label.toUpperCase(),
           style: TextStyle(
             fontFamily: FdType.family(ur),
-            fontSize: ur ? (12) * 0.9 : (12),
+            fontSize: FdType.scaled(ur, 12),
             fontWeight: FontWeight.w700,
             letterSpacing: ur ? 0 : 0.96,
             color: FdColors.muted,
@@ -1144,6 +1146,7 @@ class _SavedDoctorsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final ur = fdIsUrdu(ref.watch(localeProvider));
     return Scaffold(
       appBar: AppBar(

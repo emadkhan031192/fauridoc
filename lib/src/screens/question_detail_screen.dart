@@ -5,6 +5,7 @@ import '../l10n/strings.dart';
 import '../models/app_user.dart';
 import '../models/community.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../widgets/theme.dart';
 
 String _ago(WidgetRef ref, DateTime dt) {
@@ -155,6 +156,7 @@ class _QuestionDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
     final repo = ref.watch(repositoryProvider);

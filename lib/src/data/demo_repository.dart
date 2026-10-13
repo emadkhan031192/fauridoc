@@ -207,7 +207,7 @@ class DemoRepository implements FauridocRepository {
 
   List<Doctor> _filterDoctors({String? city, String? specialty, String? query}) {
     final q = (query ?? '').trim().toLowerCase();
-    return _doctors.values.where((d) {
+    final list = _doctors.values.where((d) {
       if (!d.approved) return false;
       if (city != null && city.isNotEmpty && d.city != city) return false;
       if (specialty != null && specialty.isNotEmpty && d.specialty != specialty) return false;
@@ -217,7 +217,16 @@ class DemoRepository implements FauridocRepository {
       }
       return true;
     }).toList();
+    return _pinnedFirst(list);
   }
+
+  /// Pinned doctors first; order is stable within each group.
+  List<Doctor> _pinnedFirst(List<Doctor> doctors) => [
+        for (final d in doctors)
+          if (d.pinned) d,
+        for (final d in doctors)
+          if (!d.pinned) d,
+      ];
 
   @override
   Future<Doctor?> getDoctor(String id) async => _doctors[id];
@@ -640,7 +649,8 @@ class DemoRepository implements FauridocRepository {
   // ---------- my entities ----------
   @override
   Stream<List<Doctor>> watchMyDoctors(String uid) =>
-      _watch(() => _doctors.values.where((d) => d.ownerUid == uid).toList());
+      _watch(() => _pinnedFirst(
+          _doctors.values.where((d) => d.ownerUid == uid).toList()));
 
   @override
   Stream<List<Lab>> watchMyLabs(String uid) =>

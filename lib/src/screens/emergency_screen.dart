@@ -7,6 +7,7 @@ import '../l10n/strings.dart';
 import '../l10n/strings_b.dart';
 import '../models/hospital.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../utils/actions.dart';
 import '../utils/geo.dart';
 import '../widgets/theme.dart';
@@ -90,6 +91,7 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
     final city = ref.watch(cityProvider);

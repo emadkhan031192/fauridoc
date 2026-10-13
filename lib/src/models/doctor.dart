@@ -29,6 +29,7 @@ class Doctor {
   final int? fee; // consultation fee in PKR
   final String? ownerUid;
   final DateTime createdAt;
+  final bool pinned; // admin pin: pinned doctors sort first
 
   Doctor({
     required this.id,
@@ -56,6 +57,7 @@ class Doctor {
     this.hasParking = false,
     this.fee,
     this.ownerUid,
+    this.pinned = false,
     DateTime? createdAt,
   })  : hours = hours ?? const {},
         createdAt = createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -87,6 +89,7 @@ class Doctor {
         hasParking: (json['hasParking'] as bool?) ?? false,
         fee: (json['fee'] as num?)?.toInt(),
         ownerUid: json['ownerUid'] as String?,
+        pinned: (json['pinned'] as bool?) ?? false,
         createdAt: parseDate(json['createdAt']),
       );
 
@@ -116,6 +119,7 @@ class Doctor {
         'hasParking': hasParking,
         'fee': fee,
         'ownerUid': ownerUid,
+        'pinned': pinned,
         'createdAt': createdAt.toIso8601String(),
       };
 
@@ -147,6 +151,7 @@ class Doctor {
     bool? hasParking,
     int? fee,
     String? ownerUid,
+    bool? pinned,
   }) =>
       Doctor(
         id: id,
@@ -173,6 +178,7 @@ class Doctor {
         hasParking: hasParking ?? this.hasParking,
         fee: fee ?? this.fee,
         ownerUid: ownerUid ?? this.ownerUid,
+        pinned: pinned ?? this.pinned,
         createdAt: createdAt,
       );
 }

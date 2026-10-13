@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../config.dart';
 import '../l10n/strings.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../widgets/theme.dart';
 
 /// Static help content + a "Send feedback" mailto button.
@@ -13,6 +14,7 @@ class HelpFeedbackScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final ur = fdIsUrdu(ref.watch(localeProvider));
     return Scaffold(
       backgroundColor: FdColors.bg,

@@ -9,6 +9,7 @@ import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/lab.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../providers/user_location.dart';
 import '../widgets/theme.dart';
 import 'doctor_detail_screen.dart';
@@ -56,6 +57,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
     final city = ref.watch(cityProvider);
@@ -687,6 +689,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
 /// Stylized map placeholder shown until a Google Maps API key is configured:
 /// light blocks, white roads, a river, and tappable colored pins.
+///
+/// The art is painted at fixed 390x844 design coordinates: a [CustomPaint]
+/// with an explicit size, wrapped in a [FittedBox] ([BoxFit.cover]) inside
+/// [SizedBox.expand]. It fills any tab size with no fractional layout math
+/// and no LayoutBuilder, so it can't collapse into broken white bars on odd
+/// constraints.
 class _MapPlaceholder extends StatelessWidget {
   final List<Doctor> doctors;
   final List<Lab> labs;
@@ -704,60 +712,70 @@ class _MapPlaceholder extends StatelessWidget {
     this.selectedKind,
   });
 
+  /// Fixed design artboard the placeholder is painted (and hit-tested) in.
+  static const Size designSize = Size(390, 844);
+
   @override
   Widget build(BuildContext context) {
-    // LayoutBuilder is used ONLY to learn the painted size so pin positions
-    // agree between painting and hit-testing. The CustomPaint itself takes
-    // its size from the tight Positioned.fill constraints via SizedBox.expand
-    // (no explicit size), so it reliably fills the tab area.
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final size = constraints.biggest;
-        final pins = _pinLayout(size);
-        return GestureDetector(
-          // Opaque: a childless CustomPaint never reports a hit on its own,
-          // so without this pin taps would fall straight through.
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (d) {
-            var best = -1;
-            var bestDist = 48.0;
-            for (var i = 0; i < pins.length; i++) {
-              final dist = (pins[i].offset - d.localPosition).distance;
-              if (dist < bestDist) {
-                bestDist = dist;
-                best = i;
-              }
-            }
-            if (best >= 0) onPinTap(pins[best].kind);
-          },
-          child: SizedBox.expand(
-            child: CustomPaint(
-              painter: _PlaceholderPainter(pins, selectedKind),
-            ),
-          ),
+    final pins = _pinLayout();
+    return GestureDetector(
+      // Opaque: a childless CustomPaint never reports a hit on its own,
+      // so without this pin taps would fall straight through.
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (d) {
+        // Map the tap from runtime pixels back into design coordinates so it
+        // agrees with the fixed pin positions, then hit-test in design space
+        // within ~28 design px of a pin center.
+        final size = context.size;
+        if (size == null || size.width <= 0 || size.height <= 0) return;
+        final tap = Offset(
+          d.localPosition.dx * designSize.width / size.width,
+          d.localPosition.dy * designSize.height / size.height,
         );
+        var best = -1;
+        var bestDist = 28.0;
+        for (var i = 0; i < pins.length; i++) {
+          final dist = (pins[i].offset - tap).distance;
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = i;
+          }
+        }
+        if (best >= 0) onPinTap(pins[best].kind);
       },
+      child: SizedBox.expand(
+        child: FittedBox(
+          fit: BoxFit.cover,
+          child: CustomPaint(
+            size: designSize,
+            painter: _PlaceholderPainter(pins, selectedKind),
+          ),
+        ),
+      ),
     );
   }
 
-  List<_Pin> _pinLayout(Size s) {
+  /// Representative pins at fixed design coordinates. The seed data carries
+  /// no coordinates, so pins are illustrative: one per kind when the list is
+  /// non-empty, a second when it holds more than one entry.
+  List<_Pin> _pinLayout() {
     final pins = <_Pin>[];
     if (doctors.isNotEmpty) {
-      pins.add(_Pin('doctor', Offset(s.width * 0.30, s.height * 0.30)));
+      pins.add(_Pin('doctor', const Offset(117, 253)));
       if (doctors.length > 1) {
-        pins.add(_Pin('doctor', Offset(s.width * 0.66, s.height * 0.42)));
+        pins.add(_Pin('doctor', const Offset(257, 354)));
       }
     }
     if (labs.isNotEmpty) {
-      pins.add(_Pin('lab', Offset(s.width * 0.72, s.height * 0.24)));
+      pins.add(_Pin('lab', const Offset(281, 203)));
       if (labs.length > 1) {
-        pins.add(_Pin('lab', Offset(s.width * 0.20, s.height * 0.55)));
+        pins.add(_Pin('lab', const Offset(78, 464)));
       }
     }
     if (hospitals.isNotEmpty) {
-      pins.add(_Pin('hospital', Offset(s.width * 0.52, s.height * 0.62)));
+      pins.add(_Pin('hospital', const Offset(203, 523)));
       if (hospitals.length > 1) {
-        pins.add(_Pin('hospital', Offset(s.width * 0.78, s.height * 0.68)));
+        pins.add(_Pin('hospital', const Offset(304, 574)));
       }
     }
     return pins;
@@ -777,66 +795,61 @@ class _PlaceholderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Guard: under loose/unbounded layout (or before layout) the painter can
-    // be handed zero or infinite dimensions; painting fractional rects/lines
-    // with those produces broken white bars, so paint nothing instead.
+    // Guard: the placeholder is designed for the fixed 390x844 artboard.
+    // Under degenerate layout (zero or infinite dimensions) paint nothing
+    // instead of broken geometry.
     if (!size.isFinite || size.width <= 0 || size.height <= 0) return;
-    // background
+    // background #E7EDEA
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
+      Offset.zero & size,
       Paint()..color = const Color(0xFFE7EDEA),
     );
-    // blocks
+    // blocks (#DDE8E4 rounded rects at fixed design coordinates)
     final block = Paint()..color = const Color(0xFFDDE8E4);
-    for (final r in [
-      Rect.fromLTWH(size.width * 0.06, size.height * 0.20, size.width * 0.24,
-          size.height * 0.10),
-      Rect.fromLTWH(size.width * 0.40, size.height * 0.16, size.width * 0.20,
-          size.height * 0.08),
-      Rect.fromLTWH(size.width * 0.70, size.height * 0.34, size.width * 0.22,
-          size.height * 0.10),
-      Rect.fromLTWH(size.width * 0.10, size.height * 0.62, size.width * 0.24,
-          size.height * 0.10),
-      Rect.fromLTWH(size.width * 0.60, size.height * 0.74, size.width * 0.28,
-          size.height * 0.12),
+    for (final r in const [
+      Rect.fromLTWH(24, 169, 94, 84),
+      Rect.fromLTWH(156, 135, 78, 68),
+      Rect.fromLTWH(273, 287, 86, 84),
+      Rect.fromLTWH(39, 523, 94, 84),
+      Rect.fromLTWH(234, 624, 109, 101),
     ]) {
       canvas.drawRRect(
           RRect.fromRectAndRadius(r, const Radius.circular(10)), block);
     }
-    // roads
+    // roads: white vertical + horizontal lines
     final road = Paint()
       ..color = Colors.white
       ..strokeWidth = 14
       ..strokeCap = StrokeCap.round;
-    for (final fx in [0.28, 0.55, 0.82]) {
-      canvas.drawLine(Offset(size.width * fx, 0),
-          Offset(size.width * fx, size.height), road);
+    for (final x in [109.0, 215.0, 320.0]) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), road);
     }
-    for (final fy in [0.32, 0.52, 0.70]) {
-      canvas.drawLine(Offset(0, size.height * fy),
-          Offset(size.width, size.height * fy), road);
+    for (final y in [270.0, 439.0, 591.0]) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), road);
     }
-    // river
+    // river: light-blue path near the bottom
     final river = Paint()
       ..color = const Color(0xFFCFE3F5)
       ..strokeWidth = 22
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
     final riverPath = Path()
-      ..moveTo(0, size.height * 0.78)
-      ..quadraticBezierTo(size.width * 0.35, size.height * 0.70,
-          size.width * 0.6, size.height * 0.76)
-      ..quadraticBezierTo(
-          size.width * 0.8, size.height * 0.81, size.width, size.height * 0.74);
+      ..moveTo(0, 658)
+      ..quadraticBezierTo(137, 591, 234, 642)
+      ..quadraticBezierTo(312, 683, 390, 624);
     canvas.drawPath(riverPath, river);
-    // user dot
-    final userAt = Offset(size.width * 0.47, size.height * 0.52);
+    // user location dot
+    const userAt = Offset(183, 439);
+    canvas.drawCircle(userAt, 34,
+        Paint()..color = const Color(0xFF2B6CB0).withValues(alpha: 0.18));
+    canvas.drawCircle(userAt, 11, Paint()..color = const Color(0xFF2B6CB0));
     canvas.drawCircle(
-        userAt, 34, Paint()..color = const Color(0xFF2B6CB0).withValues(alpha: 0.18));
-    canvas.drawCircle(
-        userAt, 11, Paint()..color = const Color(0xFF2B6CB0));
-    canvas.drawCircle(userAt, 11,
-        Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 3);
+        userAt,
+        11,
+        Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3);
     // pins
     for (final p in pins) {
       _drawPin(canvas, p);
@@ -910,9 +923,8 @@ class _PlaceholderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _PlaceholderPainter old) {
-    // Pin offsets derive from the painted size, so compare them too:
-    // otherwise a size change (e.g. rotation) would keep painting pins at
-    // their old positions while hit-testing used the new ones.
+    // Pins now sit at fixed design coordinates, so size no longer affects
+    // them; repaint on kind, position, or selection changes.
     if (old.selectedKind != selectedKind) return true;
     if (old.pins.length != pins.length) return true;
     for (var i = 0; i < pins.length; i++) {

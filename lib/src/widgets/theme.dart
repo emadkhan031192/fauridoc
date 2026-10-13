@@ -54,6 +54,16 @@ class FdType {
   static const latin = 'AlbertSans';
   static const urdu = 'NotoNastaliqUrdu';
 
+  /// User-adjustable font scales (mirrored from [fontScaleProvider]).
+  /// Defaults keep the old behavior: Latin at 100%, Urdu at 90%.
+  static double enScale = 1.0;
+  static double urScale = 0.9;
+
+  /// Single computation point for user-scaled font sizes:
+  /// `base * (ur ? urScale : enScale)`.
+  static double scaled(bool ur, double size) =>
+      size * (ur ? urScale : enScale);
+
   static String family(bool isUrdu) => isUrdu ? urdu : latin;
 
   /// Extra line height keeps Nastaliq legible.
@@ -63,7 +73,7 @@ class FdType {
           {double size = 34, FontWeight w = FontWeight.w700}) =>
       TextStyle(
         fontFamily: family(ur),
-        fontSize: ur ? size * 0.9 : size,
+        fontSize: scaled(ur, size),
         fontWeight: ur ? FontWeight.w700 : w,
         color: FdColors.ink,
         height: height(ur, 1.18),
@@ -74,7 +84,7 @@ class FdType {
           {double size = 22, FontWeight w = FontWeight.w700}) =>
       TextStyle(
         fontFamily: family(ur),
-        fontSize: ur ? size * 0.9 : size,
+        fontSize: scaled(ur, size),
         fontWeight: ur ? FontWeight.w700 : w,
         color: FdColors.ink,
         height: height(ur, 1.25),
@@ -86,7 +96,7 @@ class FdType {
           Color color = FdColors.inkSoft}) =>
       TextStyle(
         fontFamily: family(ur),
-        fontSize: ur ? size * 0.9 : size,
+        fontSize: scaled(ur, size),
         fontWeight: w,
         color: color,
         height: height(ur, 1.45),
@@ -98,7 +108,7 @@ class FdType {
           Color color = FdColors.muted}) =>
       TextStyle(
         fontFamily: family(ur),
-        fontSize: ur ? size * 0.9 : size,
+        fontSize: scaled(ur, size),
         fontWeight: w,
         color: color,
         height: height(ur, 1.3),
@@ -109,7 +119,7 @@ class FdType {
           {double size = 17, Color color = Colors.white}) =>
       TextStyle(
         fontFamily: family(ur),
-        fontSize: ur ? size * 0.9 : size,
+        fontSize: scaled(ur, size),
         fontWeight: FontWeight.w600,
         color: color,
         height: height(ur, 1.2),

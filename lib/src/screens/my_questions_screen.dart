@@ -5,6 +5,7 @@ import '../data/repository.dart';
 import '../l10n/strings.dart';
 import '../models/community.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../widgets/theme.dart';
 import 'auth_screen.dart';
 import 'question_detail_screen.dart';
@@ -33,6 +34,7 @@ class MyQuestionsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final ur = fdIsUrdu(ref.watch(localeProvider));
     final user = ref.watch(authProvider);
     final FauridocRepository repo = ref.watch(repositoryProvider);

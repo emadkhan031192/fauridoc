@@ -6,6 +6,7 @@ import '../../design/tokens.dart';
 import '../app.dart';
 import '../l10n/strings_b.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../widgets/theme.dart';
 
 /// Single onboarding screen (design page-02). "Next"/"Skip" mark onboarding
@@ -41,6 +42,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
     final family = ur ? FdType.urdu : FdType.latin;

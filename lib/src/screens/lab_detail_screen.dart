@@ -5,6 +5,7 @@ import '../l10n/strings.dart';
 import '../models/day_hours.dart';
 import '../models/lab.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../providers/user_location.dart';
 import '../utils/actions.dart';
 import '../utils/open_status.dart';
@@ -77,6 +78,7 @@ class _LabDetailScreenState extends ConsumerState<LabDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
     final pos = ref.watch(userLocationProvider).value;

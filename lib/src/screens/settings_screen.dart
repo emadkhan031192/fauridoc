@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/font_scale.dart';
 import '../providers/providers.dart';
 import '../widgets/theme.dart';
 import 'help_feedback_screen.dart';
@@ -13,6 +14,9 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ur = fdIsUrdu(ref.watch(localeProvider));
+    // Rebuild when a font-size slider moves so the preview (and the whole
+    // screen) reflects the new scale immediately.
+    final scales = ref.watch(fontScaleProvider);
     return Scaffold(
       backgroundColor: FdColors.bg,
       body: SafeArea(
@@ -36,6 +40,30 @@ class SettingsScreen extends ConsumerWidget {
             _Card(
               padding: const EdgeInsets.all(6),
               child: _LanguageSegment(ur: ur),
+            ),
+            const SizedBox(height: 18),
+            _Card(
+              child: Column(
+                children: [
+                  _FontSliderRow(
+                    label: tr(ref, 'set.fontEn'),
+                    value: scales.en,
+                    previewUr: false,
+                    onChanged: (v) => ref
+                        .read(fontScaleProvider.notifier)
+                        .setEn(_snapScale(v)),
+                  ),
+                  const Divider(color: FdColors.line, height: 28),
+                  _FontSliderRow(
+                    label: tr(ref, 'set.fontUr'),
+                    value: scales.ur,
+                    previewUr: true,
+                    onChanged: (v) => ref
+                        .read(fontScaleProvider.notifier)
+                        .setUr(_snapScale(v)),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 18),
             Text(tr(ref, 'set.version'), style: _sectionTitle(ur)),
@@ -122,7 +150,7 @@ class _Card extends StatelessWidget {
 /// Screen title: 28/800 (same as the profile screen).
 TextStyle _titleStyle(bool ur) => TextStyle(
       fontFamily: FdType.family(ur),
-      fontSize: ur ? (28) * 0.9 : (28),
+      fontSize: FdType.scaled(ur, 28),
       fontWeight: ur ? FontWeight.w700 : FontWeight.w800,
       letterSpacing: ur ? 0 : -0.56,
       color: FdColors.ink,
@@ -135,7 +163,7 @@ Widget _screenTitle(bool ur, String text) =>
 /// Section title: 17/800.
 TextStyle _sectionTitle(bool ur) => TextStyle(
       fontFamily: FdType.family(ur),
-      fontSize: ur ? (17) * 0.9 : (17),
+      fontSize: FdType.scaled(ur, 17),
       fontWeight: FontWeight.w800,
       color: FdColors.ink,
       height: FdType.height(ur, 1.3),
@@ -197,6 +225,70 @@ class _LanguageSegment extends ConsumerWidget {
               () => ref.read(localeProvider.notifier).setLocale('ur')),
         ],
       ),
+    );
+  }
+}
+
+/// Snap a slider value to the 0.05 grid (avoids float dust in storage).
+double _snapScale(double v) => double.parse(v.toStringAsFixed(2));
+
+/// "1.0x", "0.85x" …
+String _fmtScale(double v) =>
+    '${v.toStringAsFixed(2).replaceFirst(RegExp(r'0$'), '')}x';
+
+/// One font-size slider row: label + current value, slider (0.8–1.3 in 0.05
+/// steps), and a live preview line rendered at the scaled size.
+class _FontSliderRow extends StatelessWidget {
+  final String label;
+  final double value;
+  final bool previewUr;
+  final ValueChanged<double> onChanged;
+
+  const _FontSliderRow({
+    required this.label,
+    required this.value,
+    required this.previewUr,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: FdType.body(previewUr,
+                    size: 15, w: FontWeight.w600, color: FdColors.ink),
+              ),
+            ),
+            Text(
+              _fmtScale(value),
+              style: const TextStyle(
+                fontFamily: FdType.latin,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: FdColors.primary,
+              ),
+            ),
+          ],
+        ),
+        Slider(
+          value: value.clamp(0.8, 1.3),
+          min: 0.8,
+          max: 1.3,
+          divisions: 11,
+          activeColor: FdColors.primary,
+          onChanged: onChanged,
+        ),
+        Text(
+          previewUr ? 'اب پ ت ٹ ث 0123456789' : 'AaBbCcDdEe 0123456789',
+          style: FdType.body(previewUr, size: 15, color: FdColors.inkSoft),
+        ),
+      ],
     );
   }
 }

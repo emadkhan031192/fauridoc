@@ -67,9 +67,9 @@ class FirestoreRepository implements FauridocRepository {
 
   final FirebaseFirestore _db;
 
-  /// Bundled research data, used as a read-only fallback for the directory
-  /// listings while the Firestore collections are still empty (i.e. before
-  /// the admin runs the one-tap seed import). Cached after first load.
+  /// Bundled research data, merged into every directory listing so the
+  /// researched seed data never disappears when individual Firestore docs
+  /// exist (Firestore docs win on id conflict). Cached after first load.
   SeedBundle? _fallbackBundle;
   Future<SeedBundle> _seedBundle() async =>
       _fallbackBundle ??= await loadSeedBundle();
@@ -124,7 +124,8 @@ class FirestoreRepository implements FauridocRepository {
     }
 
     for (final d in bundle.doctors) {
-      batch.set(_doctors.doc(d.id), d.toJson(), SetOptions(merge: true));
+      final json = d.toJson()..['pinned'] = false;
+      batch.set(_doctors.doc(d.id), json, SetOptions(merge: true));
       if (++ops >= 400) await flush();
     }
     for (final l in bundle.labs) {
@@ -183,16 +184,25 @@ class FirestoreRepository implements FauridocRepository {
         .where('approved', isEqualTo: true)
         .snapshots()
         .asyncExpand((snap) async* {
-      if (snap.docs.isNotEmpty) {
-        yield snap.docs
-            .map((d) => Doctor.fromJson(_jsonFromData(d)))
-            .where(matches)
-            .toList();
-      } else {
-        // Collection not seeded yet: show the bundled research data.
-        final bundle = await _seedBundle();
-        yield bundle.doctors.where(matches).toList();
+      // Merge: the bundled research data is always shown, and the Firestore
+      // docs (approved == true) overwrite it on id conflict.
+      final bundle = await _seedBundle();
+      final merged = <String, Doctor>{};
+      for (final d in bundle.doctors) {
+        merged[d.id] = d;
       }
+      for (final d in snap.docs) {
+        final doc = Doctor.fromJson(_jsonFromData(d));
+        merged[doc.id] = doc;
+      }
+      // Pinned doctors first (stable: pinned keep their order, then the rest).
+      final list = merged.values.where(matches).toList();
+      yield [
+        for (final d in list)
+          if (d.pinned) d,
+        for (final d in list)
+          if (!d.pinned) d,
+      ];
     });
   }
 
@@ -258,15 +268,18 @@ class FirestoreRepository implements FauridocRepository {
         .where('approved', isEqualTo: true)
         .snapshots()
         .asyncExpand((snap) async* {
-      if (snap.docs.isNotEmpty) {
-        yield snap.docs
-            .map((d) => Lab.fromJson(_jsonFromData(d)))
-            .where(matches)
-            .toList();
-      } else {
-        final bundle = await _seedBundle();
-        yield bundle.labs.where(matches).toList();
+      // Merge: the bundled research data is always shown, and the Firestore
+      // docs (approved == true) overwrite it on id conflict.
+      final bundle = await _seedBundle();
+      final merged = <String, Lab>{};
+      for (final l in bundle.labs) {
+        merged[l.id] = l;
       }
+      for (final d in snap.docs) {
+        final lab = Lab.fromJson(_jsonFromData(d));
+        merged[lab.id] = lab;
+      }
+      yield merged.values.where(matches).toList();
     });
   }
 
@@ -327,15 +340,18 @@ class FirestoreRepository implements FauridocRepository {
         .where('approved', isEqualTo: true)
         .snapshots()
         .asyncExpand((snap) async* {
-      if (snap.docs.isNotEmpty) {
-        yield snap.docs
-            .map((d) => Hospital.fromJson(_jsonFromData(d)))
-            .where(matches)
-            .toList();
-      } else {
-        final bundle = await _seedBundle();
-        yield bundle.hospitals.where(matches).toList();
+      // Merge: the bundled research data is always shown, and the Firestore
+      // docs (approved == true) overwrite it on id conflict.
+      final bundle = await _seedBundle();
+      final merged = <String, Hospital>{};
+      for (final h in bundle.hospitals) {
+        merged[h.id] = h;
       }
+      for (final d in snap.docs) {
+        final hospital = Hospital.fromJson(_jsonFromData(d));
+        merged[hospital.id] = hospital;
+      }
+      yield merged.values.where(matches).toList();
     });
   }
 

@@ -5,19 +5,26 @@ import '../../design/tokens.dart';
 import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/lab.dart';
+import '../models/model_utils.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../widgets/theme.dart';
+
+/// Which entity form ManageEntityScreen shows. Explicit [kind] wins;
+/// when null it is inferred from the non-null entity arg (edit mode).
+enum EntityKind { doctor, lab, hospital }
 
 /// Full CRUD editor for one doctor / lab / hospital (admin + doctor self-edit).
 /// AppBar: "Edit {Doctor|Lab|Hospital}". Hours maps are intentionally
 /// untouched here (see RegisterEntityScreen: defaultHours on creation).
 class ManageEntityScreen extends ConsumerStatefulWidget {
+  final EntityKind? kind;
   final Doctor? doctor;
   final Lab? lab;
   final Hospital? hospital;
 
   const ManageEntityScreen(
-      {super.key, this.doctor, this.lab, this.hospital});
+      {super.key, this.kind, this.doctor, this.lab, this.hospital});
 
   @override
   ConsumerState<ManageEntityScreen> createState() =>
@@ -27,6 +34,24 @@ class ManageEntityScreen extends ConsumerStatefulWidget {
 class _ManageEntityScreenState
     extends ConsumerState<ManageEntityScreen> {
   bool _busy = false;
+
+  /// Effective form kind: explicit kind first, else inferred from the
+  /// non-null entity; defaults to doctor for add mode.
+  EntityKind get _kind =>
+      widget.kind ??
+      (widget.doctor != null
+          ? EntityKind.doctor
+          : widget.lab != null
+              ? EntityKind.lab
+              : widget.hospital != null
+                  ? EntityKind.hospital
+                  : EntityKind.doctor);
+
+  /// True when editing an existing entity (add mode when false).
+  bool get _isEdit =>
+      widget.doctor != null ||
+      widget.lab != null ||
+      widget.hospital != null;
 
   // shared
   final _name = TextEditingController();
@@ -102,6 +127,11 @@ class _ManageEntityScreenState
       _hasParking = h.hasParking;
       _verified = h.verified;
       _approved = h.approved;
+    } else {
+      // Add mode: admin-created records go live immediately; the admin
+      // can still toggle these off before saving.
+      _verified = true;
+      _approved = true;
     }
   }
 
@@ -128,61 +158,133 @@ class _ManageEntityScreenState
   }
 
   String get _kindTitle {
-    final ref2 = ref;
-    if (widget.doctor != null) return tr(ref2, 'admin.editDoctor');
-    if (widget.lab != null) return tr(ref2, 'admin.editLab');
-    return tr(ref2, 'admin.editHospital');
+    if (_isEdit) {
+      return switch (_kind) {
+        EntityKind.doctor => tr(ref, 'admin.editDoctor'),
+        EntityKind.lab => tr(ref, 'admin.editLab'),
+        EntityKind.hospital => tr(ref, 'admin.editHospital'),
+      };
+    }
+    // Add mode: reuse the '+ Add ...' labels, stripped of the leading plus.
+    final label = switch (_kind) {
+      EntityKind.doctor => tr(ref, 'admin.addDoctor'),
+      EntityKind.lab => tr(ref, 'admin.addLab'),
+      EntityKind.hospital => tr(ref, 'admin.addHospital'),
+    };
+    return label.replaceFirst(RegExp(r'^\s*[+＋]\s*'), '');
   }
 
   Future<void> _save() async {
     final repo = ref.read(repositoryProvider);
     setState(() => _busy = true);
     try {
-      if (widget.doctor != null) {
-        final d = widget.doctor!;
-        await repo.updateDoctor(d.copyWith(
-          name: _name.text.trim(),
-          specialty: _specialtyDrop ?? _specialty.text.trim(),
-          city: _cityDrop ?? _city.text.trim(),
-          qualification: _qualification.text.trim(),
-          clinicName: _clinicName.text.trim(),
-          address: _address.text.trim(),
-          phone: _phone.text.trim(),
-          whatsapp: _whatsapp.text.trim(),
-          fee: int.tryParse(_fee.text.trim()),
-          hoursText: _hoursText.text.trim(),
-          hasParking: _hasParking,
-          verified: _verified,
-          approved: _approved,
-        ));
-      } else if (widget.lab != null) {
-        final l = widget.lab!;
-        await repo.updateLab(l.copyWith(
-          name: _name.text.trim(),
-          city: _cityDrop ?? _city.text.trim(),
-          address: _address.text.trim(),
-          phone: _phone.text.trim(),
-          tests: List.of(_tests),
-          hoursText: _hoursText.text.trim(),
-          hasParking: _hasParking,
-          verified: _verified,
-          approved: _approved,
-        ));
-      } else if (widget.hospital != null) {
-        final h = widget.hospital!;
-        await repo.updateHospital(h.copyWith(
-          name: _name.text.trim(),
-          city: _cityDrop ?? _city.text.trim(),
-          address: _address.text.trim(),
-          phone: _phone.text.trim(),
-          emergencyPhone: _emergencyPhone.text.trim(),
-          visitingHours: _visitingHours.text.trim(),
-          emergency247: _emergency247,
-          departments: List.of(_departments),
-          hasParking: _hasParking,
-          verified: _verified,
-          approved: _approved,
-        ));
+      // Admin-created records are written directly as live listings
+      // (approved/verified default true — the switches still let the
+      // admin override); _register is user-facing only (forces pending).
+      switch (_kind) {
+        case EntityKind.doctor:
+          final d = widget.doctor;
+          final city = _cityDrop ?? _city.text.trim();
+          final specialty = _specialtyDrop ?? _specialty.text.trim();
+          if (d != null) {
+            await repo.updateDoctor(d.copyWith(
+              name: _name.text.trim(),
+              specialty: specialty,
+              city: city,
+              qualification: _qualification.text.trim(),
+              clinicName: _clinicName.text.trim(),
+              address: _address.text.trim(),
+              phone: _phone.text.trim(),
+              whatsapp: _whatsapp.text.trim(),
+              fee: int.tryParse(_fee.text.trim()),
+              hoursText: _hoursText.text.trim(),
+              hasParking: _hasParking,
+              verified: _verified,
+              approved: _approved,
+            ));
+          } else {
+            await repo.updateDoctor(Doctor(
+              id: newId('dr_'),
+              name: _name.text.trim(),
+              specialty: specialty,
+              city: city,
+              qualification: _qualification.text.trim(),
+              clinicName: _clinicName.text.trim(),
+              address: _address.text.trim(),
+              phone: _phone.text.trim(),
+              whatsapp: _whatsapp.text.trim(),
+              fee: int.tryParse(_fee.text.trim()),
+              hoursText: _hoursText.text.trim(),
+              hasParking: _hasParking,
+              verified: _verified,
+              approved: _approved,
+              createdAt: DateTime.now(),
+            ));
+          }
+        case EntityKind.lab:
+          final l = widget.lab;
+          final city = _cityDrop ?? _city.text.trim();
+          if (l != null) {
+            await repo.updateLab(l.copyWith(
+              name: _name.text.trim(),
+              city: city,
+              address: _address.text.trim(),
+              phone: _phone.text.trim(),
+              tests: List.of(_tests),
+              hoursText: _hoursText.text.trim(),
+              hasParking: _hasParking,
+              verified: _verified,
+              approved: _approved,
+            ));
+          } else {
+            await repo.updateLab(Lab(
+              id: newId('lab_'),
+              name: _name.text.trim(),
+              city: city,
+              address: _address.text.trim(),
+              phone: _phone.text.trim(),
+              tests: List.of(_tests),
+              hoursText: _hoursText.text.trim(),
+              hasParking: _hasParking,
+              verified: _verified,
+              approved: _approved,
+              createdAt: DateTime.now(),
+            ));
+          }
+        case EntityKind.hospital:
+          final h = widget.hospital;
+          final city = _cityDrop ?? _city.text.trim();
+          if (h != null) {
+            await repo.updateHospital(h.copyWith(
+              name: _name.text.trim(),
+              city: city,
+              address: _address.text.trim(),
+              phone: _phone.text.trim(),
+              emergencyPhone: _emergencyPhone.text.trim(),
+              visitingHours: _visitingHours.text.trim(),
+              emergency247: _emergency247,
+              departments: List.of(_departments),
+              hasParking: _hasParking,
+              verified: _verified,
+              approved: _approved,
+            ));
+          } else {
+            await repo.updateHospital(Hospital(
+              id: newId('hsp_'),
+              name: _name.text.trim(),
+              city: city,
+              address: _address.text.trim(),
+              phone: _phone.text.trim(),
+              emergencyPhone: _emergencyPhone.text.trim(),
+              visitingHours: _visitingHours.text.trim(),
+              emergency247: _emergency247,
+              departments: List.of(_departments),
+              hasParking: _hasParking,
+              verified: _verified,
+              approved: _approved,
+              createdAt: DateTime.now(),
+            ));
+          }
       }
       if (!mounted) return;
       _snack(tr(ref, 'admin.saved'));
@@ -236,6 +338,7 @@ class _ManageEntityScreenState
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final ur = fdIsUrdu(ref.watch(localeProvider));
     return Scaffold(
       body: Column(
@@ -254,7 +357,7 @@ class _ManageEntityScreenState
                       label: tr(ref, 'admin.name'),
                       controller: _name,
                       hint: tr(ref, 'admin.name')),
-                    if (widget.doctor != null) ...[
+                    if (_kind == EntityKind.doctor) ...[
                       _SpecialtyDrop(
                         ur: ur,
                         value: _specialtyDrop,
@@ -290,7 +393,7 @@ class _ManageEntityScreenState
                       controller: _phone,
                       hint: tr(ref, 'admin.phone'),
                       keyboardType: TextInputType.phone),
-                    if (widget.doctor != null) ...[
+                    if (_kind == EntityKind.doctor) ...[
                       _Field(
                         ur: ur,
                         label: tr(ref, 'admin.whatsapp'),
@@ -309,13 +412,13 @@ class _ManageEntityScreenState
                         controller: _hoursText,
                         hint: tr(ref, 'admin.hoursText')),
                     ],
-                    if (widget.lab != null)
+                    if (_kind == EntityKind.lab)
                     _Field(
                       ur: ur,
                       label: tr(ref, 'admin.hoursText'),
                       controller: _hoursText,
                       hint: tr(ref, 'admin.hoursText')),
-                    if (widget.hospital != null) ...[
+                    if (_kind == EntityKind.hospital) ...[
                       _Field(
                         ur: ur,
                         label: tr(ref, 'admin.emergencyPhone'),
@@ -343,7 +446,7 @@ class _ManageEntityScreenState
                     ],
                   ],
                 ),
-                if (widget.lab != null) ...[
+                if (_kind == EntityKind.lab) ...[
                   const SizedBox(height: 16),
                   _TestsEditor(
                     ur: ur,
@@ -384,14 +487,16 @@ class _ManageEntityScreenState
                   isUrdu: ur,
                   onTap: _busy ? null : _save,
                 ),
-                const SizedBox(height: 12),
-                FdButton(
-                  label: tr(ref, 'admin.deleteRecord'),
-                  style: FdButtonStyle.danger,
-                  icon: Icons.delete_outline,
-                  isUrdu: ur,
-                  onTap: _busy ? null : _delete,
-                ),
+                if (_isEdit) ...[
+                  const SizedBox(height: 12),
+                  FdButton(
+                    label: tr(ref, 'admin.deleteRecord'),
+                    style: FdButtonStyle.danger,
+                    icon: Icons.delete_outline,
+                    isUrdu: ur,
+                    onTap: _busy ? null : _delete,
+                  ),
+                ],
               ],
             ),
           ),
@@ -434,7 +539,7 @@ class _Header extends StatelessWidget {
               title,
               style: TextStyle(
                 fontFamily: FdType.family(ur),
-                fontSize: ur ? (20) * 0.9 : (20),
+                fontSize: FdType.scaled(ur, 20),
                 fontWeight: FontWeight.w800,
                 letterSpacing: ur ? 0 : -0.2,
                 color: FdColors.ink,
@@ -568,7 +673,7 @@ class _Cap extends StatelessWidget {
       child: Text(label.toUpperCase(),
           style: TextStyle(
             fontFamily: FdType.family(ur),
-            fontSize: ur ? (12) * 0.9 : (12),
+            fontSize: FdType.scaled(ur, 12),
             fontWeight: FontWeight.w700,
             letterSpacing: ur ? 0 : 0.72,
             color: FdColors.muted,

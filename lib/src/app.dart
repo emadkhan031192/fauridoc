@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/auth.dart';
+import 'providers/font_scale.dart';
 import 'providers/providers.dart';
 import 'screens/home_screen.dart';
 import 'screens/map_screen.dart';
@@ -33,13 +34,21 @@ class _FauridocAppState extends ConsumerState<FauridocApp> {
   @override
   void initState() {
     super.initState();
-    // Attach auth backend + restore saved locale after first frame.
+    // Attach auth backend + restore saved locale and font scales.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(authProvider.notifier).attach(widget.authBackend);
       ref.read(localeProvider.notifier).load(widget.prefs.getString('locale') ?? 'en');
+      ref.read(fontScaleProvider.notifier).load(
+            widget.prefs.getDouble(kFontScaleEnKey) ?? kDefaultEnScale,
+            widget.prefs.getDouble(kFontScaleUrKey) ?? kDefaultUrScale,
+          );
     });
     ref.listenManual(localeProvider, (prev, next) {
       widget.prefs.setString('locale', next);
+    });
+    ref.listenManual(fontScaleProvider, (prev, next) {
+      widget.prefs.setDouble(kFontScaleEnKey, next.en);
+      widget.prefs.setDouble(kFontScaleUrKey, next.ur);
     });
   }
 
@@ -75,6 +84,7 @@ class HomeShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tab = ref.watch(tabIndexProvider);
     final locale = ref.watch(localeProvider);
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
 
     final screens = [
       const HomeScreen(),

@@ -10,6 +10,7 @@ import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/lab.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../widgets/theme.dart';
 import 'manage_entity_screen.dart';
 
@@ -21,6 +22,7 @@ class AdminPanelScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final ur = fdIsUrdu(ref.watch(localeProvider));
     final repo = ref.watch(repositoryProvider);
     final user = ref.watch(authProvider);
@@ -66,10 +68,21 @@ class AdminPanelScreen extends ConsumerWidget {
                       '${specialtyLabel(ref.watch(localeProvider), d.specialty)} · ${d.city}',
                   tileOf: (d) => FdAvatarTile(
                       name: d.name, size: 54, bg: FdColors.peach),
-                  onEdit: (d) => _goManage(context, doctor: d),
+                  onEdit: (d) => _goManage(context,
+                      kind: EntityKind.doctor, doctor: d),
                   onDelete: (d) => repo.deleteDoctor(d.id),
-                  onAdd: () => _goManage(context),
+                  onAdd: () => _goManage(context, kind: EntityKind.doctor),
                   addLabel: tr(ref, 'admin.addDoctor'),
+                  pinButtonOf: (d) => IconButton(
+                    icon: Icon(
+                      d.pinned ? Icons.push_pin : Icons.push_pin_outlined,
+                      color: d.pinned ? FdColors.primary : FdColors.muted,
+                      size: 22,
+                    ),
+                    tooltip: tr(ref, d.pinned ? 'admin.unpin' : 'admin.pin'),
+                    onPressed: () =>
+                        repo.updateDoctor(d.copyWith(pinned: !d.pinned)),
+                  ),
                 ),
                 const SizedBox(height: 26),
                 _SearchSection<Lab>(
@@ -82,9 +95,10 @@ class AdminPanelScreen extends ConsumerWidget {
                 bg: FdColors.lavender,
                 icon: Icons.science_outlined,
                 iconColor: FdColors.lavenderInk),
-                  onEdit: (l) => _goManage(context, lab: l),
+                  onEdit: (l) => _goManage(context,
+                      kind: EntityKind.lab, lab: l),
                   onDelete: (l) => repo.deleteLab(l.id),
-                  onAdd: () => _goManage(context),
+                  onAdd: () => _goManage(context, kind: EntityKind.lab),
                   addLabel: tr(ref, 'admin.addLab'),
                 ),
                 const SizedBox(height: 26),
@@ -98,9 +112,10 @@ class AdminPanelScreen extends ConsumerWidget {
                 bg: FdColors.redSoft,
                 icon: Icons.add,
                 iconColor: FdColors.redInk),
-                  onEdit: (h) => _goManage(context, hospital: h),
+                  onEdit: (h) => _goManage(context,
+                      kind: EntityKind.hospital, hospital: h),
                   onDelete: (h) => repo.deleteHospital(h.id),
-                  onAdd: () => _goManage(context),
+                  onAdd: () => _goManage(context, kind: EntityKind.hospital),
                   addLabel: tr(ref, 'admin.addHospital'),
                 ),
                 const SizedBox(height: 24),
@@ -140,10 +155,13 @@ class AdminPanelScreen extends ConsumerWidget {
   }
 
   void _goManage(BuildContext context,
-      {Doctor? doctor, Lab? lab, Hospital? hospital}) {
+      {EntityKind kind = EntityKind.doctor,
+      Doctor? doctor,
+      Lab? lab,
+      Hospital? hospital}) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => ManageEntityScreen(
-            doctor: doctor, lab: lab, hospital: hospital)));
+            kind: kind, doctor: doctor, lab: lab, hospital: hospital)));
   }
 }
 
@@ -167,7 +185,7 @@ String _ago(WidgetRef ref, DateTime dt) {
 /// Spec section titles: 17/800 ink.
 TextStyle _sectionTitle(bool ur) => TextStyle(
       fontFamily: FdType.family(ur),
-      fontSize: ur ? (17) * 0.9 : (17),
+      fontSize: FdType.scaled(ur, 17),
       fontWeight: FontWeight.w800,
       color: FdColors.ink,
       height: FdType.height(ur, 1.3),
@@ -330,7 +348,7 @@ class _Header extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontFamily: FdType.family(ur),
-                    fontSize: ur ? (20) * 0.9 : (20),
+                    fontSize: FdType.scaled(ur, 20),
                     fontWeight: FontWeight.w800,
                     letterSpacing: ur ? 0 : -0.2,
                     color: FdColors.ink,
@@ -463,7 +481,7 @@ class _PendingSection extends ConsumerWidget {
                       child: Text(tr(ref, 'admin.pendingApproval'),
                           style: TextStyle(
                             fontFamily: FdType.family(ur),
-                            fontSize: ur ? (17) * 0.9 : (17),
+                            fontSize: FdType.scaled(ur, 17),
                             fontWeight: FontWeight.w800,
                             color: FdColors.ink,
                             height: FdType.height(ur, 1.3),
@@ -579,19 +597,22 @@ class _PendingCard extends ConsumerWidget {
         final d = await repo.getDoctor(item.id);
         if (d != null && context.mounted) {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => ManageEntityScreen(doctor: d)));
+              builder: (_) =>
+                  ManageEntityScreen(kind: EntityKind.doctor, doctor: d)));
         }
       } else if (item.kind == _PendingKind.lab) {
         final l = await repo.getLab(item.id);
         if (l != null && context.mounted) {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => ManageEntityScreen(lab: l)));
+              builder: (_) =>
+                  ManageEntityScreen(kind: EntityKind.lab, lab: l)));
         }
       } else {
         final h = await repo.getHospital(item.id);
         if (h != null && context.mounted) {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => ManageEntityScreen(hospital: h)));
+              builder: (_) => ManageEntityScreen(
+                  kind: EntityKind.hospital, hospital: h)));
         }
       }
     }
@@ -617,7 +638,7 @@ class _PendingCard extends ConsumerWidget {
                     Text(item.name,
                         style: TextStyle(
                           fontFamily: FdType.family(ur),
-                          fontSize: ur ? (15) * 0.9 : (15),
+                          fontSize: FdType.scaled(ur, 15),
                           fontWeight: FontWeight.w700,
                           color: FdColors.ink,
                           height: FdType.height(ur, 1.3),
@@ -741,7 +762,7 @@ class _ActionButton extends StatelessWidget {
         label,
         style: TextStyle(
           fontFamily: FdType.family(ur),
-          fontSize: ur ? (14) * 0.9 : (14),
+          fontSize: FdType.scaled(ur, 14),
           fontWeight: FontWeight.w700,
           color: primary ? Colors.white : _rejectRed,
           height: FdType.height(ur, 1.3),
@@ -787,6 +808,10 @@ class _SearchSection<T> extends ConsumerStatefulWidget {
   final void Function(T) onEdit;
   final Future<void> Function(T) onDelete;
 
+  /// Optional pin/unpin button per row (e.g. admin pin-to-top for doctors).
+  /// Null hides the button.
+  final Widget Function(T)? pinButtonOf;
+
   /// Optional "+ Add" pill in the header (create mode: called with no
   /// entity). Null hides the button.
   final VoidCallback? onAdd;
@@ -801,6 +826,7 @@ class _SearchSection<T> extends ConsumerStatefulWidget {
     required this.tileOf,
     required this.onEdit,
     required this.onDelete,
+    this.pinButtonOf,
     this.onAdd,
     this.addLabel,
   });
@@ -912,6 +938,8 @@ class _SearchSectionState<T>
                             ],
                           ),
                         ),
+                        if (widget.pinButtonOf != null)
+                          widget.pinButtonOf!(it),
                         IconButton(
                           icon: const Icon(Icons.edit_outlined,
                               color: FdColors.primary, size: 22),

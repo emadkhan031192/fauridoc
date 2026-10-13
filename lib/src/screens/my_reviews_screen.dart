@@ -5,6 +5,7 @@ import '../data/repository.dart';
 import '../l10n/strings.dart';
 import '../models/review.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../widgets/theme.dart';
 import 'auth_screen.dart';
 
@@ -14,6 +15,7 @@ class MyReviewsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final ur = fdIsUrdu(ref.watch(localeProvider));
     final user = ref.watch(authProvider);
     final repo = ref.watch(repositoryProvider);

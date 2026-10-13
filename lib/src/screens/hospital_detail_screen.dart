@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/strings.dart';
 import '../models/hospital.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../providers/user_location.dart';
 import '../utils/actions.dart';
 import '../widgets/theme.dart';
@@ -49,6 +50,7 @@ class _HospitalDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
     final pos = ref.watch(userLocationProvider).value;

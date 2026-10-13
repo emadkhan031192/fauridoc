@@ -11,6 +11,7 @@ import '../models/day_hours.dart';
 import '../models/doctor.dart';
 import '../models/review.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../utils/actions.dart';
 import '../utils/open_status.dart';
 import '../widgets/theme.dart';
@@ -231,6 +232,7 @@ class _DoctorDetailScreenState extends ConsumerState<DoctorDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
     final repo = ref.watch(repositoryProvider);

@@ -5,6 +5,7 @@ import '../data/repository.dart';
 import '../l10n/strings.dart';
 import '../models/community.dart';
 import '../providers/providers.dart';
+import '../providers/font_scale.dart';
 import '../widgets/theme.dart';
 import 'question_detail_screen.dart';
 
@@ -60,6 +61,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(fontScaleProvider); // Re-render when the font-size sliders change.
     final locale = ref.watch(localeProvider);
     final ur = fdIsUrdu(locale);
     final repo = ref.watch(repositoryProvider);
