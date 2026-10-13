@@ -36,6 +36,7 @@ flutter:
     - assets/seed_data/doctors.json
     - assets/seed_data/labs.json
     - assets/seed_data/hospitals.json
+    - assets/seed_data/config.json
   fonts:
     - family: Poppins
       fonts:

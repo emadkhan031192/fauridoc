@@ -67,6 +67,13 @@ class FirestoreRepository implements FauridocRepository {
 
   final FirebaseFirestore _db;
 
+  /// Bundled research data, used as a read-only fallback for the directory
+  /// listings while the Firestore collections are still empty (i.e. before
+  /// the admin runs the one-tap seed import). Cached after first load.
+  SeedBundle? _fallbackBundle;
+  Future<SeedBundle> _seedBundle() async =>
+      _fallbackBundle ??= await loadSeedBundle();
+
   // ---------- collection helpers ----------
 
   CollectionReference<Map<String, dynamic>> get _doctors => _db.collection('doctors');
@@ -159,27 +166,46 @@ class FirestoreRepository implements FauridocRepository {
   @override
   Stream<List<Doctor>> watchDoctors({String? city, String? specialty, String? query}) {
     final q = _clean(query);
-    return _doctors.where('approved', isEqualTo: true).snapshots().map((snap) {
-      return snap.docs.map((d) => Doctor.fromJson(_jsonFromData(d))).where((d) {
-        if (city != null && city.isNotEmpty && d.city != city) return false;
-        if (specialty != null && specialty.isNotEmpty && d.specialty != specialty) {
-          return false;
-        }
-        if (q.isNotEmpty) {
-          final hay =
-              '${d.name} ${d.specialty} ${d.clinicName} ${d.qualification}'.toLowerCase();
-          if (!hay.contains(q)) return false;
-        }
-        return true;
-      }).toList();
+    bool matches(Doctor d) {
+      if (city != null && city.isNotEmpty && d.city != city) return false;
+      if (specialty != null && specialty.isNotEmpty && d.specialty != specialty) {
+        return false;
+      }
+      if (q.isNotEmpty) {
+        final hay =
+            '${d.name} ${d.specialty} ${d.clinicName} ${d.qualification}'.toLowerCase();
+        if (!hay.contains(q)) return false;
+      }
+      return true;
+    }
+
+    return _doctors
+        .where('approved', isEqualTo: true)
+        .snapshots()
+        .asyncExpand((snap) async* {
+      if (snap.docs.isNotEmpty) {
+        yield snap.docs
+            .map((d) => Doctor.fromJson(_jsonFromData(d)))
+            .where(matches)
+            .toList();
+      } else {
+        // Collection not seeded yet: show the bundled research data.
+        final bundle = await _seedBundle();
+        yield bundle.doctors.where(matches).toList();
+      }
     });
   }
 
   @override
   Future<Doctor?> getDoctor(String id) async {
     final doc = await _doctors.doc(id).get();
-    if (!doc.exists) return null;
-    return Doctor.fromJson(_json(doc));
+    if (doc.exists) return Doctor.fromJson(_json(doc));
+    final bundle = await _seedBundle();
+    try {
+      return bundle.doctors.firstWhere((d) => d.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
@@ -214,24 +240,42 @@ class FirestoreRepository implements FauridocRepository {
   Stream<List<Lab>> watchLabs({String? city, String? query, String? testQuery}) {
     final q = _clean(query);
     final tq = _clean(testQuery);
-    return _labs.where('approved', isEqualTo: true).snapshots().map((snap) {
-      return snap.docs.map((d) => Lab.fromJson(_jsonFromData(d))).where((l) {
-        if (city != null && city.isNotEmpty && l.city != city) return false;
-        if (q.isNotEmpty && !l.name.toLowerCase().contains(q)) return false;
-        if (tq.isNotEmpty &&
-            !l.tests.any((t) => t.test.toLowerCase().contains(tq))) {
-          return false;
-        }
-        return true;
-      }).toList();
+    bool matches(Lab l) {
+      if (city != null && city.isNotEmpty && l.city != city) return false;
+      if (q.isNotEmpty && !l.name.toLowerCase().contains(q)) return false;
+      if (tq.isNotEmpty &&
+          !l.tests.any((t) => t.test.toLowerCase().contains(tq))) {
+        return false;
+      }
+      return true;
+    }
+
+    return _labs
+        .where('approved', isEqualTo: true)
+        .snapshots()
+        .asyncExpand((snap) async* {
+      if (snap.docs.isNotEmpty) {
+        yield snap.docs
+            .map((d) => Lab.fromJson(_jsonFromData(d)))
+            .where(matches)
+            .toList();
+      } else {
+        final bundle = await _seedBundle();
+        yield bundle.labs.where(matches).toList();
+      }
     });
   }
 
   @override
   Future<Lab?> getLab(String id) async {
     final doc = await _labs.doc(id).get();
-    if (!doc.exists) return null;
-    return Lab.fromJson(_json(doc));
+    if (doc.exists) return Lab.fromJson(_json(doc));
+    final bundle = await _seedBundle();
+    try {
+      return bundle.labs.firstWhere((l) => l.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
@@ -265,20 +309,38 @@ class FirestoreRepository implements FauridocRepository {
   @override
   Stream<List<Hospital>> watchHospitals({String? city, String? query}) {
     final q = _clean(query);
-    return _hospitals.where('approved', isEqualTo: true).snapshots().map((snap) {
-      return snap.docs.map((d) => Hospital.fromJson(_jsonFromData(d))).where((h) {
-        if (city != null && city.isNotEmpty && h.city != city) return false;
-        if (q.isNotEmpty && !h.name.toLowerCase().contains(q)) return false;
-        return true;
-      }).toList();
+    bool matches(Hospital h) {
+      if (city != null && city.isNotEmpty && h.city != city) return false;
+      if (q.isNotEmpty && !h.name.toLowerCase().contains(q)) return false;
+      return true;
+    }
+
+    return _hospitals
+        .where('approved', isEqualTo: true)
+        .snapshots()
+        .asyncExpand((snap) async* {
+      if (snap.docs.isNotEmpty) {
+        yield snap.docs
+            .map((d) => Hospital.fromJson(_jsonFromData(d)))
+            .where(matches)
+            .toList();
+      } else {
+        final bundle = await _seedBundle();
+        yield bundle.hospitals.where(matches).toList();
+      }
     });
   }
 
   @override
   Future<Hospital?> getHospital(String id) async {
     final doc = await _hospitals.doc(id).get();
-    if (!doc.exists) return null;
-    return Hospital.fromJson(_json(doc));
+    if (doc.exists) return Hospital.fromJson(_json(doc));
+    final bundle = await _seedBundle();
+    try {
+      return bundle.hospitals.firstWhere((h) => h.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
