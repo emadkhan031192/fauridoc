@@ -85,7 +85,7 @@ class MyQuestionsScreen extends ConsumerWidget {
                 return ListView.separated(
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                   itemCount: mine.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, i) =>
                       _QuestionRow(question: mine[i]),
                 );
