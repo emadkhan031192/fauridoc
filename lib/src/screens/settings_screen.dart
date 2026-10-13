@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../l10n/strings.dart';
 import '../providers/providers.dart';
 import '../widgets/theme.dart';
 import 'help_feedback_screen.dart';
