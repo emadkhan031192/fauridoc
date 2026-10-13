@@ -1198,7 +1198,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         initials.isEmpty ? '•' : initials,
         style: TextStyle(
           fontFamily: FdType.family(ur),
-          ur ? (fontSize) * 0.9 : (fontSize): fontSize,
+          fontSize: ur ? fontSize * 0.9 : fontSize,
           fontWeight: weight,
           color: color,
           height: textHeight,
@@ -1317,7 +1317,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: FdType.family(ur),
-                  ur ? (fontSize) * 0.9 : (fontSize): fontSize,
+                  fontSize: ur ? fontSize * 0.9 : fontSize,
                   fontWeight: weight,
                   color: fg,
                   height: textHeight,
